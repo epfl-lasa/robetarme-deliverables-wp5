@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.2)
-project(robotic_arms_drivers VERSION 0.1.0 DESCRIPTION "Drivers library to manage the different robotic arms")
+project(robotic-arms-drivers VERSION 0.1.0 DESCRIPTION "Drivers library to manage the different robotic arms")
 
 # Add options
 add_compile_options(-O3)
@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17) # specify the C++ standard
 
 # Find packages if any
 find_package(Eigen3 REQUIRED)
-find_package(yaml-cpp REQUIRED)
+find_package(osqp REQUIRED)
 
 # Include source file for the target library
 set(lib_name robotic_arms_drivers)
@@ -26,6 +26,6 @@ set_target_properties(${lib_name} PROPERTIES
 # Add include and src to include path to make includes easier in the code
 target_include_directories(${lib_name} PRIVATE include)
 target_include_directories(${lib_name} PRIVATE src)
-target_link_libraries(${lib_name} PRIVATE Eigen3::Eigen yaml-cpp)
-
+include_directories(${OSQP_INCLUDE_DIRS})
+target_link_libraries(${lib_name} ${OSQP_LIBRARIES} PRIVATE Eigen3::Eigen )
 export(PACKAGE ${PROJECT_NAME})

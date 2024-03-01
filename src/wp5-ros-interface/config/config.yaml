@@ -1,0 +1,14 @@
+UR5:
+  joint_topic: "/ur5/joint_states"
+  joint_command: "/ur5/joint_group_vel_controller/command"
+  njoint: 6
+
+IIWA:
+  joint_topic: "/iiwa/joint_states"
+  joint_command: "/iiwa/joint_group_vel_controller/command"
+  njoint: 7
+
+COBOD:
+  joint_topic: "/cobod/joint_states"
+  joint_command: "/cobod/joint_group_vel_controller/command"
+  njoint: 5

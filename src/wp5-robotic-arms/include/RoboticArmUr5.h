@@ -1,5 +1,5 @@
 /**
- * @file IRoboticArmBase.h
+ * @file RoboticArmUr5.h
  * @author Louis Munier (lmunier@protonmail.com)
  * @brief
  * @version 0.1
@@ -10,21 +10,21 @@
  */
 #pragma once
 
+#include "IRoboticArmBase.h"
+
 /**
- * @brief Mother class to create all the prototype fonctions needed in the different robotic arms.
+ * @brief Child class to create all the prototype fonctions needed in the different robotic arms.
  *
  * This class provides methods to manage a robotic arm with all the necessary functions to control it.
  */
-class IRoboticArmBase {
-  /* TODO: Implement all the common functions for all the robotic arms, make them pure virtual if the
-   function is not implemented in the mother class */
+class RoboticArmUr5 : public IRoboticArmBase {
 public:
   // TODO: implement all the public members, accessible from everyone owning a class object
-  explicit IRoboticArmBase() = default;
+  explicit RoboticArmUr5();
 
 protected:
   // TODO: implement all the protected members, accessible from its own and herited classes
 
 private:
-  // TODO: implement all the private members, only accessible from its own class
+
 };
