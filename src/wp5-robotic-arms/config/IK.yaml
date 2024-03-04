@@ -1,0 +1,4 @@
+IK:
+  error: 0.01
+  timeoutInSecs : 0.5
+  solve_type: Distance

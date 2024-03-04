@@ -1,81 +1,148 @@
 /**
  * @file IRoboticArmBase.h
  * @author Louis Munier (lmunier@protonmail.com)
- * @brief
+ * @brief Declaration of the IRoboticArmBase class
  * @version 0.1
  * @date 2024-02-27
  *
  * @copyright Copyright (c) 2024
- *
  */
+
 #pragma once
-#include "dynamical_systems/DynamicalSystemFactory.hpp"
-// clang-format off
+
 #include "pinocchio/fwd.hpp"
-// clang-format on
+#include "Utils.h"
+#include <eigen3/Eigen/Dense>
+#include <yaml-cpp/yaml.h>
+#include "dynamical_systems/DynamicalSystemFactory.hpp"
+#include "OsqpEigen/OsqpEigen.h"
 #include "robot_model/Model.hpp"
 #include "state_representation/space/cartesian/CartesianPose.hpp"
 #include "state_representation/space/cartesian/CartesianTwist.hpp"
 #include "state_representation/space/joint/JointPositions.hpp"
 #include "state_representation/space/joint/JointVelocities.hpp"
 #include <cmath>
-#include <eigen3/Eigen/Dense>
 #include <iostream>
 #include <sstream>
-#include <tf2/LinearMath/Quaternion.h>
 #include <trac_ik/trac_ik.hpp>
 #include <vector>
 
 using namespace std;
+using namespace Eigen;
 
 /**
- * @brief Mother class to create all the prototype fonctions needed in the different robotic arms.
+ * @brief Mother class to create all the prototype functions needed in different robotic arms.
  *
  * This class provides methods to manage a robotic arm with all the necessary functions to control it.
  */
 class IRoboticArmBase {
-  /* TODO: Implement all the common functions for all the robotic arms, make them pure virtual if the
-   function is not implemented in the mother class */
 public:
-  // TODO: implement all the public members, accessible from everyone owning a class object
-  explicit IRoboticArmBase() = default;
-  int numberJoint = 0;
-  string reference_frame = "";
-  vector<double> getFK(vector<double>);
-  geometry_msgs::Twist getTwist(vector<double>, vector<double>);
-  MatrixXd getJacobian(vector<double>);
-  pair<int, vector<double>> getIK(vector<double> , vector<double> ) ;
-  void updateIK(double , double );
+    /**
+     * @brief Default constructor for IRoboticArmBase.
+     */
+    IRoboticArmBase() = default;
 
-  virtual void low_level_controller();
+    /**
+     * @brief Destructor for IRoboticArmBase.
+     */
+    virtual ~IRoboticArmBase() = default;
+
+    /**
+     * @brief Get forward kinematics of the robotic arm.
+     *
+     * @param vectJoint Vector of joint positions.
+     * @return Vector representing the Cartesian pose (position and orientation) of the end effector.
+     */
+    vector<double> getFK(vector<double> vectJoint);
+
+    /**
+     * @brief Get inverse kinematics of the robotic arm.
+     *
+     * @param actualJoint Vector of current joint positions.
+     * @param vectorQuatPos Vector representing the target Cartesian pose (position and orientation).
+     * @return A pair containing an error code and the vector of next joint positions.
+     */
+    pair<int, vector<double>> getIK(vector<double> actualJoint, vector<double> vectorQuatPos);
+
+    /**
+     * @brief Update the inverse kinematics parameters.
+     *
+     * @param err Error threshold for inverse kinematics solver.
+     * @param timeoutInSecs Timeout value for inverse kinematics solver.
+     * @param solveTypeStr Solve type for inverse kinematics solver.
+     */
+    void updateIK(double err, double timeoutInSecs, string solveTypeStr);
+
+    /**
+     * @brief Get the twist (linear and angular velocities) of the robotic arm.
+     *
+     * @param posJoint Vector of joint positions.
+     * @param speedJoint Vector of joint velocities.
+     * @return Vector representing the twist (linear and angular velocities) of the end effector.
+     */
+    VectorXd getTwist(vector<double> posJoint, vector<double> speedJoint);
+
+    /**
+     * @brief Get the Jacobian matrix of the robotic arm.
+     *
+     * @param vectJoint Vector of joint positions.
+     * @return Matrix representing the Jacobian matrix of the end effector.
+     */
+    MatrixXd getJacobian(vector<double> vectJoint);
+
+    /**
+     * @brief Get the inverse dynamics of the robotic arm.
+     *
+     * @param vectJoint Vector of joint positions.
+     * @param speedEigen Vector of joint velocities.
+     * @return Vector representing the joint torques required for the given joint positions and velocities.
+     */
+    vector<double> getIDynamics(vector<double> vectJoint, VectorXd speedEigen);
+
+    // /**
+    //  * @brief Low-level controller function for the robotic arm.
+    //  *
+    //  * @param data Tuple containing vectors of joint positions, joint velocities, and joint efforts.
+    //  */
+    // virtual void low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& data);
 
 protected:
-  // TODO: implement all the protected members, accessible from its own and herited classes
+    /**
+     * @brief Initialization function for inverse kinematics.
+     */
+    void initIK();
+  // Protected members
+    string robotName = "";
+    vector<string> jointNames;
+    string baseLink = "";
+    string tipLink = "";
+    string tipJoint = "";
+    string referenceFrame = "";
+    string pathUrdf = "";
+    unique_ptr<robot_model::Model> model;
 
-  string robot_name = "";
-  vector<string> controller_joint_names = "";
-  string baseLink ="";
-  string tipLink = "";
-  string tipJoint = "";
-  string path_urdf = "";
-  unique_ptr<robot_model::Model> model;
+    string paramURDF = "";
+    int nJoint = 0;
 
-  string URDF_param="";
-  int  nJoint = 0  ;
+    int rc = 0;
+    TRAC_IK::TRAC_IK* ikSolver = nullptr;
+    KDL::Chain chain = {};
+    bool valid = false;
 
-
-  vector<double> posJointNext = {};
-  int rc = 0;
-  TRAC_IK::TRAC_IK* ikSolver = nullptr;  
-  TRAC_IK::SolveType type =TRAC_IK::Distance;
-  KDL::Chain chain = {};
-  bool valid = false ;
-
-
-  // TODO put in YAML
-  double error = 0.01;
-  double timeoutInSecs = 0.5;
+    TRAC_IK::SolveType type = TRAC_IK::Distance;
+    double error = 0.01;
+    double timeoutInSecs = 0.5;
 
 private:
-  // TODO: implement all the private members, only accessible from its own class
+    /**
+     * @brief Function for computing speed with quaternion interpolation.
+     *
+     * @param Pos Vector representing the current position.
+     * @param quat2 Vector representing the target quaternion.
+     * @param speed Vector representing the target speed.
+     * @return Vector representing the computed speed.
+     */
+    VectorXd speed_func(vector<double> Pos, vector<double> quat2, vector<double> speed);
+
+    // TODO: Add any additional private members as needed
 };

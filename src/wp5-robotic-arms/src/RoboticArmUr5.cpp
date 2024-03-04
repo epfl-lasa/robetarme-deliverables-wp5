@@ -9,30 +9,33 @@
  *
  */
 
-#include "../include/RoboticArmUr5.h"
+#include "RoboticArmUr5.h"
+
 
 RoboticArmUr5::RoboticArmUr5() {
-std::string package_path = ros::package::getPath("wp5-roboti-arms"); 
-path_urdf = package_path + "/urdf/ur5.urdf";
-robot_name = "ur5_robot";
+pathUrdf = "../urdf/ur5.urdf";
+robotName = "ur5_robot";
 tipLink  = "tool0";
 tipJoint = "wrist_3_joint";
-joint_names = {"shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
-reference_frame = "base";
+jointNames = {"shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
+referenceFrame = "base";
 nJoint    = 6;
 
-model = make_unique<robot_model::Model>(robot_name, path_urdf);
+model = make_unique<robot_model::Model>(robotName, pathUrdf);
 
 //inverse kinematik with track-ik
 baseLink   = "base";
-URDF_param = "/ur5/robot_description";
-vector_0.assign(nJoint, 0.0);
-posJointNext = vector_0;
-ikSolver= new TRAC_IK::TRAC_IK(baseLink, tipLink, URDF_param, timeoutInSecs, error, type);  
+paramURDF = "/ur5/robot_description";
+ikSolver= new TRAC_IK::TRAC_IK(baseLink, tipLink, paramURDF, timeoutInSecs, error, type);  
 
 valid = ikSolver->getKDLChain(chain);
 if (!valid) {
-    ROS_ERROR("There was no valid KDL chain found");
+    cout << "There was no valid KDL chain found"<< endl;
 } 
 
 }
+
+// void RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& data) {
+//     // Implement the low-level controller logic specific to RoboticArmUr5
+//     // ...
+// }
