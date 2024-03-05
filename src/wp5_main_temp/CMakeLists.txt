@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.3)
 project(wp5-main-temp)
 
 # Choose one of these options based on your needs
-# set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 14)
 # OR
 # add_compile_options(-std=c++11)
 

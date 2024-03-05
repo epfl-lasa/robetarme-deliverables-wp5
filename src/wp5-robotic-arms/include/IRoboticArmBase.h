@@ -24,7 +24,9 @@
 #include <cmath>
 #include <iostream>
 #include <sstream>
-#include <trac_ik/trac_ik.hpp>
+#include <memory>
+
+// #include <trac_ik/trac_ik.hpp>
 #include <vector>
 
 using namespace std;
@@ -37,6 +39,7 @@ using namespace Eigen;
  */
 class IRoboticArmBase {
 public:
+
     /**
      * @brief Default constructor for IRoboticArmBase.
      */
@@ -55,23 +58,23 @@ public:
      */
     vector<double> getFK(vector<double> vectJoint);
 
-    /**
-     * @brief Get inverse kinematics of the robotic arm.
-     *
-     * @param actualJoint Vector of current joint positions.
-     * @param vectorQuatPos Vector representing the target Cartesian pose (position and orientation).
-     * @return A pair containing an error code and the vector of next joint positions.
-     */
-    pair<int, vector<double>> getIK(vector<double> actualJoint, vector<double> vectorQuatPos);
+    // /**
+    //  * @brief Get inverse kinematics of the robotic arm.
+    //  *
+    //  * @param actualJoint Vector of current joint positions.
+    //  * @param vectorQuatPos Vector representing the target Cartesian pose (position and orientation).
+    //  * @return A pair containing an error code and the vector of next joint positions.
+    //  */
+    // pair<int, vector<double>> getIK(vector<double> actualJoint, vector<double> vectorQuatPos);
 
-    /**
-     * @brief Update the inverse kinematics parameters.
-     *
-     * @param err Error threshold for inverse kinematics solver.
-     * @param timeoutInSecs Timeout value for inverse kinematics solver.
-     * @param solveTypeStr Solve type for inverse kinematics solver.
-     */
-    void updateIK(double err, double timeoutInSecs, string solveTypeStr);
+    // /**
+    //  * @brief Update the inverse kinematics parameters.
+    //  *
+    //  * @param err Error threshold for inverse kinematics solver.
+    //  * @param timeoutInSecs Timeout value for inverse kinematics solver.
+    //  * @param solveTypeStr Solve type for inverse kinematics solver.
+    //  */
+    // void updateIK(double err, double timeoutInSecs, string solveTypeStr);
 
     /**
      * @brief Get the twist (linear and angular velocities) of the robotic arm.
@@ -104,34 +107,38 @@ public:
     //  *
     //  * @param data Tuple containing vectors of joint positions, joint velocities, and joint efforts.
     //  */
-    // virtual void low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& data);
+    // virtual vector<double>  low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& data, vector<double> twist);
 
 protected:
     /**
      * @brief Initialization function for inverse kinematics.
      */
-    void initIK();
-  // Protected members
-    string robotName = "";
+    // Protected members
+    std::string robotName = "";
     vector<string> jointNames;
-    string baseLink = "";
-    string tipLink = "";
-    string tipJoint = "";
-    string referenceFrame = "";
-    string pathUrdf = "";
-    unique_ptr<robot_model::Model> model;
+    std::string baseLink = "";
+    std::string tipLink = "";
+    std::string tipJoint = "";
+    std::string referenceFrame = "";
+    std::string pathUrdf = "";
+    std::unique_ptr<robot_model::Model> model;
 
-    string paramURDF = "";
+    std::string paramURDF = "";
     int nJoint = 0;
 
-    int rc = 0;
-    TRAC_IK::TRAC_IK* ikSolver = nullptr;
-    KDL::Chain chain = {};
-    bool valid = false;
 
-    TRAC_IK::SolveType type = TRAC_IK::Distance;
-    double error = 0.01;
-    double timeoutInSecs = 0.5;
+    // ik -----------------
+
+    // int rc = 0;
+    // TRAC_IK::TRAC_IK* ikSolver = nullptr;
+    // KDL::Chain chain = {};
+    // bool valid = false;
+
+    // TRAC_IK::SolveType type = TRAC_IK::Distance;
+    // double error = 0.01;
+    // double timeoutInSecs = 0.5;
+        // void initIK();
+
 
 private:
     /**

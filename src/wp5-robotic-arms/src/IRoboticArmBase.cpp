@@ -20,7 +20,6 @@ using namespace Eigen;
  * This class provides methods to manage a robotic arm with all the necessary functions to control it.
  */
 
-
 vector<double> IRoboticArmBase::getFK(vector<double> vectJoint) {
   Map<VectorXd> posJoint_eigen(vectJoint.data(), vectJoint.size());
   state_representation::JointPositions nextJoinState =  state_representation::JointPositions(robotName,jointNames,posJoint_eigen);        
@@ -36,7 +35,6 @@ vector<double> IRoboticArmBase::getFK(vector<double> vectJoint) {
 VectorXd IRoboticArmBase::getTwist(vector<double> posJoint, vector<double> speedJoint) {
 
   MatrixXd jacMatrix = getJacobian(posJoint);
-
   VectorXd speedJointEigen(nJoint);
   for(int i = 0 ;i<nJoint;++i){
     speedJointEigen(i) =speedJoint[i];
@@ -64,7 +62,6 @@ vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd 
     Vector3d  linear_velocity(3);
     linear_velocity << speedEigen(3),speedEigen(4),speedEigen(5);
 
-
     Map<VectorXd> posJoint_eigen(vectJoint.data(), vectJoint.size());
 
     state_representation::JointPositions actualJoinState = state_representation::JointPositions(robotName,jointNames,posJoint_eigen);       
@@ -72,111 +69,119 @@ vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd 
     state_representation::JointVelocities nextJoinStateSpeed = model->inverse_velocity(nextPostwist,actualJoinState,tipJoint);
     VectorXd speedJointNext_eigen = nextJoinStateSpeed.data() ;
     for (int i = 0; i < nJoint; ++i) {
-        speedJointNext[i] = speedJointNext_eigen(i);
-
+      speedJointNext[i] = speedJointNext_eigen(i);
     }
 
     return speedJointNext;
 }
 
-pair<int, vector<double>> IRoboticArmBase::getIK(vector<double> actualJoint, vector<double> vectorQuatPos ) {  
-    
-  //Inverse kinematics trac-IK
-  KDL::JntArray NextJointTask;
-  KDL::JntArray actualJointTask; 
-
-  VectorXd pos_joint_actual_eigen(nJoint);
-  for(int i = 0 ;i<nJoint;++i){
-      pos_joint_actual_eigen(i) =actualJoint[i];
-  }
-  actualJointTask.data = pos_joint_actual_eigen;
-
-  KDL::Vector Vec(vectorQuatPos[4],vectorQuatPos[5],vectorQuatPos[6]);
-
-  Quaterniond q(vectorQuatPos[3],vectorQuatPos[0],vectorQuatPos[1],vectorQuatPos[2]);
-  q.normalize();
-  KDL::Rotation Rot = KDL::Rotation::Quaternion(q.x(),q.y(),q.z(),q.w());
-  KDL::Frame NextJointCartesian(Rot,Vec); 
-  rc = ikSolver->CartToJnt(actualJointTask, NextJointCartesian, NextJointTask);
-  if (rc< 0){
-      cout<<"no inverse kinematic found"<<endl;    
-  }
-
-  VectorXd posJointNextEigen = NextJointTask.data;
-  vector<double> posJointNext ;
-  for(int i = 0 ;i<nJoint;++i){    
-      posJointNext[i] =posJointNextEigen(i);
-      }
-  //msgP.data = posJointNext;
-  
-  //actualJointTask.data.clear();
-  pair<int, vector<double>> myPair = make_pair(rc, posJointNext);
-
-  return myPair;
-    
-} 
-
-void IRoboticArmBase::updateIK(double err ,double timeoutInSecs, string solveTypeStr ){
-  // Convert the solve type string to the corresponding enum value
-  TRAC_IK::SolveType solveType;
-  if (solveTypeStr == "Distance") {
-      solveType = TRAC_IK::Distance;
-  } else if (solveTypeStr == "Speed") {
-      solveType = TRAC_IK::Speed;
-  } else {
-      cout<< "Handle unrecognized solve types: set Distance as default value" << endl;
-      solveType = TRAC_IK::Distance;
-  }
-  ikSolver= new TRAC_IK::TRAC_IK(baseLink, tipLink, paramURDF, timeoutInSecs, err, solveType);  
-}
-
-void IRoboticArmBase::initIK(){
-  YAML::Node config = YAML::LoadFile("/../config/IK.yaml");
-  // Get the solve type from the YAML file
-  string solveTypeStr = config["IK/solve_type"].as<string>();
-
-  // Convert the solve type string to the corresponding enum value
-  TRAC_IK::SolveType solveType;
-  if (solveTypeStr == "Distance") {
-      solveType = TRAC_IK::Distance;
-  } else if (solveTypeStr == "Speed") {
-      solveType = TRAC_IK::Speed;
-  } else {
-      cout<< "Handle unrecognized solve types: set Distance as default value" << endl;
-      solveType = TRAC_IK::Distance;
-  }
-  error = config["IK/error"].as<double>();
-  timeoutInSecs = config["IK/timeoutInSecs"].as<double>();
-}
-
 
 VectorXd IRoboticArmBase::speed_func(vector<double> Pos, vector<double> quat2,vector<double> speed){
-    
-    //orientation
-    Vector4d q1,q2 ;
-    q1 << Pos[3], Pos[0],Pos[1],Pos[2]; //qw,qx,qy,qz
-    q2 << quat2[3],quat2[0],quat2[1],quat2[2]; //qw,qx,qy,qz
+  //orientation
+  Vector4d q1,q2 ;
+  q1 << Pos[3], Pos[0],Pos[1],Pos[2]; //qw,qx,qy,qz
+  q2 << quat2[3],quat2[0],quat2[1],quat2[2]; //qw,qx,qy,qz
 
-    Vector4d dqd = Utils<double>::slerpQuaternion(q1, q2 ,0.5);    
-    Vector4d deltaQ = dqd -  q1;
+  Vector4d dqd = Utils<double>::slerpQuaternion(q1, q2 ,0.5);    
+  Vector4d deltaQ = dqd -  q1;
 
-    Vector4d qconj = q1;
-    qconj.segment(1,3) = -1 * qconj.segment(1,3);
-    Vector4d temp_angVel = Utils<double>::quaternionProduct(deltaQ, qconj);
+  Vector4d qconj = q1;
+  qconj.segment(1,3) = -1 * qconj.segment(1,3);
+  Vector4d temp_angVel = Utils<double>::quaternionProduct(deltaQ, qconj);
 
-    Vector3d tmp_angular_vel = temp_angVel.segment(1,3);
-    double maxDq = 0.2;
-    if (tmp_angular_vel.norm() > maxDq)
-        tmp_angular_vel = maxDq * tmp_angular_vel.normalized();
+  Vector3d tmp_angular_vel = temp_angVel.segment(1,3);
+  double maxDq = 0.2;
+  if (tmp_angular_vel.norm() > maxDq)
+      tmp_angular_vel = maxDq * tmp_angular_vel.normalized();
 
-    double dsGain_ori = 0.50;
-    double theta_gq = (-.5/(4*maxDq*maxDq)) * tmp_angular_vel.transpose() * tmp_angular_vel;
-    Vector3d Omega_out  = 2 * dsGain_ori*(1+std::exp(theta_gq)) * tmp_angular_vel;
-    
-    vector<double> V = {Omega_out[0],Omega_out[1],Omega_out[2],speed[0],speed[1],speed[2]};
+  double dsGain_ori = 0.50;
+  double theta_gq = (-.5/(4*maxDq*maxDq)) * tmp_angular_vel.transpose() * tmp_angular_vel;
+  Vector3d Omega_out  = 2 * dsGain_ori*(1+std::exp(theta_gq)) * tmp_angular_vel;
+  
+  vector<double> V = {Omega_out[0],Omega_out[1],Omega_out[2],speed[0],speed[1],speed[2]};
 
-    double* pt = &V[0];
-    VectorXd VOut = Map<VectorXd>(pt, 6);
+  double* pt = &V[0];
+  VectorXd VOut = Map<VectorXd>(pt, 6);
 
-    return VOut;
+  return VOut;
 }
+
+
+// function for the inverse kinematic  ------------------------------------------------------------------------
+
+
+// pair<int, vector<double>> IRoboticArmBase::getIK(vector<double> actualJoint, vector<double> vectorQuatPos ) {  
+    
+//   //Inverse kinematics trac-IK
+//   KDL::JntArray NextJointTask;
+//   KDL::JntArray actualJointTask; 
+
+//   VectorXd pos_joint_actual_eigen(nJoint);
+//   for(int i = 0 ;i<nJoint;++i){
+//       pos_joint_actual_eigen(i) =actualJoint[i];
+//   }
+//   actualJointTask.data = pos_joint_actual_eigen;
+
+//   KDL::Vector Vec(vectorQuatPos[4],vectorQuatPos[5],vectorQuatPos[6]);
+
+//   Quaterniond q(vectorQuatPos[3],vectorQuatPos[0],vectorQuatPos[1],vectorQuatPos[2]);
+//   q.normalize();
+//   KDL::Rotation Rot = KDL::Rotation::Quaternion(q.x(),q.y(),q.z(),q.w());
+//   KDL::Frame NextJointCartesian(Rot,Vec); 
+//   rc = ikSolver->CartToJnt(actualJointTask, NextJointCartesian, NextJointTask);
+//   if (rc< 0){
+//       cout<<"no inverse kinematic found"<<endl;    
+//   }
+
+//   VectorXd posJointNextEigen = NextJointTask.data;
+//   vector<double> posJointNext ;
+//   for(int i = 0 ;i<nJoint;++i){    
+//       posJointNext[i] =posJointNextEigen(i);
+//       }
+//   //msgP.data = posJointNext;
+  
+//   //actualJointTask.data.clear();
+//   pair<int, vector<double>> myPair = make_pair(rc, posJointNext);
+
+//   return myPair;
+// } 
+
+// void IRoboticArmBase::updateIK(double err ,double timeoutInSecs, string solveTypeStr ){
+//   // Convert the solve type string to the corresponding enum value
+//   TRAC_IK::SolveType solveType;
+//   if (solveTypeStr == "Distance") {
+//       solveType = TRAC_IK::Distance;
+//   } else if (solveTypeStr == "Speed") {
+//       solveType = TRAC_IK::Speed;
+//   } else {
+//       cout<< "Handle unrecognized solve types: set Distance as default value" << endl;
+//       solveType = TRAC_IK::Distance;
+//   }
+//   ikSolver= new TRAC_IK::TRAC_IK(baseLink, tipLink, paramURDF, timeoutInSecs, err, solveType);  
+// }
+
+// void IRoboticArmBase::initIK(){
+//   YAML::Node config = YAML::LoadFile("/../config/config.yaml");
+//   // Get the solve type from the YAML file
+//   string solveTypeStr = config["IK/solve_type"].as<string>();
+
+//   // Convert the solve type string to the corresponding enum value
+//   TRAC_IK::SolveType solveType;
+//   if (solveTypeStr == "Distance") {
+//       solveType = TRAC_IK::Distance;
+//   } else if (solveTypeStr == "Speed") {
+//       solveType = TRAC_IK::Speed;
+//   } else {
+//       cout<< "Handle unrecognized solve types: set Distance as default value" << endl;
+//       solveType = TRAC_IK::Distance;
+//   }
+//   error = config["IK/error"].as<double>();
+//   timeoutInSecs = config["IK/timeoutInSecs"].as<double>();
+
+//   ikSolver= new TRAC_IK::TRAC_IK(baseLink, tipLink, paramURDF, timeoutInSecs, error, type);  
+
+//   valid = ikSolver->getKDLChain(chain);
+//   if (!valid) {
+//       cout << "There was no valid KDL chain found"<< endl;
+//   } 
+// }

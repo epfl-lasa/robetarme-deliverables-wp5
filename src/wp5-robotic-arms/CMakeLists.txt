@@ -14,13 +14,13 @@ find_package(osqp REQUIRED)
 
 include_directories(${OSQP_INCLUDE_DIRS})
 
-# trac-ik 
-find_package(catkin REQUIRED COMPONENTS
-    trac_ik_lib)
+# # trac-ik 
+# find_package(catkin REQUIRED COMPONENTS
+#     trac_ik_lib)
 
 include_directories(
   include
-  ${catkin_INCLUDE_DIRS}	
+#   ${catkin_INCLUDE_DIRS}	
   ${EIGEN3_INCLUDE_DIRS}
 )
 
@@ -50,8 +50,8 @@ target_link_libraries(${lib_name}
     ${control_libraries_LIBRARIES}
     Eigen3::Eigen
     osqp::osqp
-    ${catkin_LIBRARIES}
-    trac_ik_lib
+    # ${catkin_LIBRARIES}
+    # trac_ik_lib
 )
 
 export(PACKAGE ${PROJECT_NAME})

@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 
     // Create an instance of RosInterfaceNoetic
     RosInterfaceNoetic rosInterface(nh);
-    // IRoboticArmBase ur5Arm;
+    IRoboticArmBase iRoboticArmBase;
     RoboticArmUr5 ur5Arm;
 
 

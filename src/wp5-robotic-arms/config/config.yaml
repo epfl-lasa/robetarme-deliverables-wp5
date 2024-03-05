@@ -1,26 +1,9 @@
-UR5:
-  robot_name: "ur5_robot"
-  controller_joint_names: ["shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"]
-  reference_frame: "base"
-  tipLink: "tool0"
-  tipJoint: "wrist_3_joint"
-  numberJoint: 6
-  path_urdf: "/home/ros/ros_ws/src/controller_ur5/urdf/ur5.urdf";
+ROBOTS:
+  nameRobot: Ur5
+  # nameRobot: Cobod
+  # nameRobot: Iiwa
 
-IIWA:
-  controller_joint_names: ['iiwa_joint_1', 'iiwa_joint_2', 'iiwa_joint_3', 'iiwa_joint_4', 'iiwa_joint_5', 'iiwa_joint_6', 'iiwa_joint_7' ]
-  robot_name: "iiwa_robot"
-  reference_frame: "base"
-  tipLink: "-";
-  tipJoint: "-";
-  numberJoint: 7
-  path_urdf: "/home/ros/ros_ws/src/controller_iiwa/urdf/iiwa.urdf";
-
-COBOD:
-  controller_joint_names: ["-" ]
-  robot_name: "cobod_robot"
-  reference_frame: "base"
-  tipLink: "-";
-  tipJoint: "-";
-  numberJoint: 5
-  path_urdf: "/home/ros/ros_ws/src/controller_cobod/urdf/cobod.urdf";
+IK:
+  error: 0.01
+  timeoutInSecs : 0.5
+  solve_type: Distance

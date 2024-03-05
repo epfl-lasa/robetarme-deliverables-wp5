@@ -17,25 +17,23 @@ pathUrdf = "../urdf/ur5.urdf";
 robotName = "ur5_robot";
 tipLink  = "tool0";
 tipJoint = "wrist_3_joint";
+baseLink = "base";
 jointNames = {"shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
 referenceFrame = "base";
 nJoint    = 6;
 
 model = make_unique<robot_model::Model>(robotName, pathUrdf);
 
-//inverse kinematik with track-ik
-baseLink   = "base";
-paramURDF = "/ur5/robot_description";
-ikSolver= new TRAC_IK::TRAC_IK(baseLink, tipLink, paramURDF, timeoutInSecs, error, type);  
-
-valid = ikSolver->getKDLChain(chain);
-if (!valid) {
-    cout << "There was no valid KDL chain found"<< endl;
-} 
+// IRoboticArmBase::initIK();
 
 }
 
-// void RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& data) {
-//     // Implement the low-level controller logic specific to RoboticArmUr5
-//     // ...
+// vector<double>  RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,vector<double> twist) {
+//     vector<double>& retrievedPosition = get<0>(stateJoints);
+
+//     Eigen::VectorXd eigenVector = Eigen::Map<Eigen::VectorXd>(twist.data(), twist.size());
+
+//     vector<double> desiredJointSpeed = IRoboticArmBase::getIDynamics(retrievedPosition, eigenVector);
+//     return desiredJointSpeed;
+
 // }
