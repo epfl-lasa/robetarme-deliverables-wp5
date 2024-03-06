@@ -126,7 +126,6 @@ protected:
     std::string paramURDF = "";
     int nJoint = 0;
 
-
     // ik -----------------
 
     // int rc = 0;

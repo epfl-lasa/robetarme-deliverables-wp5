@@ -90,7 +90,7 @@ WORKDIR /home/${USER}/control-libraries/source
 RUN sudo bash install.sh -y
 
 
-# # Install pinochio and control libraire from epfl-lasa#
+# # Install pinochio and control libraire from aica#
 # WORKDIR /home/${USER}
 # RUN git clone https://github.com/aica-technology/control-libraries.git  --single-branch
 # WORKDIR /home/${USER}/control-libraries/source
