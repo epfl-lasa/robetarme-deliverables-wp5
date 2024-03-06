@@ -20,14 +20,6 @@ RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y sudo
 RUN useradd -m ${USER} && echo "${USER}:${USER}passwd" | chpasswd && adduser ${USER} sudo
 
-# # Install ROS-noetic
-# RUN apt update --fix-missing && apt upgrade -y && apt clean
-# RUN apt install -y curl gnupg2
-# RUN echo "deb http://packages.ros.org/ros/ubuntu ${UBUNTU_DISTRO} main" > /etc/apt/sources.list.d/ros-latest.list
-# RUN curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | apt-key add -
-# RUN apt update && apt install -y \
-#     ros-${ROS_DISTRO}-desktop-full
-
 ### Add a few essential tools
 RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y git openssh-client python3 net-tools build-essential cmake git
