@@ -1,6 +1,7 @@
 #include "IRoboticArmBase.h"
 #include "DynamicalSystem.h"
 #include "RosInterfaceNoetic.h"
+#include "BoustrophedonServer.h"
 #include "PathPlanner.h"
 #include "TargetExtraction.h"
 #include "RoboticArmUr5.h"
@@ -20,9 +21,6 @@ int main(int argc, char **argv)
     // RoboticArmUr5 ur5Arm;
 
     // TargetExtraction targetextraction(nh);
-
-
-
 
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     while (ros::ok()){
