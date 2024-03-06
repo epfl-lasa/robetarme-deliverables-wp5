@@ -20,7 +20,7 @@ catkin_package(
   CATKIN_DEPENDS roscpp wp5-ros-interface 
 )
 
-set(WP5_ROBOTIC_ARMS_DIR ${CMAKE_SOURCE_DIR}/wp5-robotic-arms)
+set(WP5_ROBOTIC_ARMS_DIR ${CMAKE_SOURCE_DIR}/../wp5-robotic-arms)
 
 include_directories(
   include

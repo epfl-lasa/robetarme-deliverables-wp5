@@ -25,7 +25,7 @@ services:
               capabilities: [ gpu ]
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
-      - .:/home/${ROS_USER}/catkin_ws/src
+      - ./src:/home/${ROS_USER}/catkin_ws/src
     stdin_open: true
     tty: true
 
