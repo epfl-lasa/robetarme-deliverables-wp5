@@ -9,7 +9,7 @@
  *
  */
 
-#include "../include/RosInterfaceNoetic.h"
+#include "RosInterfaceNoetic.h"
 
 using namespace std;
 

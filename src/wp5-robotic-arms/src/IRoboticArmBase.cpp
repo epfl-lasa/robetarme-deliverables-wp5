@@ -82,12 +82,12 @@ VectorXd IRoboticArmBase::speed_func(vector<double> Pos, vector<double> quat2,ve
   q1 << Pos[3], Pos[0],Pos[1],Pos[2]; //qw,qx,qy,qz
   q2 << quat2[3],quat2[0],quat2[1],quat2[2]; //qw,qx,qy,qz
 
-  Vector4d dqd = Utils<double>::slerpQuaternion(q1, q2 ,0.5);    
+  Vector4d dqd = slerpQuaternion(q1, q2, 0.5);    
   Vector4d deltaQ = dqd -  q1;
 
   Vector4d qconj = q1;
   qconj.segment(1,3) = -1 * qconj.segment(1,3);
-  Vector4d temp_angVel = Utils<double>::quaternionProduct(deltaQ, qconj);
+  Vector4d temp_angVel = quaternionProduct(deltaQ, qconj);
 
   Vector3d tmp_angular_vel = temp_angVel.segment(1,3);
   double maxDq = 0.2;
@@ -105,6 +105,52 @@ VectorXd IRoboticArmBase::speed_func(vector<double> Pos, vector<double> quat2,ve
 
   return VOut;
 }
+
+Eigen::Matrix<double, 4, 1> IRoboticArmBase::slerpQuaternion( Eigen::Matrix<double, 4, 1>& q1,  Eigen::Matrix<double, 4, 1>& q2, double t)
+{
+  Eigen::Matrix<double, 4, 1> q;
+
+  // Change sign of q2 if dot product of the two quaternions is negative => allows interpolating along the shortest path
+  if (q1.dot(q2) < 0.0)
+  {
+    q2 = -q2;
+  }
+
+  double dotProduct = q1.dot(q2);
+  if (dotProduct > 1.0)
+  {
+    dotProduct = 1.0;
+  }
+  else if (dotProduct < -1.0)
+  {
+    dotProduct = -1.0;
+  }
+
+  double omega = acos(dotProduct);
+
+  if (std::fabs(omega) < std::numeric_limits<double>::epsilon())
+  {
+    q = q1.transpose() + t * (q2 - q1).transpose();
+  }
+  else
+  {
+    q = (std::sin((1 - t) * omega) * q1 + std::sin(t * omega) * q2) / std::sin(omega);
+  }
+
+  return q;
+}
+
+Eigen::Matrix<double, 4, 1> IRoboticArmBase::quaternionProduct(Eigen::Matrix<double, 4, 1> q1, Eigen::Matrix<double, 4, 1> q2)
+{
+    Eigen::Matrix<double, 4, 1> q;
+    q(0) = q1(0) * q2(0) - (q1.segment(1, 3)).dot(q2.segment(1, 3));
+    Eigen::Matrix<double, 3, 1> q1Im = (q1.segment(1, 3));
+    Eigen::Matrix<double, 3, 1> q2Im = (q2.segment(1, 3));
+    q.segment(1, 3) = q1(0) * q2Im + q2(0) * q1Im + q1Im.cross(q2Im);
+
+    return q;
+}
+
 
 
 // function for the inverse kinematic  ------------------------------------------------------------------------

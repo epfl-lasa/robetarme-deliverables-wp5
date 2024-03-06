@@ -1,9 +1,10 @@
 #include "IRoboticArmBase.h"
+#include "DynamicalSystem.h"
+#include "RosInterfaceNoetic.h"
+#include "PathPlanner.h"
+#include "TargetExtraction.h"
 #include "RoboticArmUr5.h"
 #include "ros/ros.h"
-// #include <Eigen/Dense>
-// #include <eigen3/Eigen/Dense>
-#include "RosInterfaceNoetic.h"
 #include <tuple>
 
 
@@ -16,7 +17,10 @@ int main(int argc, char **argv)
     // Create an instance of RosInterfaceNoetic
     RosInterfaceNoetic rosInterface(nh);
     IRoboticArmBase iRoboticArmBase;
-    RoboticArmUr5 ur5Arm;
+    // RoboticArmUr5 ur5Arm;
+
+    // TargetExtraction targetextraction(nh);
+
 
 
 
@@ -28,8 +32,8 @@ int main(int argc, char **argv)
         vector<double>& retrievedSpeed    = get<1>(stateJoints);
         vector<double>& retrievedTorque   = get<2>(stateJoints);
         std::cout << "retrievedPosition:"<<retrievedPosition[3]<< std::endl;
-        vector<double> posCart = ur5Arm.getFK(retrievedPosition);
-        std::cout << "posCart:"<<posCart[3]<< std::endl;
+        // vector<double> posCart = ur5Arm.getFK(retrievedPosition);
+        // std::cout << "posCart:"<<posCart[3]<< std::endl;
 
         ros::spinOnce(); // Allow the message to be subscribed
         loop_rate.sleep(); 

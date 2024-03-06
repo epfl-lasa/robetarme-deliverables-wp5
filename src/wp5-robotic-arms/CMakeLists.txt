@@ -25,7 +25,7 @@ include_directories(
 )
 
 # Include source file for the target library
-set(lib_name robotic_arms_drivers)
+set(lib_name wp5-robotic-driver)
 
 # Create a STATIC library instead of SHARED
 add_library(${lib_name} STATIC

@@ -11,7 +11,6 @@
 #pragma once
 
 #include "pinocchio/fwd.hpp"
-#include "Utils.h"
 #include <eigen3/Eigen/Dense>
 #include <yaml-cpp/yaml.h>
 #include "dynamical_systems/DynamicalSystemFactory.hpp"
@@ -149,6 +148,19 @@ private:
      * @return Vector representing the computed speed.
      */
     VectorXd speed_func(vector<double> Pos, vector<double> quat2, vector<double> speed);
-
-    // TODO: Add any additional private members as needed
+    /**
+     * @brief Function to interpolating quaternion along the shortest path.
+     * @param q1 First quaternion.
+     * @param q2 Second quaternion.
+     * @param t .
+     * @return quaternion 
+     */
+    Eigen::Matrix<double, 4, 1> slerpQuaternion( Eigen::Matrix<double, 4, 1>& q1,  Eigen::Matrix<double, 4, 1>& q2, double t);
+    /**
+     * @brief Function fo computing the quaternion product.
+     * @param q1 First quaternion.
+     * @param q2 Second quaternion.
+     * @return quaternion product 
+     */
+    Eigen::Matrix<double, 4, 1> quaternionProduct(Eigen::Matrix<double, 4, 1> q1, Eigen::Matrix<double, 4, 1> q2);
 };
