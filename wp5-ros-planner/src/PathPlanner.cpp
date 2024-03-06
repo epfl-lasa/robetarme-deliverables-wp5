@@ -1,80 +1,4 @@
-#include "library_planner_ros.h"
-
-//TargetExrtaction functon
-TargetExtraction::TargetExtraction(ros::NodeHandle& nh)
-    : poseTargetSub(nh.subscribe("/vrpn_client_node/TargetRobetarme/pose_transform", 10, &TargetExtraction::CC_vrpn_target, this)){
-
-    originalPolygonPub = nh.advertise<geometry_msgs::PolygonStamped>("/original_polygon", 1, true);
-    // Get the path to the package
-    std::string package_path = ros::package::getPath("motion_planner"); // Replace "your_package" with your actual package name
-
-    // Load parameters from YAML file
-    std::string yaml_path = package_path + "/config/config.yaml";
-    YAML::Node config = YAML::LoadFile(yaml_path);
-
-    // Access parameters from the YAML file
-    height_target = config["height_target"].as<double>();
-    width_target = config["width_target"].as<double>();
-
-    while(!targetReceived){
-      ros::spinOnce();
-    }
-    std::cout << "rostopic for the target received" << std::endl;
-}
-
-std::vector<Eigen::Vector3d> TargetExtraction::get_polygons() {
-    // Desired displacements
-    std::vector<Eigen::Vector3d> displacements{
-        Eigen::Vector3d(width_target / 2.0, height_target / 2.0 , 0),
-        Eigen::Vector3d(-width_target / 2.0, height_target / 2.0, 0),
-        Eigen::Vector3d(-width_target / 2.0, -height_target / 2.0, 0),
-        Eigen::Vector3d(width_target / 2.0, -height_target / 2.0, 0)
-    };
-
-    // Extract position and ensure quaternion is normalized
-    Eigen::Vector3d position = targetPos;
-    Eigen::Quaterniond normalizedQuat = targetQuat.normalized();
-    Eigen::Matrix3d rotation_matrix = normalizedQuat.toRotationMatrix();
-
-    // Calculate new positions
-    polygons_positions.clear();  // Clear existing positions
-    for (const auto& displacement : displacements) {
-        polygons_positions.push_back(position + rotation_matrix * displacement);
-    }
-    std::cout<<"Polygons well computed"<<std::endl;
-
-    return polygons_positions;
-}
-
-Eigen::Quaterniond TargetExtraction::get_quat_target() {
-    return targetQuat;
-}
-
-Eigen::Vector3d TargetExtraction::get_pos_target() {
-    return targetPos;
-}
-
-void TargetExtraction::CC_vrpn_target(const geometry_msgs::PoseStamped::ConstPtr msg) {
-    targetPos << msg->pose.position.x, msg->pose.position.y, msg->pose.position.z;
-    targetQuat = Eigen::Quaterniond(msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
-    targetReceived = true;
-}
-void TargetExtraction::see_target(){
-
-      geometry_msgs::PolygonStamped visualpolygonTarget;
-      visualpolygonTarget.header.frame_id = "base";  
-      visualpolygonTarget.header.stamp = ros::Time::now();
-
-      for (const auto& point : polygons_positions) {
-          geometry_msgs::Point32 msg_point;
-          msg_point.x = point.x();
-          msg_point.y = point.y();
-          msg_point.z = point.z();
-          visualpolygonTarget.polygon.points.push_back(msg_point);
-      }
-      originalPolygonPub.publish(visualpolygonTarget);
-  }
-
+#include "PathPlanner.h"
 //path panning functon
 
 // Constructor definition
@@ -333,7 +257,7 @@ nav_msgs::Path PathPlanner::get_transformed_path(const nav_msgs::Path& originalP
     double y = first_pose.pose.position.y;
     double z = first_pose.pose.position.z;
     firstPos = {x,y,z};
-    set_strategique_position();
+    // set_strategique_position();
     return transformedPath;
 }
 
@@ -441,7 +365,7 @@ bool PathPlanner::convertStripingPlanToVectorVector(const boustrophedon_msgs::St
     quatPos.push_back(pose.pose.position.y);
     quatPos.push_back(pose.pose.position.z);
 
-    path[i].push_back(quatPos);
+    path.push_back(quatPos);
   }
 
   return true;
@@ -467,37 +391,4 @@ geometry_msgs::Quaternion PathPlanner::headingToQuaternion(double x, double y, d
   }
 
   return tf2::toMsg(q);
-}
-
-BoustrophedonServer::BoustrophedonServer(ros::NodeHandle& n, double rad) : nh(n), client("plan_path", true), optimumRad(rad) {
-  // Advertise publishers
-  polygon_pub = nh.advertise<geometry_msgs::PolygonStamped>("/input_polygon", 1, true);
-  path_pub = nh.advertise<nav_msgs::Path>("/result_path", 1, true);
-  start_pub = nh.advertise<geometry_msgs::PoseStamped>("/start_pose", 1, true);
-
-  // Set parameter
-  nh.setParam("/boustrophedon_server/stripe_separation",  optimumRad);
-
-  // Run roslaunch using the system function in the background
-  std::string launch_command = "roslaunch boustrophedon_server boustrophedon_server.launch";
-  launchProcessId = fork(); // Fork a new process for roslaunch
-
-  if (launchProcessId == 0) {
-      // This is the child process (roslaunch)
-      system(launch_command.c_str());
-      exit(0); // Terminate the child process after roslaunch is done
-  }
-
-  // Sleep for a short duration to allow the launch to initialize
-  std::this_thread::sleep_for(std::chrono::seconds(2));
-
-  // The client should be initialized after the launch has started
-  client.waitForServer(ros::Duration(5.0));
-}
-
-
-void BoustrophedonServer::closeRosLaunch() {
-    // Use the process ID to terminate the roslaunch process
-    std::string kill_command = "kill " + std::to_string(launchProcessId);
-    system(kill_command.c_str());
 }

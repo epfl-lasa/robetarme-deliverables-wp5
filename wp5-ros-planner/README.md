@@ -1,12 +1,11 @@
-# WP5 - Planner
+# WP5 - Ros Interface
 
-Implement the planner to define the trajectories being used in that project.
+Implement the ros interface to be the most uncoupled to the project in order to easily switch from the needed ROS versions.
 
 ## Maintainers
 
 - Louis Munier - <lmunier@protonmail.com>
 - Tristan Bonato - <tristan_bonato@hotmail.com>
-- Rui Wu - <wurui19930213@gmail.com>
 
 ## Architecture
 

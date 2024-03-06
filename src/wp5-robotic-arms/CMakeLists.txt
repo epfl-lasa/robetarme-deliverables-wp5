@@ -33,7 +33,6 @@ add_library(${PROJECT_NAME} STATIC
     src/RoboticArmCr7.cpp
     src/RoboticArmIiwa7.cpp
     src/RoboticArmUr5.cpp
-    src/Utils.cpp
 )
 
 # Set lib version

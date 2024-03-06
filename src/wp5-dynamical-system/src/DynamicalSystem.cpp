@@ -1,4 +1,4 @@
-#include "library_ds.h"
+#include "DynamicalSystem.h"
 
 
 DynamicalSystem::DynamicalSystem(double freq)
@@ -13,7 +13,6 @@ void DynamicalSystem::parameter_initialization(){
   std::string yaml_path = + "/../config.yaml";
   YAML::Node config = YAML::LoadFile(yaml_path);
   // Access parameters from the YAML file
-  robotName = config["robotName"].as<std::string>();
   CycleRadiusLC = config["limit_cycle_radius"].as<double>();
   CycleSpeedLC = config["limit_cycle_speed"].as<double>();
   linearVelExpected = config["linear_speed"].as<double>();
@@ -112,9 +111,11 @@ Eigen::Vector3d DynamicalSystem::get_DS_vel()
 
   }else
   {
-    pathPoint(0)=desiredPath.poses[iFollow].pose.position.x;
-    pathPoint(1)=desiredPath.poses[iFollow].pose.position.y;
-    pathPoint(2)=desiredPath.poses[iFollow].pose.position.z;
+    std::vector<double> desiredQuatPos = desiredPath[iFollow];
+    pathPoint(0)=desiredQuatPos[4];
+    pathPoint(1)=desiredQuatPos[5];
+    pathPoint(2)=desiredQuatPos[6];
+
 
     dx = pathPoint(2) - realPosOffset(0);
     dy = pathPoint(1) - realPosOffset(1);

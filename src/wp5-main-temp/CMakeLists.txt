@@ -11,6 +11,7 @@ find_package(catkin REQUIRED COMPONENTS
   wp5-ros-interface
   wp5-robotic-arms-drivers
 )
+# find_package(  wp5-planner-ros-dependency REQUIRED)
 
 find_package(control_libraries 6.3.1 REQUIRED)
 

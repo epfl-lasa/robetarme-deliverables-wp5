@@ -1,13 +1,13 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>wp5-main-temp</name>
+  <name>wp5-planner-ros</name>
   <version>0.0.0</version>
-  <description>The wp5-main-temp package</description>
+  <description>The motion_planner package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
   <!-- <maintainer email="jane.doe@example.com">Jane Doe</maintainer> -->
-  <maintainer email="ros@todo.todo">ros</maintainer>
+  <maintainer email="lasa@todo.todo">lasa</maintainer>
 
 
   <!-- One license tag required, multiple allowed, one license per tag -->
@@ -19,7 +19,7 @@
   <!-- Url tags are optional, but multiple are allowed, one per tag -->
   <!-- Optional attribute type can be: website, bugtracker, or repository -->
   <!-- Example: -->
-  <!-- <url type="website">http://wiki.ros.org/wp5_main_temp</url> -->
+  <!-- <url type="website">http://wiki.ros.org/test_boustrophedon</url> -->
 
 
   <!-- Author tags are optional, multiple are allowed, one per tag -->
@@ -49,21 +49,24 @@
   <!-- Use doc_depend for packages you need only for building documentation: -->
   <!--   <doc_depend>doxygen</doc_depend> -->
   <buildtool_depend>catkin</buildtool_depend>
+  <build_depend>actionlib</build_depend>
+  <build_depend>boustrophedon_server</build_depend>
+  <build_depend>boustrophedon_msgs</build_depend>
+  <build_depend>geometry_msgs</build_depend>
   <build_depend>roscpp</build_depend>
-  <build_depend>std_msgs</build_depend>
-  <build_depend>wp5-robotic-arms-drivers</build_depend>
-  <build_depend>wp5-ros-interface</build_depend>
-  <build_depend>wp5-planner-ros</build_depend>
+  <build_export_depend>actionlib</build_export_depend>
+  <build_export_depend>boustrophedon_server</build_export_depend>
+  <build_export_depend>boustrophedon_msgs</build_export_depend>
+  <build_export_depend>geometry_msgs</build_export_depend>
   <build_export_depend>roscpp</build_export_depend>
-  <build_export_depend>std_msgs</build_export_depend>
-  <build_export_depend>wp5-robotic-arms-drivers</build_export_depend>
+  <exec_depend>actionlib</exec_depend>
+  <exec_depend>boustrophedon_server</exec_depend>
+  <exec_depend>boustrophedon_msgs</exec_depend>
+  <exec_depend>geometry_msgs</exec_depend>
   <exec_depend>roscpp</exec_depend>
-  <exec_depend>std_msgs</exec_depend>
-  <exec_depend>wp5-robotic-arms-drivers</exec_depend>
-  <exec_depend>wp5-ros-interface</exec_depend>
-  <exec_depend>wp5-planner-ros</exec_depend>
 
 
+  <!-- The export tag contains other, unspecified, tags -->
   <export>
     <!-- Other tools can request additional information be placed here -->
 

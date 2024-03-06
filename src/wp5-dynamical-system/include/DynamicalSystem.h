@@ -1,20 +1,9 @@
-#ifndef LIBRARY_DS_H
-#define LIBRARY_DS_H
+#pragma once
 
-#include <ros/ros.h>
-#include <ros/package.h>
-#include "geometry_msgs/Pose.h"
-#include <geometry_msgs/PoseStamped.h>
-#include <geometry_msgs/PoseWithCovarianceStamped.h>
-#include <geometry_msgs/PolygonStamped.h>
-#include "geometry_msgs/Twist.h"
-#include <nav_msgs/Path.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
+
+// #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <yaml-cpp/yaml.h>  
 #include <Eigen/Dense>
-#include <actionlib/client/simple_action_client.h>
-#include <boustrophedon_msgs/PlanMowingPathAction.h>
-#include <boustrophedon_msgs/ConvertPlanToPath.h>
 #include <vector>
 #include <string>
 #include <cstdlib>
@@ -28,9 +17,9 @@ class DynamicalSystem {
 public:
     bool finish =false;
 
-    DynamicalSystem(ros::NodeHandle& nh, double freq);
+    DynamicalSystem( double freq);
     void parameter_initialization();
-    void set_path(std::vector<double> firstQuatPos);
+    void set_path(std::vector<std::vector<double>> firstQuatPos);
     void addOffsetEef(Eigen::Vector3d pos, Eigen::Vector4d quat) ;
     Eigen::Vector3d get_DS_vel();
     Eigen::Matrix3d quaternionToRotationMatrix(Eigen::Vector4d q);
@@ -73,4 +62,3 @@ private:
 };
 
 
-#endif  // LIBRARY_DS_H
