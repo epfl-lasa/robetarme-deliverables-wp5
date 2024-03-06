@@ -5,6 +5,3 @@
 	path = src/iiwa_ros
 	url = https://github.com/epfl-lasa/iiwa_ros.git
 	branch = feature/dockerise
-[submodule "src/gazebo_ros_pkgs"]
-	path = src/gazebo_ros_pkgs
-	url = https://github.com/ros-simulation/gazebo_ros_pkgs.git

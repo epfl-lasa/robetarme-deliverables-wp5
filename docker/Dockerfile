@@ -120,4 +120,4 @@ RUN chown -R ${USER}:${USER} ${HOME}/catkin_ws
 USER ${USER}
 RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${HOME}/catkin_ws && catkin build"
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
-
+WORKDIR /home/${USER}/catkin_ws
