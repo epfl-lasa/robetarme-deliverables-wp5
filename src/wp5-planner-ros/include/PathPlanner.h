@@ -33,7 +33,11 @@ public:
     geometry_msgs::PoseStamped initialPose;
     geometry_msgs::PoseWithCovarianceStamped initialPoseMsg;
     
-    PathPlanner(ros::NodeHandle& nh, Eigen::Quaterniond target_quat, Eigen::Vector3d target_pos, std::vector<Eigen::Vector3d> polygons_positions);
+    // PathPlanner(ros::NodeHandle& nh, Eigen::Quaterniond target_quat, Eigen::Vector3d target_pos, std::vector<Eigen::Vector3d> polygons_positions);
+    PathPlanner(ros::NodeHandle& nh);
+    void setTarget( Eigen::Quaterniond target_quat, Eigen::Vector3d target_pos, std::vector<Eigen::Vector3d> polygons_positions);
+    double getOptimumRadius();
+    geometry_msgs::PoseStamped getInitialPose();
     geometry_msgs::PoseStamped get_initial_pos_ros_msg();
     std::vector<Eigen::Vector3d> get_planner_points();
     boustrophedon_msgs::PlanMowingPathGoal  ComputeGoal();
@@ -43,7 +47,7 @@ public:
     void see_target_flat();
     // void set_strategique_position();
     bool convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& striping_plan, nav_msgs::Path& path);
-    bool convertStripingPlanToVectorVector(const boustrophedon_msgs::StripingPlan& striping_plan);
+    bool convertPathPlanToVectorVector(const  nav_msgs::Path& path);
     geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z);
 
 private:

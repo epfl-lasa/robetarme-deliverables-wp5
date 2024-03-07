@@ -1,12 +1,19 @@
 #include "BoustrophedonServer.h"
 
 
-BoustrophedonServer::BoustrophedonServer(ros::NodeHandle& n, double rad) : nh(n), client("plan_path", true), optimumRad(rad) {
+BoustrophedonServer::BoustrophedonServer(ros::NodeHandle& n) : nh(n), client("plan_path", true) {
   // Advertise publishers
   polygon_pub = nh.advertise<geometry_msgs::PolygonStamped>("/input_polygon", 1, true);
   path_pub = nh.advertise<nav_msgs::Path>("/result_path", 1, true);
   start_pub = nh.advertise<geometry_msgs::PoseStamped>("/start_pose", 1, true);
 
+}
+void BoustrophedonServer::setOptimumRad(double rad) {
+  optimumRad = rad;
+}
+
+void BoustrophedonServer::initRosLaunch() {
+  
   // Set parameter
   nh.setParam("/boustrophedon_server/stripe_separation",  optimumRad);
 
@@ -24,9 +31,8 @@ BoustrophedonServer::BoustrophedonServer(ros::NodeHandle& n, double rad) : nh(n)
   std::this_thread::sleep_for(std::chrono::seconds(2));
 
   // The client should be initialized after the launch has started
-  client.waitForServer(ros::Duration(5.0));
+  client.waitForServer(ros::Duration(2.0));
 }
-
 
 void BoustrophedonServer::closeRosLaunch() {
     // Use the process ID to terminate the roslaunch process

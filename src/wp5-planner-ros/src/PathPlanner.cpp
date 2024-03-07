@@ -2,12 +2,12 @@
 //path panning functon
 
 // Constructor definition
-PathPlanner::PathPlanner(ros::NodeHandle& n, Eigen::Quaterniond target_quat, Eigen::Vector3d target_pos, std::vector<Eigen::Vector3d> polygons_positions) : 
+PathPlanner::PathPlanner(ros::NodeHandle& n) : 
   initialPosePub_(nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/initialpose", 10))  {
 
     nh=n;
     transformedPolygonPub = nh.advertise<geometry_msgs::PolygonStamped>("/flat_polygon", 1, true);
-    std::string package_path = ros::package::getPath("motion_planner"); 
+    std::string package_path = ros::package::getPath("wp5-planner-ros"); 
     // Load parameters from YAML file
     std::string yaml_path = package_path + "/config/config.yaml";
     YAML::Node config = YAML::LoadFile(yaml_path);
@@ -18,10 +18,7 @@ PathPlanner::PathPlanner(ros::NodeHandle& n, Eigen::Quaterniond target_quat, Eig
     flow_radius = config["flow_radius"].as<double>();
     sum_rad = flow_radius + limit_cycle_radius;
 
-    polygonsPositions = polygons_positions;
-    targetQuat = target_quat ;
-    targetPos = target_pos;
-    optimization_parameter();
+
 
 
     // FROM DS  -------------------------------------
@@ -29,6 +26,21 @@ PathPlanner::PathPlanner(ros::NodeHandle& n, Eigen::Quaterniond target_quat, Eig
     // point_pub = nh.advertise<geometry_msgs::PointStamped>("path_point", 1);
     // sub_real_pose= nh.subscribe<geometry_msgs::Pose>(robot_name + "/ee_info/Pose" , 1000, &DynamicalSystem::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
 
+}
+
+void PathPlanner::setTarget( Eigen::Quaterniond target_quat, Eigen::Vector3d target_pos, std::vector<Eigen::Vector3d> polygons_positions) {
+  targetQuat = target_quat ;
+  targetPos = target_pos;
+  polygonsPositions = polygons_positions;
+  optimization_parameter();
+}
+
+double PathPlanner::getOptimumRadius(){
+  return optimum_radius;
+}
+
+geometry_msgs::PoseStamped PathPlanner::getInitialPose (){
+  return initialPose;
 }
 
 // Function to find the center of the polygon
@@ -116,6 +128,8 @@ boustrophedon_msgs::PlanMowingPathGoal  PathPlanner::ComputeGoal() {
   goal.robot_position.pose.orientation.y = 0.0;
   goal.robot_position.pose.orientation.z = 0.0;
   goal.robot_position.pose.orientation.w = 1.0;
+
+
 
   return goal;
 }
@@ -213,6 +227,7 @@ void PathPlanner::publishInitialPose() {
   initialPosePub_.publish(initialPoseMsg);
   initialPose.header = initialPoseMsg.header;
   initialPose.pose = initialPoseMsg.pose.pose;
+
 }
 
 nav_msgs::Path PathPlanner::get_transformed_path(const nav_msgs::Path& originalPath) {
@@ -329,24 +344,22 @@ bool PathPlanner::convertStripingPlanToPath(const boustrophedon_msgs::StripingPl
 
   return true;
 }
-bool PathPlanner::convertStripingPlanToVectorVector(const boustrophedon_msgs::StripingPlan& striping_plan)
+
+bool PathPlanner::convertPathToVectorVector(const , nav_msgs::Path& path)
 {
-  size_t size = striping_plan.points.size();
-  std::vector<std::vector<double>> path(size);
+  size_t size = path.poses.size();
+    std::vector<std::vector<double>> path(size);
   std::vector<double> quatPos ;
 
   for (std::size_t i = 0; i < size; i++)
   {
-    geometry_msgs::PoseStamped pose;
-    pose.header.frame_id = striping_plan.header.frame_id;
-    pose.header.stamp = striping_plan.header.stamp;
-    pose.pose.position = striping_plan.points[i].point;
+    geometry_msgs::PoseStamped pose = path.poses[i];
 
     if (i < striping_plan.points.size() - 1)
-    {
-      double dx = striping_plan.points[i + 1].point.x - striping_plan.points[i].point.x;
-      double dy = striping_plan.points[i + 1].point.y - striping_plan.points[i].point.y;
-      double dz = striping_plan.points[i + 1].point.z - striping_plan.points[i].point.z;
+
+      double dx = path.poses[i + 1].pose.position.x - pose.pose.position.x;
+      double dy = path.poses[i + 1].pose.position.y - pose.pose.position.y;
+      double dz = path.poses[i + 1].pose.position.z - pose.pose.position.z;
 
       pose.pose.orientation = headingToQuaternion(dx, dy, dz);
       quatPos.push_back(pose.pose.orientation.x);
@@ -366,9 +379,8 @@ bool PathPlanner::convertStripingPlanToVectorVector(const boustrophedon_msgs::St
     quatPos.push_back(pose.pose.position.z);
 
     path.push_back(quatPos);
-  }
-
-  return true;
+  
+    return true;
 }
 
 geometry_msgs::Quaternion PathPlanner::headingToQuaternion(double x, double y, double z)

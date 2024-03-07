@@ -6,7 +6,7 @@ TargetExtraction::TargetExtraction(ros::NodeHandle& nh)
 
     originalPolygonPub = nh.advertise<geometry_msgs::PolygonStamped>("/original_polygon", 1, true);
     // Get the path to the package
-    std::string package_path = ros::package::getPath("motion_planner"); // Replace "your_package" with your actual package name
+    std::string package_path = ros::package::getPath("wp5-planner-ros"); // Replace "your_package" with your actual package name
 
     // Load parameters from YAML file
     std::string yaml_path = package_path + "/config/config.yaml";
@@ -16,7 +16,9 @@ TargetExtraction::TargetExtraction(ros::NodeHandle& nh)
     height_target = config["height_target"].as<double>();
     width_target = config["width_target"].as<double>();
 
-    while(!targetReceived){
+    std::cout << "Waiting for target Pose" << std::endl;
+
+    while(!targetReceived || !ros::ok()){
       ros::spinOnce();
     }
     std::cout << "rostopic for the target received" << std::endl;
@@ -42,7 +44,7 @@ std::vector<Eigen::Vector3d> TargetExtraction::get_polygons() {
         polygons_positions.push_back(position + rotation_matrix * displacement);
     }
     std::cout<<"Polygons well computed"<<std::endl;
-
+    see_target();
     return polygons_positions;
 }
 
@@ -59,6 +61,7 @@ void TargetExtraction::CC_vrpn_target(const geometry_msgs::PoseStamped::ConstPtr
     targetQuat = Eigen::Quaterniond(msg->pose.orientation.w, msg->pose.orientation.x, msg->pose.orientation.y, msg->pose.orientation.z);
     targetReceived = true;
 }
+
 void TargetExtraction::see_target(){
 
       geometry_msgs::PolygonStamped visualpolygonTarget;

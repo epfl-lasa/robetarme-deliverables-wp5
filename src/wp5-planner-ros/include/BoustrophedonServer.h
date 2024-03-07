@@ -26,8 +26,10 @@
 
 class BoustrophedonServer {
 public:
-    BoustrophedonServer(ros::NodeHandle& n, double rad);
+    BoustrophedonServer(ros::NodeHandle& n);
+    void initRosLaunch();
     void closeRosLaunch();
+    void setOptimumRad(double rad);
     ros::Publisher polygon_pub;
     ros::Publisher path_pub;
     ros::Publisher start_pub;
