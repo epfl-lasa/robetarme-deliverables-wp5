@@ -1,48 +1,52 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(wp5-dynamical-system VERSION 0.1.0 DESCRIPTION "Drivers library to manage dynamical system")
-cmake_policy(SET CMP0057 NEW)
+
+if(POLICY CMP0057)
+  cmake_policy(SET CMP0057 NEW)
+endif()
 
 # Add options
-# add_compile_options(-O3)
-set(CMAKE_CXX_STANDARD 14) # specify the C++ standard
+set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_BUILD_TYPE Debug)
 
 # Find packages if any
+find_package(catkin REQUIRED COMPONENTS)
 find_package(Eigen3 3.4 REQUIRED)
 
-
-# # trac-ik 
-# find_package(catkin REQUIRED COMPONENTS
-#     trac_ik_lib)
+## The catkin_package macro generates cmake config files for your package
+catkin_package(
+  INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
+  CATKIN_DEPENDS
+)
 
 include_directories(
   include
-#   ${catkin_INCLUDE_DIRS}	
+  ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
 
-# Include source file for the target library
-set(lib_name wp5-dynamical-system)
-
 # Create a STATIC library instead of SHARED
-add_library(${lib_name} STATIC
+add_library(${PROJECT_NAME} STATIC
     src/DynamicalSystem.cpp
 )
 
 # Set lib version
-set_target_properties(${lib_name} PROPERTIES
+set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION ${PROJECT_VERSION}
 )
 
 # Add include and src to include path to make includes easier in the code
-target_include_directories(${lib_name} PRIVATE include)
-target_include_directories(${lib_name} PRIVATE src)
+target_include_directories(${PROJECT_NAME} PRIVATE
+  include
+  src
+)
 
 # Link library to robotic_arms_drivers
-target_link_libraries(${lib_name}
-    ${control_libraries_LIBRARIES}
-    Eigen3::Eigen
-
+add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
+target_link_libraries(${PROJECT_NAME} PRIVATE
+  ${catkin_LIBRARIES}
+  Eigen3::Eigen
 )
 
 export(PACKAGE ${PROJECT_NAME})

@@ -12,7 +12,6 @@
 #pragma once
 
 #include <OsqpEigen/OsqpEigen.h>
-#include <Utils.h>
 #include <cmath>
 #include <dynamical_systems/DynamicalSystemFactory.hpp>
 #include <eigen3/Eigen/Dense>

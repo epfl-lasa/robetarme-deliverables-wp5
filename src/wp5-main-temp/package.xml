@@ -54,14 +54,18 @@
   <build_depend>wp5-robotic-arms-drivers</build_depend>
   <build_depend>wp5-ros-interface</build_depend>
   <build_depend>wp5-planner-ros</build_depend>
+  <build_depend>wp5-dynamical-system</build_depend>
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
   <build_export_depend>wp5-robotic-arms-drivers</build_export_depend>
+  <build_export_depend>wp5-planner-ros</build_export_depend>
+  <build_export_depend>wp5-dynamical-system</build_export_depend>
   <exec_depend>roscpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
   <exec_depend>wp5-robotic-arms-drivers</exec_depend>
   <exec_depend>wp5-ros-interface</exec_depend>
   <exec_depend>wp5-planner-ros</exec_depend>
+  <exec_depend>wp5-dynamical-system</exec_depend>
 
 
   <export>

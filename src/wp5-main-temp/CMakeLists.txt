@@ -10,13 +10,14 @@ find_package(catkin REQUIRED COMPONENTS
   trac_ik_lib
   wp5-ros-interface
   wp5-robotic-arms-drivers
+  wp5-dynamical-system
 )
 # find_package(  wp5-planner-ros-dependency REQUIRED)
 
 find_package(control_libraries 6.3.1 REQUIRED)
 
 catkin_package(
-  CATKIN_DEPENDS roscpp wp5-ros-interface wp5-robotic-arms-drivers
+  CATKIN_DEPENDS roscpp wp5-ros-interface wp5-robotic-arms-drivers wp5-dynamical-system
 )
 
 include_directories(
