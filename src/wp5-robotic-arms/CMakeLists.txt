@@ -8,6 +8,11 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_BUILD_TYPE Debug)
 
+
+# save the path during compilation 
+add_definitions("-DWP5_ROBOTIC_ARMS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
+
+
 # Find packages if any
 find_package(catkin REQUIRED COMPONENTS)
 find_package(Eigen3 3.4 REQUIRED)
@@ -22,6 +27,7 @@ catkin_package(
 
 include_directories(
   include
+  urdf
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
 )
@@ -33,6 +39,7 @@ add_library(${PROJECT_NAME} STATIC
     src/RoboticArmCr7.cpp
     src/RoboticArmIiwa7.cpp
     src/RoboticArmUr5.cpp
+    urdf/ur5.urdf
 )
 
 # Set lib version
@@ -43,6 +50,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 # Add include and src to include path to make includes easier in the code
 target_include_directories(${PROJECT_NAME} PRIVATE
   include
+  urdf
   src
 )
 
@@ -54,4 +62,10 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   ${control_libraries_LIBRARIES}
 )
 
+
+
 export(PACKAGE ${PROJECT_NAME})
+
+install(DIRECTORY urdf 
+DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
+)

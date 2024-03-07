@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(wp5-planner-ros)
 
-## Compile as C++11, supported in ROS Kinetic and newer
+set(CMAKE_CXX_STANDARD 14)
 add_compile_options(-std=c++11)
 
 ## Find catkin macros and libraries
@@ -28,6 +28,7 @@ find_package(catkin REQUIRED COMPONENTS
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
   INCLUDE_DIRS include
+  LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS actionlib boustrophedon_server boustrophedon_msgs geometry_msgs roscpp
   DEPENDS system_lib
 )
@@ -147,4 +148,4 @@ add_dependencies(${PROJECT_NAME}
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
+# set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
