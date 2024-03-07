@@ -40,20 +40,25 @@ add_executable(boustrophedon_planner_server
   src/boustrophedon_server/boustrophedon_types.cpp
   src/boustrophedon_server/cellular_decomposition/polygon_decomposer.cpp
   src/boustrophedon_server/cellular_decomposition/cell.cpp
-  )
+)
+
 target_link_libraries(boustrophedon_planner_server
   ${catkin_LIBRARIES}
   CGAL::CGAL
-  CGAL::CGAL_Core)
+  CGAL::CGAL_Core
+)
+
 add_dependencies(boustrophedon_planner_server ${catkin_EXPORTED_TARGETS})
 
 add_executable(boustrophedon_planner_client
   src/boustrophedon_server/boustrophedon_planner_client_node.cpp
-  )
+)
+
 target_link_libraries(boustrophedon_planner_client
   ${catkin_LIBRARIES}
   CGAL::CGAL
-  CGAL::CGAL_Core)
+  CGAL::CGAL_Core
+)
 add_dependencies(boustrophedon_planner_client ${catkin_EXPORTED_TARGETS})
 
 install(
@@ -66,4 +71,4 @@ install(
 
 install(DIRECTORY launch/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-  )
+)
