@@ -10,8 +10,9 @@ DynamicalSystem::DynamicalSystem(double freq)
 void DynamicalSystem::parameter_initialization(){
   velocityLimit=1.5;
   // Load parameters from YAML file
-  std::string yaml_path = std::string(WP5_DYNAMICAL_SYSTEM_DIR) + "/../config.yaml";
+  std::string yaml_path = std::string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/config.yaml";
   YAML::Node config = YAML::LoadFile(yaml_path);
+  
   // Access parameters from the YAML file
   CycleRadiusLC = config["limit_cycle_radius"].as<double>();
   CycleSpeedLC = config["limit_cycle_speed"].as<double>();

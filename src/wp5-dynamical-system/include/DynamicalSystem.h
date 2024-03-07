@@ -31,9 +31,9 @@ public:
     void restart_path();
 
 private:
-    double ConvergenceRateLC  = 10;
-    double CycleRadiusLC      = 0.03;
-    double CycleSpeedLC       = 2.5* 3.14;
+    double ConvergenceRateLC    = 10;
+    double CycleRadiusLC        = 0.03;
+    double CycleSpeedLC         = 2.5* 3.14;
     double fs                   = 100;
     double toleranceToNextPoint = 0.1;
     double linearVelExpected    = 0.04;

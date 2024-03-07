@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(control_libraries 6.3.1 REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 catkin_package(CATKIN_DEPENDS
   roscpp
@@ -38,4 +39,5 @@ add_executable(wp5-main-temp-node
 target_link_libraries(wp5-main-temp-node PRIVATE
   ${catkin_LIBRARIES}
   ${control_libraries_LIBRARIES}
+  yaml-cpp
 )

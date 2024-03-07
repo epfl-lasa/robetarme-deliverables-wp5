@@ -24,6 +24,8 @@ int main(int argc, char** argv) {
 
   BoustrophedonServer boustrophedonServer(nh, 0.5);
   TargetExtraction targetextraction(nh);
+  DynamicalSystem  dynamicalSystem(100.0);
+
 
   tuple<vector<double>, vector<double>, vector<double>> stateJoints;
   while (ros::ok()) {

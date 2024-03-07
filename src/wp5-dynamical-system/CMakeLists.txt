@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.3)
 project(wp5-dynamical-system VERSION 0.1.0 DESCRIPTION "Drivers library to manage dynamical system")
 
 if(POLICY CMP0057)
@@ -7,14 +7,13 @@ endif()
 
 add_definitions("-DWP5_DYNAMICAL_SYSTEM_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
-
 # Add options
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_BUILD_TYPE Debug)
 
 # Find packages if any
 find_package(catkin REQUIRED COMPONENTS)
 find_package(Eigen3 3.4 REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 ## The catkin_package macro generates cmake config files for your package
 catkin_package(
@@ -27,9 +26,9 @@ include_directories(
   include
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIR}
 )
-
-# Create a STATIC library instead of SHARED
+# Create a static library
 add_library(${PROJECT_NAME} STATIC
     src/DynamicalSystem.cpp
 )
@@ -47,9 +46,11 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 
 # Link library to robotic_arms_drivers
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
-target_link_libraries(${PROJECT_NAME} PRIVATE
+
+target_link_libraries(${PROJECT_NAME} 
   ${catkin_LIBRARIES}
   Eigen3::Eigen
+  yaml-cpp
 )
 
 export(PACKAGE ${PROJECT_NAME})

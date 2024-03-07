@@ -14,7 +14,6 @@
 RoboticArmUr5::RoboticArmUr5() {
 
 pathUrdf = std::string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/ur5.urdf";
-std::cout<< pathUrdf << std::endl;
 robotName = "ur5_robot";
 tipLink  = "tool0";
 tipJoint = "wrist_3_joint";
