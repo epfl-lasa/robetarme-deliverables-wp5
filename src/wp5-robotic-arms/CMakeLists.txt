@@ -1,28 +1,30 @@
-cmake_minimum_required(VERSION 3.0.2)
+cmake_minimum_required(VERSION 3.3)
 project(wp5-robotic-arms-drivers VERSION 0.1.0 DESCRIPTION "Drivers library to manage different robotic arms")
+
 if(POLICY CMP0057)
   cmake_policy(SET CMP0057 NEW)
 endif()
 
 # Add options
+add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 14)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
 
-
-# save the path during compilation 
+# Save the path during compilation to solve inclusion problems with linked files
 add_definitions("-DWP5_ROBOTIC_ARMS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
-
 
 # Find packages if any
 find_package(catkin REQUIRED COMPONENTS)
 find_package(Eigen3 3.4 REQUIRED)
 find_package(control_libraries 6.3.1 REQUIRED)
+find_package(yaml-cpp REQUIRED)
 
 ## The catkin_package macro generates cmake config files for your package
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
+  DEPENDS EIGEN3 control_libraries YAML_CPP
 )
 
 include_directories(
@@ -30,6 +32,7 @@ include_directories(
   urdf
   ${catkin_INCLUDE_DIRS}
   ${EIGEN3_INCLUDE_DIRS}
+  ${YAML_CPP_INCLUDE_DIR}
 )
 
 # Create a STATIC library instead of SHARED
@@ -39,7 +42,6 @@ add_library(${PROJECT_NAME} STATIC
     src/RoboticArmCr7.cpp
     src/RoboticArmIiwa7.cpp
     src/RoboticArmUr5.cpp
-    urdf/ur5.urdf
 )
 
 # Set lib version
@@ -52,6 +54,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
   include
   urdf
   src
+  ${YAML_CPP_INCLUDE_DIR}
 )
 
 # Link library to robotic_arms_drivers
@@ -60,12 +63,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
   ${catkin_LIBRARIES}
   Eigen3::Eigen
   ${control_libraries_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
 )
-
-
 
 export(PACKAGE ${PROJECT_NAME})
-
-install(DIRECTORY urdf 
-DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/urdf
-)

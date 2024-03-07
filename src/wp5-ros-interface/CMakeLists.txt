@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.3)
 project(wp5-ros-interface VERSION 0.1.0 DESCRIPTION "Ros interface library to bind with specific ros version")
 
+add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_BUILD_TYPE Release)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -15,7 +17,8 @@ find_package(yaml-cpp REQUIRED)
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp roslib std_msgs message_runtime sensor_msgs geometry_msgs
+  CATKIN_DEPENDS roscpp roslib message_runtime std_msgs sensor_msgs geometry_msgs
+  DEPENDS YAML_CPP
 )
 
 include_directories(
@@ -24,7 +27,7 @@ include_directories(
   ${YAML_CPP_INCLUDE_DIR}
 )
 
-# Create a static library
+# Create a library
 add_library(${PROJECT_NAME} STATIC
   src/RosInterfaceNoetic.cpp
 )
@@ -34,12 +37,6 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
     VERSION ${PROJECT_VERSION}
 )
 
-# Add include and src to include path to make includes easier in the code
-target_include_directories(${PROJECT_NAME} PRIVATE
-  include
-  src
-)
-
 # Link library to robotic_arms_drivers
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
@@ -47,19 +44,14 @@ add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EX
 target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
   ${roslib_LIBRARIES}
-  yaml-cpp
+  ${YAML_CPP_LIBRARIES}
+)
+
+# Add include and src to include path to make includes easier in the code
+target_include_directories(${PROJECT_NAME} PRIVATE
+  include
+  src
+  ${YAML_CPP_INCLUDE_DIR}
 )
 
 export(PACKAGE ${PROJECT_NAME})
-
-# Create an executable using the shared library
-# add_executable(RosInterfaceNoeticNode src/RosInterfaceNoetic.cpp)
-# target_link_libraries(RosInterfaceNoeticNode
-#   ${PROJECT_NAME}  # Link against the shared library
-# )
-
-# Optionally, if you have a main.cpp file:
-# add_executable(your_main_executable main.cpp)
-# target_link_libraries(your_main_executable
-#   ${PROJECT_NAME}  # Link against the shared library
-# )

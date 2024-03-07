@@ -1,7 +1,13 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(boustrophedon_msgs)
 
+if(POLICY CMP0048)
+  cmake_policy(SET CMP0048 NEW)
+endif()
+
+add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_BUILD_TYPE Release)
 
 find_package(catkin REQUIRED
   genmsg
@@ -9,7 +15,7 @@ find_package(catkin REQUIRED
   geometry_msgs
   actionlib_msgs
   nav_msgs
-  )
+)
 
 add_message_files(
   DIRECTORY msg

@@ -1,6 +1,7 @@
 /**
  * @file RoboticArmUr5.cpp
  * @author Louis Munier (lmunier@protonmail.com)
+ * @author Tristan Bonato (tristan_bonato@hotmail.com)
  * @brief
  * @version 0.1
  * @date 2024-02-27
@@ -11,21 +12,22 @@
 
 #include "RoboticArmUr5.h"
 
+using namespace std;
+
 RoboticArmUr5::RoboticArmUr5() {
+  pathUrdf = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/ur5.urdf";
+  robotName = "ur5_robot";
+  tipLink = "tool0";
+  tipJoint = "wrist_3_joint";
+  baseLink = "base";
+  jointNames =
+      {"shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
+  referenceFrame = "base";
+  nJoint = 6;
 
-pathUrdf = std::string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/ur5.urdf";
-robotName = "ur5_robot";
-tipLink  = "tool0";
-tipJoint = "wrist_3_joint";
-baseLink = "base";
-jointNames = {"shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
-referenceFrame = "base";
-nJoint    = 6;
+  model = make_unique<robot_model::Model>(robotName, pathUrdf);
 
-model = make_unique<robot_model::Model>(robotName, pathUrdf);
-
-// IRoboticArmBase::initIK();
-
+  // IRoboticArmBase::initIK();
 }
 
 // vector<double>  RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,vector<double> twist) {

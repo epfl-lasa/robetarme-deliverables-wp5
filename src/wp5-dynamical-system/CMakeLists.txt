@@ -8,7 +8,9 @@ endif()
 add_definitions("-DWP5_DYNAMICAL_SYSTEM_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 # Add options
+add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_BUILD_TYPE Release)
 
 # Find packages if any
 find_package(catkin REQUIRED COMPONENTS)
@@ -20,6 +22,7 @@ catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
+  DEPENDS EIGEN3 YAML_CPP
 )
 
 include_directories(
@@ -28,6 +31,7 @@ include_directories(
   ${EIGEN3_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIR}
 )
+
 # Create a static library
 add_library(${PROJECT_NAME} STATIC
     src/DynamicalSystem.cpp
@@ -42,15 +46,16 @@ set_target_properties(${PROJECT_NAME} PROPERTIES
 target_include_directories(${PROJECT_NAME} PRIVATE
   include
   src
+  ${YAML_CPP_INCLUDE_DIR}
 )
 
 # Link library to robotic_arms_drivers
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 
-target_link_libraries(${PROJECT_NAME} 
+target_link_libraries(${PROJECT_NAME}
   ${catkin_LIBRARIES}
   Eigen3::Eigen
-  yaml-cpp
+  ${YAML_CPP_LIBRARIES}
 )
 
 export(PACKAGE ${PROJECT_NAME})

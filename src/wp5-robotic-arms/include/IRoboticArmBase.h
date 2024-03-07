@@ -4,33 +4,27 @@
  * @author Tristan Bonato (tristan_bonato@hotmail.com)
  * @brief Declaration of the IRoboticArmBase class
  * @version 0.1
- * @date 2024-02-27
+ * @date 2024-03-07
  *
  * @copyright Copyright (c) 2024
  */
 
 #pragma once
 
-#include <OsqpEigen/OsqpEigen.h>
+// clang-format off
+#include <pinocchio/fwd.hpp>
+// clang-format on
+
 #include <cmath>
 #include <dynamical_systems/DynamicalSystemFactory.hpp>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
 #include <memory>
-#include <pinocchio/fwd.hpp>
 #include <robot_model/Model.hpp>
 #include <sstream>
-#include <state_representation/space/cartesian/CartesianPose.hpp>
-#include <state_representation/space/cartesian/CartesianTwist.hpp>
-#include <state_representation/space/joint/JointPositions.hpp>
-#include <state_representation/space/joint/JointVelocities.hpp>
-#include <yaml-cpp/yaml.h>
 
 // #include <trac_ik/trac_ik.hpp>
 #include <vector>
-
-using namespace std;
-using namespace Eigen;
 
 /**
  * @brief Mother class to create all the prototype functions needed in different robotic arms.
@@ -55,7 +49,7 @@ public:
      * @param vectJoint Vector of joint positions.
      * @return Vector representing the Cartesian pose (position and orientation) of the end effector.
      */
-  vector<double> getFK(vector<double> vectJoint);
+  std::vector<double> getFK(std::vector<double> vectJoint);
 
   // /**
   //  * @brief Get inverse kinematics of the robotic arm.
@@ -64,7 +58,7 @@ public:
   //  * @param vectorQuatPos Vector representing the target Cartesian pose (position and orientation).
   //  * @return A pair containing an error code and the vector of next joint positions.
   //  */
-  // pair<int, vector<double>> getIK(vector<double> actualJoint, vector<double> vectorQuatPos);
+  // std::pair<int, std::vector<double>> getIK(std::vector<double> actualJoint, std::vector<double> vectorQuatPos);
 
   // /**
   //  * @brief Update the inverse kinematics parameters.
@@ -73,7 +67,7 @@ public:
   //  * @param timeoutInSecs Timeout value for inverse kinematics solver.
   //  * @param solveTypeStr Solve type for inverse kinematics solver.
   //  */
-  // void updateIK(double err, double timeoutInSecs, string solveTypeStr);
+  // void updateIK(double err, double timeoutInSecs, std::string solveTypeStr);
 
   /**
      * @brief Get the twist (linear and angular velocities) of the robotic arm.
@@ -82,7 +76,7 @@ public:
      * @param speedJoint Vector of joint velocities.
      * @return Vector representing the twist (linear and angular velocities) of the end effector.
      */
-  VectorXd getTwist(vector<double> posJoint, vector<double> speedJoint);
+  Eigen::VectorXd getTwist(std::vector<double> posJoint, std::vector<double> speedJoint);
 
   /**
      * @brief Get the Jacobian matrix of the robotic arm.
@@ -90,7 +84,7 @@ public:
      * @param vectJoint Vector of joint positions.
      * @return Matrix representing the Jacobian matrix of the end effector.
      */
-  MatrixXd getJacobian(vector<double> vectJoint);
+  Eigen::MatrixXd getJacobian(std::vector<double> vectJoint);
 
   /**
      * @brief Get the inverse dynamics of the robotic arm.
@@ -99,7 +93,7 @@ public:
      * @param speedEigen Vector of joint velocities.
      * @return Vector representing the joint torques required for the given joint positions and velocities.
      */
-  vector<double> getIDynamics(vector<double> vectJoint, VectorXd speedEigen);
+  std::vector<double> getIDynamics(std::vector<double> vectJoint, Eigen::VectorXd speedEigen);
 
   // /**
   //  * @brief Low-level controller function for the robotic arm.
@@ -114,7 +108,7 @@ protected:
      */
   // Protected members
   std::string robotName = "";
-  vector<string> jointNames;
+  std::vector<std::string> jointNames;
   std::string baseLink = "";
   std::string tipLink = "";
   std::string tipJoint = "";
@@ -146,7 +140,7 @@ private:
      * @param speed Vector representing the target speed.
      * @return Vector representing the computed speed.
      */
-  VectorXd speed_func(vector<double> Pos, vector<double> quat2, vector<double> speed);
+  Eigen::VectorXd speed_func(std::vector<double> Pos, std::vector<double> quat2, std::vector<double> speed);
 
   /**
      * @brief Function to interpolating quaternion along the shortest path.

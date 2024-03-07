@@ -4,12 +4,19 @@
  * @author Tristan Bonato (tristan_bonato@hotmail.com)
  * @brief
  * @version 0.1
- * @date 2024-02-27
+ * @date 2024-03-07
  *
  * @copyright Copyright (c) 2024
  *
  */
 #include "IRoboticArmBase.h"
+
+#include <OsqpEigen/OsqpEigen.h>
+#include <state_representation/space/cartesian/CartesianPose.hpp>
+#include <state_representation/space/cartesian/CartesianTwist.hpp>
+#include <state_representation/space/joint/JointPositions.hpp>
+#include <state_representation/space/joint/JointVelocities.hpp>
+#include <yaml-cpp/yaml.h>
 
 using namespace std;
 using namespace Eigen;
@@ -19,7 +26,6 @@ using namespace Eigen;
  *
  * This class provides methods to manage a robotic arm with all the necessary functions to control it.
  */
-
 vector<double> IRoboticArmBase::getFK(vector<double> vectJoint) {
   Map<VectorXd> posJoint_eigen(vectJoint.data(), vectJoint.size());
   state_representation::JointPositions nextJoinState =
@@ -34,10 +40,12 @@ vector<double> IRoboticArmBase::getFK(vector<double> vectJoint) {
 }
 
 VectorXd IRoboticArmBase::getTwist(vector<double> posJoint, vector<double> speedJoint) {
-
   MatrixXd jacMatrix = getJacobian(posJoint);
   VectorXd speedJointEigen(nJoint);
-  for (int i = 0; i < nJoint; ++i) { speedJointEigen(i) = speedJoint[i]; }
+
+  for (int i = 0; i < nJoint; ++i) {
+    speedJointEigen(i) = speedJoint[i];
+  }
 
   VectorXd twistLinearAngular = jacMatrix * speedJointEigen;
   return twistLinearAngular;
@@ -71,7 +79,9 @@ vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd 
   state_representation::JointVelocities nextJoinStateSpeed =
       model->inverse_velocity(nextPostwist, actualJoinState, tipJoint);
   VectorXd speedJointNext_eigen = nextJoinStateSpeed.data();
-  for (int i = 0; i < nJoint; ++i) { speedJointNext[i] = speedJointNext_eigen(i); }
+  for (int i = 0; i < nJoint; ++i) {
+    speedJointNext[i] = speedJointNext_eigen(i);
+  }
 
   return speedJointNext;
 }
@@ -95,7 +105,7 @@ VectorXd IRoboticArmBase::speed_func(vector<double> Pos, vector<double> quat2, v
 
   double dsGain_ori = 0.50;
   double theta_gq = (-.5 / (4 * maxDq * maxDq)) * tmp_angular_vel.transpose() * tmp_angular_vel;
-  Vector3d Omega_out = 2 * dsGain_ori * (1 + std::exp(theta_gq)) * tmp_angular_vel;
+  Vector3d Omega_out = 2 * dsGain_ori * (1 + exp(theta_gq)) * tmp_angular_vel;
 
   vector<double> V = {Omega_out[0], Omega_out[1], Omega_out[2], speed[0], speed[1], speed[2]};
 
@@ -105,12 +115,13 @@ VectorXd IRoboticArmBase::speed_func(vector<double> Pos, vector<double> quat2, v
   return VOut;
 }
 
-Eigen::Matrix<double, 4, 1>
-IRoboticArmBase::slerpQuaternion(Eigen::Matrix<double, 4, 1>& q1, Eigen::Matrix<double, 4, 1>& q2, double t) {
-  Eigen::Matrix<double, 4, 1> q;
+Matrix<double, 4, 1> IRoboticArmBase::slerpQuaternion(Matrix<double, 4, 1>& q1, Matrix<double, 4, 1>& q2, double t) {
+  Matrix<double, 4, 1> q;
 
   // Change sign of q2 if dot product of the two quaternions is negative => allows interpolating along the shortest path
-  if (q1.dot(q2) < 0.0) { q2 = -q2; }
+  if (q1.dot(q2) < 0.0) {
+    q2 = -q2;
+  }
 
   double dotProduct = q1.dot(q2);
   if (dotProduct > 1.0) {
@@ -121,21 +132,21 @@ IRoboticArmBase::slerpQuaternion(Eigen::Matrix<double, 4, 1>& q1, Eigen::Matrix<
 
   double omega = acos(dotProduct);
 
-  if (std::fabs(omega) < std::numeric_limits<double>::epsilon()) {
+  if (fabs(omega) < numeric_limits<double>::epsilon()) {
     q = q1.transpose() + t * (q2 - q1).transpose();
   } else {
-    q = (std::sin((1 - t) * omega) * q1 + std::sin(t * omega) * q2) / std::sin(omega);
+    q = (sin((1 - t) * omega) * q1 + sin(t * omega) * q2) / sin(omega);
   }
 
   return q;
 }
 
-Eigen::Matrix<double, 4, 1> IRoboticArmBase::quaternionProduct(Eigen::Matrix<double, 4, 1> q1,
-                                                               Eigen::Matrix<double, 4, 1> q2) {
-  Eigen::Matrix<double, 4, 1> q;
+Matrix<double, 4, 1> IRoboticArmBase::quaternionProduct(Matrix<double, 4, 1> q1, Matrix<double, 4, 1> q2) {
+  Matrix<double, 4, 1> q;
   q(0) = q1(0) * q2(0) - (q1.segment(1, 3)).dot(q2.segment(1, 3));
-  Eigen::Matrix<double, 3, 1> q1Im = (q1.segment(1, 3));
-  Eigen::Matrix<double, 3, 1> q2Im = (q2.segment(1, 3));
+
+  Matrix<double, 3, 1> q1Im = (q1.segment(1, 3));
+  Matrix<double, 3, 1> q2Im = (q2.segment(1, 3));
   q.segment(1, 3) = q1(0) * q2Im + q2(0) * q1Im + q1Im.cross(q2Im);
 
   return q;

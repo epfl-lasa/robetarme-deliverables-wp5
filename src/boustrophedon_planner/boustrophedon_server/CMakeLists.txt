@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(boustrophedon_server)
 
+add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_BUILD_TYPE Release)
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -11,7 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   nav_msgs
   rosparam_shortcuts
-  )
+)
 
 find_package(CGAL REQUIRED COMPONENTS Core)
 catkin_package(
