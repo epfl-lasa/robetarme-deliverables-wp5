@@ -110,7 +110,7 @@ FROM simulation-tools as finalisation
 WORKDIR /home/${USER}
 
 RUN echo export ROS_MASTER_URI=http://localhost:11311 >> ~/.bashrc
-RUN echo export ROS_IP=localhost >> ~/.bashrc
+RUN echo export ROS_IP=127.0.0.1 >> ~/.bashrc
 RUN chown -R ${USER}:${HOST_GID} .bashrc
 
 # Create catkin workspace

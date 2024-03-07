@@ -47,7 +47,7 @@ public:
     void see_target_flat();
     // void set_strategique_position();
     bool convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& striping_plan, nav_msgs::Path& path);
-    bool convertPathPlanToVectorVector(const  nav_msgs::Path& path);
+    std::vector<std::vector<double>> convertPathPlanToVectorVector(const  nav_msgs::Path& path);
     geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z);
 
 private:
