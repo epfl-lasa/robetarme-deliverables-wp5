@@ -16,7 +16,6 @@ using namespace std;
 using namespace Eigen;
 
 int main(int argc, char** argv) {
-
   double deltaTime = 0.1;
 
   // init ros
