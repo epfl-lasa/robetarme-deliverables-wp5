@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(wp5-dynamical-system VERSION 0.1.0 DESCRIPTION "Drivers library to manage dynamical system")
+project(wp5_dynamical_system VERSION 0.1.0 DESCRIPTION "Drivers library to manage dynamical system")
 
 if(POLICY CMP0057)
   cmake_policy(SET CMP0057 NEW)

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(wp5-planner-ros)
+project(wp5_planner_ros)
 
 add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 14)

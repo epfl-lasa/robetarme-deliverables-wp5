@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-  <name>wp5-planner-ros</name>
+  <name>wp5_planner_ros</name>
   <version>0.0.0</version>
   <description>The motion_planner package</description>
 

@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2024-02-27
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  *
  */
 #pragma once
@@ -27,5 +27,4 @@ protected:
   // TODO: implement all the protected members, accessible from its own and herited classes
 
 private:
-
 };

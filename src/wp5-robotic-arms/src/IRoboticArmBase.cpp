@@ -6,7 +6,7 @@
  * @version 0.1
  * @date 2024-03-07
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  *
  */
 #include "IRoboticArmBase.h"
@@ -89,8 +89,8 @@ vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd 
 VectorXd IRoboticArmBase::speed_func(vector<double> Pos, vector<double> quat2, vector<double> speed) {
   //orientation
   Vector4d q1, q2;
-  q1 << Pos[3], Pos[0], Pos[1], Pos[2];        //qw,qx,qy,qz
-  q2 << quat2[3], quat2[0], quat2[1], quat2[2];//qw,qx,qy,qz
+  q1 << Pos[3], Pos[0], Pos[1], Pos[2];         //qw,qx,qy,qz
+  q2 << quat2[3], quat2[0], quat2[1], quat2[2]; //qw,qx,qy,qz
 
   Vector4d dqd = slerpQuaternion(q1, q2, 0.5);
   Vector4d deltaQ = dqd - q1;

@@ -6,7 +6,7 @@
  * @version 0.1
  * @date 2024-03-07
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  *
  */
 

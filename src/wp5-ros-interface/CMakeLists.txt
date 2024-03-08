@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(wp5-ros-interface VERSION 0.1.0 DESCRIPTION "Ros interface library to bind with specific ros version")
+project(wp5_ros_interface VERSION 0.1.0 DESCRIPTION "Ros interface library to bind with specific ros version")
 
 add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 14)
