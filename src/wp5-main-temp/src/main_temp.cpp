@@ -95,8 +95,12 @@ int main(int argc, char** argv) {
 
       if (result->plan.points.size() > 2) {
         pathplanner->convertStripingPlanToPath(result->plan, path);
+
         path_transformed = pathplanner->get_transformed_path(path);
+
         vector<vector<double>> vectorPathTransformed = pathplanner->convertPathPlanToVectorVector(path_transformed);
+
+        vector<double> firstQuatPos = vectorPathTransformed[0];
 
         dynamicalSystem->set_path(vectorPathTransformed);
 
@@ -110,25 +114,34 @@ int main(int argc, char** argv) {
     loop_rate.sleep();
   }
 
-  // nav_msgs::Path path;
-  // nav_msgs::Path path_transformed;
-  // n.setParam("/startDS", false);
-  // n.setParam("/finishDS", false);
-
-  // BoustrophedonServer boustrophedonServer(nh, 0.5);
+  // 3) shotcreete -------------------------------------------------
 
   while (ros::ok()) {
+    // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     stateJoints = rosInterface->receive_state();
+    vector<double> actualJoint = get<0>(stateJoints);
+    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm->getFK(actualJoint);
 
-    vector<double>& retrievedPosition = get<0>(stateJoints);
-    vector<double>& retrievedSpeed = get<1>(stateJoints);
-    vector<double>& retrievedTorque = get<2>(stateJoints);
-    cout << "retrievedPosition:" << retrievedPosition[3] << endl;
-    vector<double> posCart = roboticArm->getFK(retrievedPosition);
-    cout << "posCart:" << posCart[5] << endl;
+    dynamicalSystem->setCartPose(pairActualQuatPos);
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->get_DS_quat_speed();
 
-    ros::spinOnce(); // Allow the message to be subscribed
+    // const Eigen::Quaterniond& quat = pairQuatLinerSpeed.first;
+    // const Eigen::Vector3d& vec = pairActualQuatPos.second;
+
+    // // Print Quaterniond components
+    // std::cout << "Quaterniond: [" << quat.w() << ", " << quat.x() << ", " << quat.y() << ", " << quat.z() << "]"
+    //           << std::endl;
+
+    // // Print Vector3d components
+    // std::cout << "Vector3d: [" << vec.x() << ", " << vec.y() << ", " << vec.z() << "]" << std::endl;
+
+    VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    vector<double> desiredJointSpeed = roboticArm->getIDynamics(actualJoint, twistDesiredEigen);
+
+    rosInterface->send_state(desiredJointSpeed);
+
+    ros::spinOnce();
     loop_rate.sleep();
   }
 

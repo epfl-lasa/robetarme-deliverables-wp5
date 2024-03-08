@@ -49,7 +49,7 @@ public:
      * @param vectJoint Vector of joint positions.
      * @return Vector representing the Cartesian pose (position and orientation) of the end effector.
      */
-  std::vector<double> getFK(std::vector<double> vectJoint);
+  std::pair<Eigen::Quaterniond, Eigen::Vector3d> getFK(std::vector<double> vectJoint);
 
   // /**
   //  * @brief Get inverse kinematics of the robotic arm.
@@ -58,6 +58,9 @@ public:
   //  * @param vectorQuatPos Vector representing the target Cartesian pose (position and orientation).
   //  * @return A pair containing an error code and the vector of next joint positions.
   //  */
+  std::vector<double> getIKinematics(std::vector<double> vectJoint,
+                                     const std::pair<Eigen::Quaterniond, Eigen::Vector3d> pairQuatPos);
+
   // std::pair<int, std::vector<double>> getIK(std::vector<double> actualJoint, std::vector<double> vectorQuatPos);
 
   // /**
@@ -76,7 +79,7 @@ public:
      * @param speedJoint Vector of joint velocities.
      * @return Vector representing the twist (linear and angular velocities) of the end effector.
      */
-  Eigen::VectorXd getTwist(std::vector<double> posJoint, std::vector<double> speedJoint);
+  Eigen::VectorXd getTwistFromJointState(std::vector<double> posJoint, std::vector<double> speedJoint);
 
   /**
      * @brief Get the Jacobian matrix of the robotic arm.
@@ -90,10 +93,19 @@ public:
      * @brief Get the inverse dynamics of the robotic arm.
      *
      * @param vectJoint Vector of joint positions.
-     * @param speedEigen Vector of joint velocities.
+     * @param speedEigen Vector of twist desired.
      * @return Vector representing the joint torques required for the given joint positions and velocities.
      */
   std::vector<double> getIDynamics(std::vector<double> vectJoint, Eigen::VectorXd speedEigen);
+  /**
+     * @brief Function for computing twist with dynamical system.
+     *
+     * @param Pos Vector representing the current position.
+     * @param quat2 Vector representing the target quaternion.
+     * @param speed Vector representing the target speed.
+     * @return Vector representing the computed speed.
+     */
+  Eigen::VectorXd getTwistFromDS(Eigen::Quaterniond quat1, std::pair<Eigen::Quaterniond, Eigen::Vector3d> pairQuatPos);
 
   // /**
   //  * @brief Low-level controller function for the robotic arm.
@@ -118,6 +130,7 @@ protected:
 
   std::string paramURDF = "";
   int nJoint = 0;
+  struct robot_model::InverseKinematicsParameters paramsIK = {};
 
   // ik -----------------
 
@@ -132,16 +145,6 @@ protected:
   // void initIK();
 
 private:
-  /**
-     * @brief Function for computing speed with quaternion interpolation.
-     *
-     * @param Pos Vector representing the current position.
-     * @param quat2 Vector representing the target quaternion.
-     * @param speed Vector representing the target speed.
-     * @return Vector representing the computed speed.
-     */
-  Eigen::VectorXd speed_func(std::vector<double> Pos, std::vector<double> quat2, std::vector<double> speed);
-
   /**
      * @brief Function to interpolating quaternion along the shortest path.
      * @param q1 First quaternion.

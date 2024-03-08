@@ -27,6 +27,14 @@ RoboticArmUr5::RoboticArmUr5() {
 
   model = make_unique<robot_model::Model>(robotName, pathUrdf);
 
+  double damp = 1e-6;
+  double alpha = 0.5;
+  double gamma = 0.8;
+  double margin = 0.07;
+  double tolerance = 1e-3;
+  unsigned int max_number_of_iterations = 1000;
+  paramsIK = {damp, alpha, gamma, tolerance, max_number_of_iterations};
+
   // IRoboticArmBase::initIK();
 }
 

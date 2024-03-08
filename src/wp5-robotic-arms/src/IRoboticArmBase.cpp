@@ -26,7 +26,7 @@ using namespace Eigen;
  *
  * This class provides methods to manage a robotic arm with all the necessary functions to control it.
  */
-vector<double> IRoboticArmBase::getFK(vector<double> vectJoint) {
+pair<Quaterniond, Vector3d> IRoboticArmBase::getFK(vector<double> vectJoint) {
   Map<VectorXd> posJoint_eigen(vectJoint.data(), vectJoint.size());
   state_representation::JointPositions nextJoinState =
       state_representation::JointPositions(robotName, jointNames, posJoint_eigen);
@@ -35,11 +35,10 @@ vector<double> IRoboticArmBase::getFK(vector<double> vectJoint) {
   Vector3d p1Prime = nextCartesianPose.get_position();
   Quaterniond q1Prime = nextCartesianPose.get_orientation();
 
-  vector<double> posCart = {q1Prime.x(), q1Prime.y(), q1Prime.z(), q1Prime.w(), p1Prime[0], p1Prime[1], p1Prime[2]};
-  return posCart;
+  return make_pair(q1Prime, p1Prime);
 }
 
-VectorXd IRoboticArmBase::getTwist(vector<double> posJoint, vector<double> speedJoint) {
+VectorXd IRoboticArmBase::getTwistFromJointState(vector<double> posJoint, vector<double> speedJoint) {
   MatrixXd jacMatrix = getJacobian(posJoint);
   VectorXd speedJointEigen(nJoint);
 
@@ -59,6 +58,30 @@ MatrixXd IRoboticArmBase::getJacobian(vector<double> vectJoint) {
   MatrixXd jacobian = jacobianObject.data();
 
   return jacobian;
+}
+vector<double> IRoboticArmBase::getIKinematics(vector<double> vectJoint,
+                                               const pair<Quaterniond, Vector3d> pairQuatPos) {
+  Quaterniond orientation = pairQuatPos.first;
+  Vector3d position = pairQuatPos.second;
+  vector<double> positionJointNext(nJoint);
+
+  Map<VectorXd> posJoint_eigen(vectJoint.data(), vectJoint.size());
+  state_representation::JointPositions actualJoinState =
+      state_representation::JointPositions(robotName, jointNames, posJoint_eigen);
+
+  state_representation::CartesianPose cartesianPose =
+      state_representation::CartesianPose(robotName, position, orientation, referenceFrame);
+
+  state_representation::JointPositions nextJoinState =
+      model->inverse_kinematics(cartesianPose, actualJoinState, paramsIK, referenceFrame);
+
+  VectorXd positionJointNext_eigen = nextJoinState.data();
+
+  for (int i = 0; i < nJoint; ++i) {
+    positionJointNext[i] = positionJointNext_eigen(i);
+  }
+
+  return positionJointNext;
 }
 
 vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd speedEigen) {
@@ -86,11 +109,14 @@ vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd 
   return speedJointNext;
 }
 
-VectorXd IRoboticArmBase::speed_func(vector<double> Pos, vector<double> quat2, vector<double> speed) {
+VectorXd IRoboticArmBase::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Vector3d> pairQuatPos) {
+
+  Quaterniond quat2 = pairQuatPos.first;
+  Vector3d speed = pairQuatPos.second;
   //orientation
   Vector4d q1, q2;
-  q1 << Pos[3], Pos[0], Pos[1], Pos[2];        //qw,qx,qy,qz
-  q2 << quat2[3], quat2[0], quat2[1], quat2[2];//qw,qx,qy,qz
+  q1 << quat1.w(), quat1.x(), quat1.y(), quat1.z(); //qw,qx,qy,qz
+  q2 << quat2.w(), quat2.x(), quat2.y(), quat2.z(); //qw,qx,qy,qz
 
   Vector4d dqd = slerpQuaternion(q1, q2, 0.5);
   Vector4d deltaQ = dqd - q1;
@@ -107,7 +133,7 @@ VectorXd IRoboticArmBase::speed_func(vector<double> Pos, vector<double> quat2, v
   double theta_gq = (-.5 / (4 * maxDq * maxDq)) * tmp_angular_vel.transpose() * tmp_angular_vel;
   Vector3d Omega_out = 2 * dsGain_ori * (1 + exp(theta_gq)) * tmp_angular_vel;
 
-  vector<double> V = {Omega_out[0], Omega_out[1], Omega_out[2], speed[0], speed[1], speed[2]};
+  vector<double> V = {Omega_out[0], Omega_out[1], Omega_out[2], speed(0), speed(1), speed(2)};
 
   double* pt = &V[0];
   VectorXd VOut = Map<VectorXd>(pt, 6);

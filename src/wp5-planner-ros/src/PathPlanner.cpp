@@ -343,33 +343,27 @@ bool PathPlanner::convertStripingPlanToPath(const boustrophedon_msgs::StripingPl
 
   return true;
 }
-
 vector<vector<double>> PathPlanner::convertPathPlanToVectorVector(const nav_msgs::Path& input_path) {
+
   size_t size = input_path.poses.size();
-  vector<vector<double>> path(size);
-  vector<double> quatPos;
+  vector<vector<double>> path;
+
   for (size_t i = 0; i < size; i++) {
     geometry_msgs::PoseStamped pose = input_path.poses[i];
-    if (i < size - 1) {
-      double dx = input_path.poses[i + 1].pose.position.x - pose.pose.position.x;
-      double dy = input_path.poses[i + 1].pose.position.y - pose.pose.position.y;
-      double dz = input_path.poses[i + 1].pose.position.z - pose.pose.position.z;
-      pose.pose.orientation = headingToQuaternion(dx, dy, dz);
-      quatPos.push_back(pose.pose.orientation.x);
-      quatPos.push_back(pose.pose.orientation.y);
-      quatPos.push_back(pose.pose.orientation.z);
-      quatPos.push_back(pose.pose.orientation.w);
-    } else {
-      quatPos.push_back(0.0);
-      quatPos.push_back(0.0);
-      quatPos.push_back(0.0);
-      quatPos.push_back(1.0);
-    }
+    vector<double> quatPos;
+
+    quatPos.push_back(pose.pose.orientation.x);
+    quatPos.push_back(pose.pose.orientation.y);
+    quatPos.push_back(pose.pose.orientation.z);
+    quatPos.push_back(pose.pose.orientation.w);
+
     quatPos.push_back(pose.pose.position.x);
     quatPos.push_back(pose.pose.position.y);
     quatPos.push_back(pose.pose.position.z);
+
     path.push_back(quatPos);
   }
+
   return path;
 }
 

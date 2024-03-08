@@ -49,13 +49,10 @@ void DynamicalSystem::set_limitCycle_speed_conv(double angSpeed, double conv) {
 }
 void DynamicalSystem::set_limitCycle_radius(double rad) { CycleRadiusLC = rad; }
 
-void DynamicalSystem::addOffsetEef(Vector3d pos, Vector4d quat) {
+void DynamicalSystem::setCartPose(pair<Quaterniond, Vector3d> pairQuatPos) {
 
-  realPos(0) = pos(0);
-  realPos(1) = pos(1);
-  realPos(2) = pos(2);
-
-  realQuat = Quaterniond(quat(3), quat(0), quat(1), quat(2));
+  realQuat = pairQuatPos.first;
+  realPos = pairQuatPos.second;
 
   //---- Update end effector pose (position+orientation)
   realQuatOffset = realQuat;
@@ -69,7 +66,7 @@ void DynamicalSystem::addOffsetEef(Vector3d pos, Vector4d quat) {
 
 // this function take the path comoute from server and create a linear DS
 //when the eef is close the the next point it change the goal until the last point of the path
-Vector3d DynamicalSystem::get_DS_vel() {
+pair<Quaterniond, Vector3d> DynamicalSystem::get_DS_quat_speed() {
   double dx, dy, dz;
   double norm;
   double scaleVel;
@@ -130,7 +127,14 @@ Vector3d DynamicalSystem::get_DS_vel() {
     desiredVel = desiredVel / desiredVel.norm() * velocityLimit;
     cout << "TOO FAST!, limite speed =" << velocityLimit << endl;
   }
-  return desiredVel;
+  // Fill desiredQuat with the values from desiredOriVelocityFiltered_
+  Eigen::Quaterniond desiredQuat(desiredOriVelocityFiltered_(3), // w
+                                 desiredOriVelocityFiltered_(0), // x
+                                 desiredOriVelocityFiltered_(1), // y
+                                 desiredOriVelocityFiltered_(2)  // z
+  );
+
+  return make_pair(desiredQuat, desiredVel);
 }
 
 // void DynamicalSystem::publishPointStamped(const Vector3d&  pathPoint ) {
