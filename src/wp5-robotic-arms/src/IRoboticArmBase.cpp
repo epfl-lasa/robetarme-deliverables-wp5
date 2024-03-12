@@ -38,6 +38,8 @@ pair<Quaterniond, Vector3d> IRoboticArmBase::getFK(vector<double> vectJoint) {
   return make_pair(q1Prime, p1Prime);
 }
 
+
+
 VectorXd IRoboticArmBase::getTwistFromJointState(vector<double> posJoint, vector<double> speedJoint) {
   MatrixXd jacMatrix = getJacobian(posJoint);
   VectorXd speedJointEigen(nJoint);

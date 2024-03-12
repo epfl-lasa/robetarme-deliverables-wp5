@@ -24,7 +24,7 @@ RoboticArmUr5::RoboticArmUr5() {
       {"shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
   referenceFrame = "base";
   nJoint = 6;
-
+  originalHomeJoint = vector<double>(nJoint, 0.0);
   model = make_unique<robot_model::Model>(robotName, pathUrdf);
 
   double damp = 1e-6;

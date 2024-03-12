@@ -43,6 +43,8 @@ public:
      */
   virtual ~IRoboticArmBase() = default;
 
+   std::vector<double> getHomeJoint();
+
   /**
      * @brief Get forward kinematics of the robotic arm.
      *
@@ -113,6 +115,7 @@ public:
   //  * @param data Tuple containing vectors of joint positions, joint velocities, and joint efforts.
   //  */
   // virtual vector<double>  low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& data, vector<double> twist);
+  std::vector<double> originalHomeJoint =  {};
 
 protected:
   /**

@@ -30,7 +30,7 @@ TargetExtraction::TargetExtraction(ros::NodeHandle& nh) :
 
   cout << "Waiting for target Pose" << endl;
 
-  while (!targetReceived || !ros::ok()) {
+  while (!targetReceived && ros::ok()) {
     ros::spinOnce();
   }
   cout << "rostopic for the target received" << endl;
