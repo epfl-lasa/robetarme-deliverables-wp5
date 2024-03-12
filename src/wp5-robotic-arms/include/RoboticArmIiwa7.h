@@ -21,6 +21,7 @@ class RoboticArmIiwa7 : public IRoboticArmBase {
 public:
   // TODO: implement all the public members, accessible from everyone owning a class object
   explicit RoboticArmIiwa7();
+  std::vector<double> low_level_controller(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,  Eigen::VectorXd& twist) override;
 
 protected:
   // TODO: implement all the protected members, accessible from its own and herited classes

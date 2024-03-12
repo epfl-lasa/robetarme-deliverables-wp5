@@ -86,9 +86,9 @@ vector<double> IRoboticArmBase::getIKinematics(vector<double> vectJoint,
   return positionJointNext;
 }
 
+
 vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd speedEigen) {
   vector<double> speedJointNext(nJoint);
-  Matrix<double, 6, 1> twist = speedEigen;
 
   Vector3d angular_velocity(3);
   angular_velocity << speedEigen(0), speedEigen(1), speedEigen(2);
@@ -112,7 +112,6 @@ vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd 
 }
 
 VectorXd IRoboticArmBase::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Vector3d> pairQuatPos) {
-
   Quaterniond quat2 = pairQuatPos.first;
   Vector3d speed = pairQuatPos.second;
   //orientation

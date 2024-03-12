@@ -135,7 +135,8 @@ bool Tasks::goFirstPosition(){
     checkFirstPosition =  dynamicalSystem->checkLinearDs;
 
     VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-    vector<double> desiredJointSpeed = roboticArm->getIDynamics(actualJoint, twistDesiredEigen);
+
+    vector<double> desiredJointSpeed = roboticArm->low_level_controller(stateJoints, twistDesiredEigen);
     rosInterface->send_state(desiredJointSpeed);
 
     ros::spinOnce();
@@ -160,7 +161,7 @@ bool Tasks::DoShotcrete(){
     checkFinish =  dynamicalSystem->finish;
 
     VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-    vector<double> desiredJointSpeed = roboticArm->getIDynamics(actualJoint, twistDesiredEigen);
+    vector<double> desiredJointSpeed = roboticArm->low_level_controller(stateJoints, twistDesiredEigen);
 
     rosInterface->send_state(desiredJointSpeed);
 
@@ -195,7 +196,7 @@ bool Tasks::goHome(){
     checkGoHome =  dynamicalSystem->checkLinearDs;
 
     VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-    vector<double> desiredJointSpeed = roboticArm->getIDynamics(actualJoint, twistDesiredEigen);
+    vector<double> desiredJointSpeed = roboticArm->low_level_controller(stateJoints, twistDesiredEigen);
     rosInterface->send_state(desiredJointSpeed);
 
     ros::spinOnce();

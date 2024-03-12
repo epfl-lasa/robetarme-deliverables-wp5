@@ -38,12 +38,10 @@ RoboticArmUr5::RoboticArmUr5() {
   // IRoboticArmBase::initIK();
 }
 
-// vector<double>  RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,vector<double> twist) {
-//     vector<double>& retrievedPosition = get<0>(stateJoints);
+vector<double> RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints, Eigen::VectorXd& twist) {
+    vector<double>& retrievedPosition = get<0>(stateJoints);
 
-//     Eigen::VectorXd eigenVector = Eigen::Map<Eigen::VectorXd>(twist.data(), twist.size());
+    vector<double> desiredJointSpeed = IRoboticArmBase::getIDynamics(retrievedPosition, twist);
+    return desiredJointSpeed;
 
-//     vector<double> desiredJointSpeed = IRoboticArmBase::getIDynamics(retrievedPosition, eigenVector);
-//     return desiredJointSpeed;
-
-// }
+}

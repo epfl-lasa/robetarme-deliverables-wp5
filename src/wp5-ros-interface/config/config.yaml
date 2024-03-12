@@ -5,7 +5,7 @@ UR5:
 
 IIWA:
   joint_topic: "/iiwa/joint_states"
-  joint_command: "/iiwa/joint_group_vel_controller/command"
+  joint_command: "/iiwa/TorqueController/command"
   njoint: 7
 
 COBOD:

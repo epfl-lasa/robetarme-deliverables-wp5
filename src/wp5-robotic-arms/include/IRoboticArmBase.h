@@ -114,8 +114,8 @@ public:
   //  *
   //  * @param data Tuple containing vectors of joint positions, joint velocities, and joint efforts.
   //  */
-  // virtual vector<double>  low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& data, vector<double> twist);
-  std::vector<double> originalHomeJoint =  {};
+virtual std::vector<double> low_level_controller(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,  Eigen::VectorXd& twist) = 0;
+std::vector<double> originalHomeJoint =  {};
 
 protected:
   /**
