@@ -3,6 +3,8 @@
 #include <string>
 #include <wp5_tasks_action/ExecuteTaskAction.h>
 
+using namespace std;
+
 class ExecuteTaskAction {
 protected:
   ros::NodeHandle nh_;
@@ -16,7 +18,7 @@ protected:
   wp5_tasks_action::ExecuteTaskResult result_;
 
 public:
-  ExecuteTaskAction(std::string name) :
+  explicit ExecuteTaskAction(std::string name) :
       as_(nh_, name, boost::bind(&ExecuteTaskAction::executeCB, this, _1), false), action_name_(name) {
     as_.start();
   }
@@ -26,12 +28,14 @@ public:
   void executeCB(const wp5_tasks_action::ExecuteTaskGoalConstPtr& goal) {
     bool success = true;
 
+    cout << "Task ID: " << goal->task_id << endl;
+
     // start executing the action
-    ROS_INFO("Executing action-task %s", action_name_.c_str());
+    ROS_INFO("Executing action-task %s", to_string(goal->task_id).c_str());
 
     if (success) {
       result_.success = success;
-      ROS_INFO("%s: Succeeded", action_name_.c_str());
+      ROS_INFO("%s: Succeeded", to_string(goal->task_id).c_str());
 
       // set the action state to succeeded
       as_.setSucceeded(result_);

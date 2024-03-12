@@ -41,11 +41,20 @@ include_directories(
 )
 
 # Add the main node
-add_executable(${PROJECT_NAME}_node
+add_executable(${PROJECT_NAME}_server_node
   src/tasks_action_server.cpp
 )
 
-target_link_libraries(${PROJECT_NAME}_node PRIVATE
+target_link_libraries(${PROJECT_NAME}_server_node PRIVATE
+  ${catkin_LIBRARIES}
+)
+
+# Add the main node
+add_executable(${PROJECT_NAME}_client_node
+  src/tasks_action_client.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}_client_node PRIVATE
   ${catkin_LIBRARIES}
 )
 
