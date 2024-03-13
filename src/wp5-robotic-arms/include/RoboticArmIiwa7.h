@@ -11,6 +11,8 @@
 #pragma once
 
 #include "IRoboticArmBase.h"
+#include "controllers/ControllerFactory.hpp"
+
 
 /**
  * @brief Child class to create all the prototype fonctions needed in the different robotic arms.
@@ -25,7 +27,11 @@ public:
 
 protected:
   // TODO: implement all the protected members, accessible from its own and herited classes
+  state_representation::JointState command_state;  
+  state_representation::JointState feedback_state;  
+  std::unique_ptr<controllers::JointControllerFactory> joint_ctrl;
 
 private:
+
   // TODO: implement all the private members, only accessible from its own class
 };

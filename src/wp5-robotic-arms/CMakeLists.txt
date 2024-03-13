@@ -16,7 +16,7 @@ add_definitions("-DWP5_ROBOTIC_ARMS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 # Find packages if any
 find_package(catkin REQUIRED COMPONENTS)
 find_package(Eigen3 3.4 REQUIRED)
-find_package(control_libraries 6.3.1 REQUIRED)
+find_package(control_libraries 7.3.0 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
 ## The catkin_package macro generates cmake config files for your package

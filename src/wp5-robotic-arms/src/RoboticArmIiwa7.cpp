@@ -11,6 +11,9 @@
 
 #include "RoboticArmIiwa7.h"
 
+ 
+using namespace controllers;
+using namespace state_representation;
 using namespace std;
 
 
@@ -26,6 +29,7 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   nJoint = 7;
   originalHomeJoint = vector<double>(nJoint, 0.0);
   model = make_unique<robot_model::Model>(robotName, pathUrdf);
+  auto robot = robot_model::Model(robotName, pathUrdf);
 
   double damp = 1e-6;
   double alpha = 0.5;
@@ -34,31 +38,38 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   double tolerance = 1e-3;
   unsigned int max_number_of_iterations = 1000;
   paramsIK = {damp, alpha, gamma, tolerance, max_number_of_iterations};
+  
+  std::list<std::shared_ptr<ParameterInterface>> parameters;
+  parameters.emplace_back(make_shared_parameter("damping", 10.0));
+  parameters.emplace_back(make_shared_parameter("stiffness", 5.0));
+  parameters.emplace_back(make_shared_parameter("inertia", 1.0));
+
+
+  command_state = state_representation::JointState(robotName,jointNames);	
+  feedback_state = state_representation::JointState(robotName,jointNames);	
+
+  joint_ctrl = make_unique<JointControllerFactory::create_controller>(CONTROLLER_TYPE::IMPEDANCE,parameters, robot);
+  // auto joint_ctrl2 = JointControllerFactory::create_controller(CONTROLLER_TYPE::DISSIPATIVE, robot);
+  // auto ctrl = CartesianControllerFactory::create_controller(CONTROLLER_TYPE::IMPEDANCE, parameters);
   }
 
 
 vector<double> RoboticArmIiwa7::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints, Eigen::VectorXd& twist) {
-    vector<double>& retrievedPosition = get<0>(stateJoints);
+  vector<double>& retrievedPosition = get<0>(stateJoints);
+  vector<double>& retrievedSpeed = get<1>(stateJoints);
+  vector<double>& retrievedTorque = get<2>(stateJoints);
+  Eigen::VectorXd positions(retrievedPosition.size());
+  for (size_t i = 0; i < retrievedPosition.size(); ++i) {
+      positions(i) = retrievedPosition[i];
+  }  
+  command_state.set_position(positions);
+  // auto command_state = JointState::Random("command");
+  // auto feedback_state = JointState::Random("feedback");
+
+  // // compute the command output
+  // auto command_output = ctrl->compute_command(command_state, feedback_state);
 
 
-    Eigen::MatrixXd temp_stiffness = gain_scale * this->stiffness;
-    Eigen::MatrixXd temp_damping = gain_scale * this->damping;
-    this->controller_->set_parameter_value("stiffness", temp_stiffness);
-    this->controller_->set_parameter_value("damping", temp_damping);
-
-    // RCLCPP_INFO(this->get_logger(), "Twist command : [%.2f, %.2f, %.2f] \n", twist_command.data()(0), twist_command.data()(1), twist_command.data()(2));
-    // RCLCPP_INFO(this->get_logger(), "Gain weights : [%.2f, %.2f] \n", gain_weights.at(0),  gain_weights.at(1));
-    // RCLCPP_INFO(this->get_logger(), "Stiffness : [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f]", temp_stiffness(0,0), temp_stiffness(1,1),temp_stiffness(2,2),
-    //   temp_stiffness(3,3),temp_stiffness(4,4),temp_stiffness(5,5),temp_stiffness(6,6));
-    // RCLCPP_INFO(this->get_logger(), "Damping : [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f]", temp_damping(0,0), temp_damping(1,1),temp_damping(2,2),
-    //   temp_damping(3,3),temp_damping(4,4),temp_damping(5,5),temp_damping(6,6));
-
-    // Impedance controller version 2023
-    this->command_message_.joint_state = this->controller_->compute_command(
-        q_dot_desired, this->state_message_.joint_state);
-
-    // Clamp torques
-    this->command_message_.joint_state.clamp_state_variable(20.0, state_representation::JointStateVariable::TORQUES);
-    return desiredJointSpeed;
+ return retrievedPosition;
 
 }
