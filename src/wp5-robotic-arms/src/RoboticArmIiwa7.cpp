@@ -48,9 +48,10 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   command_state = state_representation::JointState(robotName,jointNames);	
   feedback_state = state_representation::JointState(robotName,jointNames);	
 
-  joint_ctrl = make_unique<JointControllerFactory::create_controller>(CONTROLLER_TYPE::IMPEDANCE,parameters, robot);
+  // joint_ctrl = make_unique<JointControllerFactory::create_controller>(CONTROLLER_TYPE::IMPEDANCE,parameters, robot);
   // auto joint_ctrl2 = JointControllerFactory::create_controller(CONTROLLER_TYPE::DISSIPATIVE, robot);
   // auto ctrl = CartesianControllerFactory::create_controller(CONTROLLER_TYPE::IMPEDANCE, parameters);
+  // std::cout << "Type of ctrl: " << typeid(ctrl).name() << std::endl;
   }
 
 
@@ -62,7 +63,7 @@ vector<double> RoboticArmIiwa7::low_level_controller(tuple<vector<double>, vecto
   for (size_t i = 0; i < retrievedPosition.size(); ++i) {
       positions(i) = retrievedPosition[i];
   }  
-  command_state.set_position(positions);
+  // command_state.set_position(positions);
   // auto command_state = JointState::Random("command");
   // auto feedback_state = JointState::Random("feedback");
 
