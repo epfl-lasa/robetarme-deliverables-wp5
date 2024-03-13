@@ -23,7 +23,7 @@ public:
   explicit RosInterfaceNoetic(ros::NodeHandle& nh);
 
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> receive_state();
-  void send_state(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data);
+  void send_state(std::vector<double>& data);
 
 private:
   void jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);

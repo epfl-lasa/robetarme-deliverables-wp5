@@ -14,7 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   wp5_dynamical_system
 )
 
-find_package(control_libraries 6.3.1 REQUIRED)
+find_package(control_libraries 7.3.0 REQUIRED)
 
 catkin_package(CATKIN_DEPENDS
   roscpp

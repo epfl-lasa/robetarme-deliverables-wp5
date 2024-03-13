@@ -9,19 +9,23 @@
 class DynamicalSystem {
 public:
   bool finish = false;
-
+  bool init = false;
+  bool checkLinearDs = false;
+  Eigen::Vector3d pathPoint;
   DynamicalSystem(double freq);
   void parameter_initialization();
   void set_path(std::vector<std::vector<double>> firstQuatPos);
-  void addOffsetEef(Eigen::Vector3d pos, Eigen::Vector4d quat);
-  Eigen::Vector3d get_DS_vel();
-  //   Eigen::Matrix3d quaternionToRotationMatrix(Eigen::Vector4d q);
+  void setCartPose(std::pair<Eigen::Quaterniond, Eigen::Vector3d>);
+  std::pair<Eigen::Quaterniond, Eigen::Vector3d> getLinearDsOnePosition(std::vector<double> desiredQuatPos );
+  std::pair<Eigen::Quaterniond, Eigen::Vector3d> get_DS_quat_speed();
   void updateLimitCycle3DPosVel_with2DLC(Eigen::Vector3d pose, Eigen::Vector3d target_pose_cricleDS);
   void set_linear_speed(double speed);
   void set_limitCycle_speed_conv(double angSpeed, double conv);
   void set_limitCycle_radius(double rad);
   void set_tolerance_next_point(double tol);
   void restart_path();
+  std::vector<double> getFirstQuatPos();
+
 
 private:
   double ConvergenceRateLC = 10;
@@ -30,6 +34,7 @@ private:
   double fs = 100;
   double toleranceToNextPoint = 0.1;
   double linearVelExpected = 0.04;
+
 
   std::size_t iFollow = 0;
 

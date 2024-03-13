@@ -12,16 +12,35 @@
 #include <ros/ros.h>
 #include <tuple>
 
+
+#include <geometry_msgs/PointStamped.h> //<----------to remove
+#include <geometry_msgs/Point.h> //<----------to remove
+#include "visualization_msgs/Marker.h"
+
+
 using namespace std;
 using namespace Eigen;
 
+void publishPointStamped(const Eigen::Vector3d&  pathPoint,  ros::Publisher pointPub);
+void twistMarker(VectorXd twistDesiredEigen, vector<double> pos, ros::Publisher& marker_pub);
+
+
 int main(int argc, char** argv) {
-  double deltaTime = 0.1;
+
+  double deltaTime = 0.01;
 
   // init ros
   ros::init(argc, argv, "main_temporary");
   ros::NodeHandle nh;
   ros::Rate loop_rate(1 / deltaTime);
+
+
+// CHECK RVIZ -------------------------------------
+  ros::Publisher point_pub = nh.advertise<geometry_msgs::PointStamped>("path_point", 1);
+  ros::Publisher pub_desired_vel_filtered = nh.advertise<visualization_msgs::Marker>("visualization_marker", 100 );
+
+
+//------------------------------
 
   // 1) init class for shotcrete -----------------------------------------
 
@@ -95,8 +114,12 @@ int main(int argc, char** argv) {
 
       if (result->plan.points.size() > 2) {
         pathplanner->convertStripingPlanToPath(result->plan, path);
+
         path_transformed = pathplanner->get_transformed_path(path);
+
         vector<vector<double>> vectorPathTransformed = pathplanner->convertPathPlanToVectorVector(path_transformed);
+
+        vector<double> firstQuatPos = vectorPathTransformed[0];
 
         dynamicalSystem->set_path(vectorPathTransformed);
 
@@ -110,27 +133,106 @@ int main(int argc, char** argv) {
     loop_rate.sleep();
   }
 
-  // nav_msgs::Path path;
-  // nav_msgs::Path path_transformed;
-  // n.setParam("/startDS", false);
-  // n.setParam("/finishDS", false);
+  // 3) shotcreete -------------------------------------------------
 
-  // BoustrophedonServer boustrophedonServer(nh, 0.5);
 
   while (ros::ok()) {
+    // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     stateJoints = rosInterface->receive_state();
+    vector<double> actualJoint = get<0>(stateJoints);
+    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm->getFK(actualJoint);
 
-    vector<double>& retrievedPosition = get<0>(stateJoints);
-    vector<double>& retrievedSpeed = get<1>(stateJoints);
-    vector<double>& retrievedTorque = get<2>(stateJoints);
-    cout << "retrievedPosition:" << retrievedPosition[3] << endl;
-    vector<double> posCart = roboticArm->getFK(retrievedPosition);
-    cout << "posCart:" << posCart[5] << endl;
+    dynamicalSystem->setCartPose(pairActualQuatPos);
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->get_DS_quat_speed();
 
-    ros::spinOnce(); // Allow the message to be subscribed
+
+    VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    vector<double> desiredJointSpeed = roboticArm->getIDynamics(actualJoint, twistDesiredEigen);
+
+    // rosInterface->send_state(desiredJointSpeed);
+
+    //ros checkup
+    publishPointStamped(dynamicalSystem->pathPoint,  point_pub);
+    Vector3d poseigen =pairActualQuatPos.second;
+    vector<double> pos = {poseigen(0),poseigen(1),poseigen(2)};
+    twistMarker(twistDesiredEigen, pos, pub_desired_vel_filtered);
+
+
+    ros::spinOnce();
     loop_rate.sleep();
   }
 
   return 0;
+}
+
+
+
+void publishPointStamped(const Vector3d&  pathPoint,  ros::Publisher pointPub) {
+
+geometry_msgs::PointStamped point_stamped_msg;
+point_stamped_msg.header.stamp = ros::Time::now();
+point_stamped_msg.header.frame_id = "base"; // Set your desired frame_id
+
+// Assign Eigen vector components to PointStamped message
+point_stamped_msg.point.x = pathPoint(0);
+point_stamped_msg.point.y = pathPoint(1);
+point_stamped_msg.point.z = pathPoint(2);
+
+// Publish the PointStamped message
+pointPub.publish(point_stamped_msg);
+}
+
+
+void twistMarker(VectorXd twistDesiredEigen,vector<double> pos, ros::Publisher& marker_pub) {
+    visualization_msgs::Marker linear_marker, angular_marker;
+
+
+    // Linear twist arrow marker
+    linear_marker.header.frame_id = "base"; // Set your desired frame ID
+    linear_marker.header.stamp = ros::Time();
+    linear_marker.ns = "twist";
+    linear_marker.id = 0;
+    linear_marker.type = visualization_msgs::Marker::ARROW;
+    linear_marker.action = visualization_msgs::Marker::ADD;
+    linear_marker.color.r = 1.0;
+    linear_marker.color.g = 1.0;
+    linear_marker.color.b = 0.0;
+    linear_marker.color.a = 1.0; // Don't forget to set the alpha!
+
+    linear_marker.scale.x = 0.05; // Arrow width
+    linear_marker.scale.y = 0.01; // Arrow head width
+    linear_marker.scale.z = 0.5; // Arrow head length
+
+
+
+    linear_marker.pose.orientation.w = 1.0;
+    linear_marker.pose.position.x = pos[0];
+    linear_marker.pose.position.y = pos[1];
+    linear_marker.pose.position.z = pos[2];
+
+    linear_marker.points.push_back(geometry_msgs::Point());
+    geometry_msgs::Point point;
+    point.x = twistDesiredEigen(3);
+    point.y = twistDesiredEigen(4);
+    point.z =  twistDesiredEigen(5);
+    linear_marker.points.push_back(point);
+
+    // Angular twist arrow marker
+    angular_marker = linear_marker; // Copy settings from linear_marker
+    angular_marker.id = 1;
+    angular_marker.color.r = 1.0;
+    angular_marker.color.g = 0.0;
+    angular_marker.color.b = 0.0;
+
+    // Angular twist direction
+    angular_marker.points.push_back(geometry_msgs::Point());
+    point.x = twistDesiredEigen(0);
+    point.y = twistDesiredEigen(1);
+    point.z =  twistDesiredEigen(2);
+    angular_marker.points.push_back(point);
+
+    // Publish markers
+    marker_pub.publish(linear_marker);
+    //marker_pub.publish(angular_marker);
 }

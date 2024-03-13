@@ -12,8 +12,8 @@ mkdir temp
 cd temp
 
 # Install control Lasa
-echo "* CLONING CONTROL LIBRAIRIES LASA..."
-git clone https://github.com/epfl-lasa/control-libraries.git --branch v6.3.1  --single-branch
+echo "* CLONING CONTROL LIBRAIRIES AICA..."
+git clone https://github.com/aica-technology/control-libraries.git --branch v7.3.0  --single-branch
 cd control-libraries/source
 echo "* CONFIGURING CONTROL LIBRAIRIES LASA..."
 sudo bash install.sh -y

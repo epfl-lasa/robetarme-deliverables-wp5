@@ -44,6 +44,7 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& nh) : nh_(nh) {
     jointsTorque.assign(nJoint, 0.0);
     init_joint = true;
 
+
     // ROS init
     sub_state_ = nh_.subscribe(actualStateTopic, 10, &RosInterfaceNoetic::jointStateCallback, this);
     pub_state_ = nh_.advertise<std_msgs::Float64MultiArray>(commandStateTopic, 1000);
@@ -92,13 +93,9 @@ tuple<vector<double>, vector<double>, vector<double>> RosInterfaceNoetic::receiv
   return stateJoints;
 }
 
-void RosInterfaceNoetic::send_state(tuple<vector<double>, vector<double>, vector<double>>& data) {
-  // Access the vectors in the tuple if needed
-  vector<double>& retrievedPosition = get<0>(data);
-  vector<double>& retrievedSpeed = get<1>(data);
-  vector<double>& retrievedTorque = get<2>(data);
+void RosInterfaceNoetic::send_state(vector<double>& data) {
 
   std_msgs::Float64MultiArray nextSpeedJointMsg;
-  nextSpeedJointMsg.data = retrievedSpeed;
+  nextSpeedJointMsg.data = data;
   pub_state_.publish(nextSpeedJointMsg);
 }

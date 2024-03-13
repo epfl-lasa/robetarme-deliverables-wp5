@@ -1,5 +1,0 @@
-<launch>
-    <node pkg="wp5_tasks_action" type="wp5_tasks_action_client_node"
-        name="wp5_tasks_action_client_node"
-        output="screen" />
-</launch>

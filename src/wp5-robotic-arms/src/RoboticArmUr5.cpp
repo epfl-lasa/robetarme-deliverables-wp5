@@ -24,18 +24,24 @@ RoboticArmUr5::RoboticArmUr5() {
       {"shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
   referenceFrame = "base";
   nJoint = 6;
-
+  originalHomeJoint = vector<double>(nJoint, 0.0);
   model = make_unique<robot_model::Model>(robotName, pathUrdf);
+
+  double damp = 1e-6;
+  double alpha = 0.5;
+  double gamma = 0.8;
+  double margin = 0.07;
+  double tolerance = 1e-3;
+  unsigned int max_number_of_iterations = 1000;
+  paramsIK = {damp, alpha, gamma, tolerance, max_number_of_iterations};
 
   // IRoboticArmBase::initIK();
 }
 
-// vector<double>  RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,vector<double> twist) {
-//     vector<double>& retrievedPosition = get<0>(stateJoints);
+vector<double> RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints, Eigen::VectorXd& twist) {
+    vector<double>& retrievedPosition = get<0>(stateJoints);
 
-//     Eigen::VectorXd eigenVector = Eigen::Map<Eigen::VectorXd>(twist.data(), twist.size());
+    vector<double> desiredJointSpeed = IRoboticArmBase::getIDynamics(retrievedPosition, twist);
+    return desiredJointSpeed;
 
-//     vector<double> desiredJointSpeed = IRoboticArmBase::getIDynamics(retrievedPosition, eigenVector);
-//     return desiredJointSpeed;
-
-// }
+}

@@ -23,8 +23,6 @@ public:
     as_.start();
   }
 
-  ~ExecuteTaskAction(void) {}
-
   void executeCB(const wp5_tasks_action::ExecuteTaskGoalConstPtr& goal) {
     bool success = true;
 
@@ -32,6 +30,9 @@ public:
 
     // start executing the action
     ROS_INFO("Executing action-task %s", to_string(goal->task_id).c_str());
+
+    feedback_.percent_complete = 0;
+    as_.publishFeedback(feedback_); // publish the feedback
 
     if (success) {
       result_.success = success;
