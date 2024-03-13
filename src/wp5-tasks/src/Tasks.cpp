@@ -2,6 +2,7 @@
 #include <yaml-cpp/yaml.h>
 // include all the robot needeed
 #include "RoboticArmUr5.h"
+#include "RoboticArmIiwa7.h"
 
 
 using namespace std;
@@ -10,8 +11,7 @@ using namespace Eigen;
 Tasks::Tasks(ros::NodeHandle& n, double freq) : nh(n), rosFreq(freq),loop_rate(freq) {
   // Create an unique pointer for the instance of DynamicalSystem
   dynamicalSystem = make_unique<DynamicalSystem>(rosFreq);
-  // Create an unique pointer for the instance of RosInterfaceNoetic
-  rosInterface = make_unique<RosInterfaceNoetic>(nh);
+
   // Create an unique pointer for the instance of TargetExtraction
   targetextraction = make_unique<TargetExtraction>(nh);
   // Create an unique pointer for the instance of PathPlanner
@@ -27,10 +27,24 @@ bool Tasks::initShotcrete(){
 
   // Access parameters from the YAML file
   string robotName = config["shotcrete"]["robot_name"].as<string>();
+
+  // Create an unique pointer for the instance of RosInterfaceNoetic
+  rosInterface = make_unique<RosInterfaceNoetic>(nh,robotName);
+
   if(robotName  == "Ur5"){  
     roboticArm = make_unique<RoboticArmUr5>();
     if (roboticArm) {
       cout<< "Ur5 chosen and well initializate"<< endl;
+      checkInit = true;
+      homeJoint =  roboticArm->originalHomeJoint;
+    } 
+    else {
+      cout << "Error: roboticArm is null." << endl;
+    }
+  }else if(robotName  == "Iiwa7"){  
+    roboticArm = make_unique<RoboticArmIiwa7>();
+    if (roboticArm) {
+      cout<< "Iiwa7 chosen and well initializate"<< endl;
       checkInit = true;
       homeJoint =  roboticArm->originalHomeJoint;
     } 

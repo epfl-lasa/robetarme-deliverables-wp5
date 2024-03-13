@@ -20,7 +20,7 @@
 
 class RosInterfaceNoetic {
 public:
-  explicit RosInterfaceNoetic(ros::NodeHandle& nh);
+  explicit RosInterfaceNoetic(ros::NodeHandle& nh, std::string robotName);
 
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> receive_state();
   void send_state(std::vector<double>& data);
@@ -31,6 +31,7 @@ private:
   std::vector<double> jointsPosition;
   std::vector<double> jointsSpeed;
   std::vector<double> jointsTorque;
+  std::string robotName;
 
   bool init_joint;
 

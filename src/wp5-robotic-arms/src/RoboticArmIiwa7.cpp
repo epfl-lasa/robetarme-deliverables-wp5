@@ -11,11 +11,9 @@
 
 #include "RoboticArmIiwa7.h"
 
- 
 using namespace controllers;
 using namespace state_representation;
 using namespace std;
-
 
 RoboticArmIiwa7::RoboticArmIiwa7() {
   pathUrdf = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/iiwa7.urdf";
@@ -24,7 +22,7 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   tipJoint = "iiwa_joint_7";
   baseLink = "base";
   jointNames =
-      {"iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6","iiwa_joint_7"};
+      {"iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6", "iiwa_joint_7"};
   referenceFrame = "ground_plane";
   nJoint = 7;
   originalHomeJoint = vector<double>(nJoint, 0.0);
@@ -38,39 +36,40 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   double tolerance = 1e-3;
   unsigned int max_number_of_iterations = 1000;
   paramsIK = {damp, alpha, gamma, tolerance, max_number_of_iterations};
-  
-  std::list<std::shared_ptr<ParameterInterface>> parameters;
-  parameters.emplace_back(make_shared_parameter("damping", 10.0));
-  parameters.emplace_back(make_shared_parameter("stiffness", 5.0));
+
+  parameters.emplace_back(make_shared_parameter("damping", 1.0));
+  parameters.emplace_back(make_shared_parameter("stiffness", 10.0));
   parameters.emplace_back(make_shared_parameter("inertia", 1.0));
 
+  command_state = state_representation::JointState(robotName, jointNames);
+  feedback_state = state_representation::JointState(robotName, jointNames);
 
-  command_state = state_representation::JointState(robotName,jointNames);	
-  feedback_state = state_representation::JointState(robotName,jointNames);	
+  joint_ctrl = JointControllerFactory::create_controller(CONTROLLER_TYPE::IMPEDANCE, parameters, *model);
+}
 
-  // joint_ctrl = make_unique<JointControllerFactory::create_controller>(CONTROLLER_TYPE::IMPEDANCE,parameters, robot);
-  // auto joint_ctrl2 = JointControllerFactory::create_controller(CONTROLLER_TYPE::DISSIPATIVE, robot);
-  // auto ctrl = CartesianControllerFactory::create_controller(CONTROLLER_TYPE::IMPEDANCE, parameters);
-  // std::cout << "Type of ctrl: " << typeid(ctrl).name() << std::endl;
-  }
-
-
-vector<double> RoboticArmIiwa7::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints, Eigen::VectorXd& twist) {
+vector<double> RoboticArmIiwa7::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,
+                                                     Eigen::VectorXd& twist) {
   vector<double>& retrievedPosition = get<0>(stateJoints);
   vector<double>& retrievedSpeed = get<1>(stateJoints);
   vector<double>& retrievedTorque = get<2>(stateJoints);
-  Eigen::VectorXd positions(retrievedPosition.size());
-  for (size_t i = 0; i < retrievedPosition.size(); ++i) {
-      positions(i) = retrievedPosition[i];
-  }  
-  // command_state.set_position(positions);
-  // auto command_state = JointState::Random("command");
-  // auto feedback_state = JointState::Random("feedback");
+  Eigen::VectorXd positions = Eigen::Map<Eigen::VectorXd>(retrievedPosition.data(), retrievedPosition.size());
+  Eigen::VectorXd velocities = Eigen::Map<Eigen::VectorXd>(retrievedSpeed.data(), retrievedSpeed.size());
+  Eigen::VectorXd torques = Eigen::Map<Eigen::VectorXd>(retrievedTorque.data(), retrievedTorque.size());
+  feedback_state.set_positions(positions);
+  feedback_state.set_velocities(velocities);
+  feedback_state.set_torques(torques);
 
-  // // compute the command output
-  // auto command_output = ctrl->compute_command(command_state, feedback_state);
+  vector<double> desiredJointSpeed = IRoboticArmBase::getIDynamics(retrievedPosition, twist);
+  Eigen::VectorXd JointSpeed = Eigen::Map<Eigen::VectorXd>(desiredJointSpeed.data(), desiredJointSpeed.size());
+  command_state.set_velocities(JointSpeed);
+
+  cout << twist << endl;
+  // compute the command output
+  auto command_output = joint_ctrl->compute_command(command_state, feedback_state);
 
 
- return retrievedPosition;
+  Eigen::VectorXd EigentorqueCommand = command_output.get_torques();
+  std::vector<double> torqueCommand(EigentorqueCommand.data(), EigentorqueCommand.data() + EigentorqueCommand.size());
 
+  return torqueCommand;
 }

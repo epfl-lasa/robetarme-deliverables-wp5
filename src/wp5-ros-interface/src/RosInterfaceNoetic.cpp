@@ -20,7 +20,7 @@
 
 using namespace std;
 
-RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& nh) : nh_(nh) {
+RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& nh, string robot) : nh_(nh), robotName(robot) {
   // Load parameters from YAML file
   try {
     std::string package_path = ros::package::getPath("wp5-ros-interface");
@@ -29,21 +29,20 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& nh) : nh_(nh) {
     std::string yaml_path = package_path + "/config/config.yaml";
     YAML::Node config = YAML::LoadFile(yaml_path);
 
-    // Print information about "UR5" field
-    YAML::Node ur5Node = config["UR5"];
+    // Print information about robotname field
+    YAML::Node robotNode = config[robotName];
 
-    // Attempt to access the "njoint" field within "UR5"
-    int nJoint = ur5Node["njoint"].as<int>();
+    // Attempt to access the "njoint" field within the robot
+    int nJoint = robotNode["njoint"].as<int>();
 
-    string actualStateTopic = ur5Node["joint_topic"].as<string>();
-    string commandStateTopic = ur5Node["joint_command"].as<string>();
+    string actualStateTopic = robotNode["joint_topic"].as<string>();
+    string commandStateTopic = robotNode["joint_command"].as<string>();
 
     // Initialization
     jointsPosition.assign(nJoint, 0.0);
     jointsSpeed.assign(nJoint, 0.0);
     jointsTorque.assign(nJoint, 0.0);
-    init_joint = true;
-
+    init_joint = false;
 
     // ROS init
     sub_state_ = nh_.subscribe(actualStateTopic, 10, &RosInterfaceNoetic::jointStateCallback, this);
@@ -60,7 +59,7 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& nh) : nh_(nh) {
   }
 
   // Wait for the callback to be called at least once
-  while (init_joint) {
+  while (!init_joint) {
     ROS_INFO("Waiting for the callback to be called...");
     ros::Duration(1.0).sleep(); // Sleep for 1 second before checking again
     ros::spinOnce();            // Ensure the callback is called
@@ -73,10 +72,12 @@ void RosInterfaceNoetic::jointStateCallback(const sensor_msgs::JointState::Const
     jointsSpeed = msg->velocity;    // Update the speed vector
     jointsTorque = msg->effort;     // Update the torque vector
 
-    // swap the position to have each joint in the kinematic order
-    swap(jointsPosition[0], jointsPosition[2]);
-    swap(jointsSpeed[0], jointsSpeed[2]);
-    init_joint = false;
+    if (robotName == "Ur5") {
+      // swap the position to have each joint in the kinematic order, ONLY FOR UR%
+      swap(jointsPosition[0], jointsPosition[2]);
+      swap(jointsSpeed[0], jointsSpeed[2]);
+    }
+    init_joint = true;
 
   } else {
     ROS_WARN("Received joint positions are empty.");

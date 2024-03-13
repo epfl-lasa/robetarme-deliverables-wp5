@@ -1,6 +1,7 @@
 
 shotcrete:
-  robot_name: "Ur5"
+  # robot_name: "Ur5"
+  robot_name: "Iiwa7"
 surface_finishing:
   robot_name: "Ur5"
 metal_additive:

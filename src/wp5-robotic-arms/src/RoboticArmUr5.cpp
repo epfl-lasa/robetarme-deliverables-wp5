@@ -13,7 +13,6 @@
 #include "RoboticArmUr5.h"
 #include "controllers/ControllerFactory.hpp"
 
-
 using namespace controllers;
 using namespace state_representation;
 using namespace std;
@@ -30,7 +29,6 @@ RoboticArmUr5::RoboticArmUr5() {
   nJoint = 6;
   originalHomeJoint = vector<double>(nJoint, 0.0);
   model = make_unique<robot_model::Model>(robotName, pathUrdf);
-
   double damp = 1e-6;
   double alpha = 0.5;
   double gamma = 0.8;
@@ -39,20 +37,12 @@ RoboticArmUr5::RoboticArmUr5() {
   unsigned int max_number_of_iterations = 1000;
   paramsIK = {damp, alpha, gamma, tolerance, max_number_of_iterations};
 
-
-  std::list<std::shared_ptr<ParameterInterface>> parameters;
-  parameters.emplace_back(make_shared_parameter("damping", 10.0));
-  parameters.emplace_back(make_shared_parameter("stiffness", 5.0));
-  parameters.emplace_back(make_shared_parameter("inertia", 1.0));
-
-  std::shared_ptr<controllers::IController<state_representation::JointState>> joint_ctrl
-  joint_ctrl = JointControllerFactory::create_controller(CONTROLLER_TYPE::IMPEDANCE,parameters);
-  std::cout << "Type of ctrl: " << typeid(joint_ctrl).name() << std::endl;
 }
 
 vector<double> RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,
                                                    Eigen::VectorXd& twist) {
   vector<double>& retrievedPosition = get<0>(stateJoints);
+
 
   vector<double> desiredJointSpeed = IRoboticArmBase::getIDynamics(retrievedPosition, twist);
   return desiredJointSpeed;

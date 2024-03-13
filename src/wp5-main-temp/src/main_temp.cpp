@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   roboticArm = make_unique<RoboticArmUr5>();
   // Create an unique pointer for the instance of RosInterfaceNoetic
   unique_ptr<RosInterfaceNoetic> rosInterface = nullptr;
-  rosInterface = make_unique<RosInterfaceNoetic>(nh);
+  rosInterface = make_unique<RosInterfaceNoetic>(nh,"Ur5");
   // Create an unique pointer for the instance of DynamicalSystem
   unique_ptr<DynamicalSystem> dynamicalSystem = nullptr;
   dynamicalSystem = make_unique<DynamicalSystem>(1 / deltaTime);
