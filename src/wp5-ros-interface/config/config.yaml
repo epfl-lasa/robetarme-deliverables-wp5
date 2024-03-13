@@ -1,14 +1,14 @@
-UR5:
+Ur5:
   joint_topic: "/ur5/joint_states"
   joint_command: "/ur5/joint_group_vel_controller/command"
   njoint: 6
 
-IIWA:
+Iiwa7:
   joint_topic: "/iiwa/joint_states"
   joint_command: "/iiwa/TorqueController/command"
   njoint: 7
 
-COBOD:
+Cobod:
   joint_topic: "/cobod/joint_states"
   joint_command: "/cobod/joint_group_vel_controller/command"
   njoint: 5

@@ -5,8 +5,7 @@
 using namespace std;
 using namespace Eigen;
 
-
-//TODO: add some warning if not wellinit 
+//TODO: add some warning if not wellinit
 
 DynamicalSystem::DynamicalSystem(double freq) {
   fs = freq;
@@ -28,9 +27,7 @@ void DynamicalSystem::parameter_initialization() {
 
   toolOffsetFromTarget = config["toolOffsetFromTarget"].as<double>();
 }
-  std::vector<double> DynamicalSystem::getFirstQuatPos(){
-    return firstQuatPos;
-  }
+std::vector<double> DynamicalSystem::getFirstQuatPos() { return firstQuatPos; }
 
 void DynamicalSystem::set_path(vector<vector<double>> pathInput) {
   desiredPath = pathInput;
@@ -67,18 +64,17 @@ void DynamicalSystem::setCartPose(pair<Quaterniond, Vector3d> pairQuatPos) {
   Matrix3d rotation_matrix = normalizedQuat.toRotationMatrix();
 
   realPosOffset = realPos + toolOffsetFromTarget * rotation_matrix.col(2);
-  if(iFollow == 0 && !init)
- {  centerLimitCycle = realPosOffset;
+  if (iFollow == 0 && !init) {
+    centerLimitCycle = realPosOffset;
     init = true;
- }
-
+  }
 }
 //----------------define all function-------------------------------------
 
 // this function take the path comoute from server and create a linear DS
 //when the eef is close the the next point it change the goal until the last point of the path
 pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<double> desiredQuatPos) {
-double dx, dy, dz;
+  double dx, dy, dz;
   double norm;
   double scaleVel;
   Vector3d dVel;
@@ -173,12 +169,11 @@ pair<Quaterniond, Vector3d> DynamicalSystem::get_DS_quat_speed() {
                                  desiredOriVelocityFiltered_(2)  // z
   );
 
-  return make_pair(desiredQuat,desiredVel);
+  return make_pair(desiredQuat, desiredVel);
   // return make_pair(desiredQuat, dVel);
 }
 
-
-void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos , Vector3d target_pose_cricleDS) {
+void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d target_pose_cricleDS) {
   float a[2] = {1., 1.};
   float norm_a = sqrt(a[0] * a[0] + a[1] * a[1]);
   for (int i = 0; i < 2; i++) a[i] = a[i] / norm_a;
