@@ -11,6 +11,7 @@
  */
 
 #include "RoboticArmUr5.h"
+
 #include "controllers/ControllerFactory.hpp"
 
 using namespace controllers;
@@ -23,8 +24,8 @@ RoboticArmUr5::RoboticArmUr5() {
   tipLink = "tool0";
   tipJoint = "wrist_3_joint";
   baseLink = "base";
-  jointNames =
-      {"shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
+  jointNames = {
+      "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
   referenceFrame = "base";
   nJoint = 6;
   originalHomeJoint = vector<double>(nJoint, 0.0);
@@ -35,14 +36,12 @@ RoboticArmUr5::RoboticArmUr5() {
   double margin = 0.07;
   double tolerance = 1e-3;
   unsigned int max_number_of_iterations = 1000;
-  paramsIK = {damp, alpha, gamma, tolerance, max_number_of_iterations};
-
+  paramsIK = {damp, alpha, gamma, margin, tolerance, max_number_of_iterations};
 }
 
 vector<double> RoboticArmUr5::low_level_controller(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,
                                                    Eigen::VectorXd& twist) {
   vector<double>& retrievedPosition = get<0>(stateJoints);
-
 
   vector<double> desiredJointSpeed = IRoboticArmBase::getIDynamics(retrievedPosition, twist);
   return desiredJointSpeed;

@@ -21,8 +21,8 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   tipLink = "iiwa_link_7";
   tipJoint = "iiwa_joint_7";
   baseLink = "base";
-  jointNames =
-      {"iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6", "iiwa_joint_7"};
+  jointNames = {
+      "iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6", "iiwa_joint_7"};
   referenceFrame = "ground_plane";
   nJoint = 7;
   originalHomeJoint = vector<double>(nJoint, 0.0);
@@ -35,7 +35,7 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   double margin = 0.07;
   double tolerance = 1e-3;
   unsigned int max_number_of_iterations = 1000;
-  paramsIK = {damp, alpha, gamma, tolerance, max_number_of_iterations};
+  paramsIK = {damp, alpha, gamma, margin, tolerance, max_number_of_iterations};
 
   parameters.emplace_back(make_shared_parameter("damping", 1.0));
   parameters.emplace_back(make_shared_parameter("stiffness", 10.0));
@@ -66,7 +66,6 @@ vector<double> RoboticArmIiwa7::low_level_controller(tuple<vector<double>, vecto
   cout << twist << endl;
   // compute the command output
   auto command_output = joint_ctrl->compute_command(command_state, feedback_state);
-
 
   Eigen::VectorXd EigentorqueCommand = command_output.get_torques();
   std::vector<double> torqueCommand(EigentorqueCommand.data(), EigentorqueCommand.data() + EigentorqueCommand.size());

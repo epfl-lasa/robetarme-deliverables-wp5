@@ -1,17 +1,19 @@
 // clang-format off
 #include <pinocchio/fwd.hpp>
 // clang-format on
-#include <ros/ros.h>
 #include "IRoboticArmBase.h"
+#include <ros/ros.h>
 
+#include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
+#include "PathPlanner.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
-#include "PathPlanner.h"
-#include "BoustrophedonServer.h"
 
 class Tasks {
 public:
+  enum Type { UNDEFINED, SHOTCRETE, SURFACE_FINISHING, SAND_BLASTING, MAM_REBARS };
+
   Tasks(ros::NodeHandle& n, double freq);
   bool computePathShotcrete();
   bool goFirstPosition();
@@ -31,7 +33,6 @@ private:
   ros::Rate loop_rate;
   std::vector<double> homeJoint;
 
-
   double rosFreq;
   // Create an unique pointer for the instance of IRoboticArmBase
   std::unique_ptr<IRoboticArmBase> roboticArm = nullptr;
@@ -45,6 +46,4 @@ private:
   std::unique_ptr<PathPlanner> pathplanner = nullptr;
   // Create an unique pointer for the instance of PathPlanner
   std::unique_ptr<BoustrophedonServer> boustrophedonserver = nullptr;
-  
-
-  };
+};

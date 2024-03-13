@@ -43,7 +43,7 @@ public:
      */
   virtual ~IRoboticArmBase() = default;
 
-   std::vector<double> getHomeJoint();
+  std::vector<double> getHomeJoint();
 
   /**
      * @brief Get forward kinematics of the robotic arm.
@@ -114,8 +114,9 @@ public:
   //  *
   //  * @param data Tuple containing vectors of joint positions, joint velocities, and joint efforts.
   //  */
-virtual std::vector<double> low_level_controller(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,  Eigen::VectorXd& twist) = 0;
-std::vector<double> originalHomeJoint =  {};
+  virtual std::vector<double> low_level_controller(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data, Eigen::VectorXd& twist) = 0;
+  std::vector<double> originalHomeJoint = {};
 
 protected:
   /**
@@ -133,7 +134,7 @@ protected:
 
   std::string paramURDF = "";
   int nJoint = 0;
-  struct robot_model::InverseKinematicsParameters paramsIK = {};
+  struct robot_model::InverseKinematicsParameters paramsIK;
 
   // ik -----------------
 
@@ -155,8 +156,9 @@ private:
      * @param t .
      * @return quaternion
      */
-  Eigen::Matrix<double, 4, 1>
-  slerpQuaternion(Eigen::Matrix<double, 4, 1>& q1, Eigen::Matrix<double, 4, 1>& q2, double t);
+  Eigen::Matrix<double, 4, 1> slerpQuaternion(Eigen::Matrix<double, 4, 1>& q1,
+                                              Eigen::Matrix<double, 4, 1>& q2,
+                                              double t);
 
   /**
      * @brief Function fo computing the quaternion product.

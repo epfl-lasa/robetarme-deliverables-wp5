@@ -10,8 +10,9 @@ find_package(catkin REQUIRED COMPONENTS
   actionlib
   actionlib_msgs
   std_msgs
-  message_generation
   message_runtime
+  message_generation
+  wp5_tasks
 )
 
 add_action_files(
@@ -33,6 +34,7 @@ catkin_package(CATKIN_DEPENDS
   std_msgs
   message_runtime
   message_generation
+  wp5_tasks
 )
 
 include_directories(
