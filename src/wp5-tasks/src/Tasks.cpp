@@ -1,20 +1,20 @@
 #include "Tasks.h"
+
 #include <yaml-cpp/yaml.h>
 // include all the robot needeed
 #include "RoboticArmIiwa7.h"
 #include "RoboticArmUr5.h"
 
-//TODO: remove rviz dependency
-#include "visualization_msgs/Marker.h"
+//TODO(Tristant): remove rviz dependency
 #include <geometry_msgs/Point.h>        //<----------to remove
 #include <geometry_msgs/PointStamped.h> //<----------to remove
+
+#include "visualization_msgs/Marker.h"
 
 using namespace std;
 using namespace Eigen;
 
-//TODO:reviz dep
-
-//TODO:RVIZ DEP
+//TODO(Tristant): RVIZ DEP
 void twistMarker(VectorXd twistDesiredEigen, Vector3d pos, ros::Publisher& marker_pub) {
   visualization_msgs::Marker linear_marker, angular_marker;
 
@@ -31,7 +31,7 @@ void twistMarker(VectorXd twistDesiredEigen, Vector3d pos, ros::Publisher& marke
   linear_marker.color.a = 1.0; // Don't forget to set the alpha!
 
   linear_marker.scale.x = 0.01; // Arrow width
-  linear_marker.scale.y = 0.1; // Arrow head width
+  linear_marker.scale.y = 0.1;  // Arrow head width
   linear_marker.scale.z = 0.5;  // Arrow head length
 
   linear_marker.pose.orientation.w = 1.0;
@@ -80,7 +80,6 @@ void publishPointStamped(const Vector3d& pathPoint, ros::Publisher pointPub) {
   pointPub.publish(point_stamped_msg);
 }
 
-
 //--------------------------------------------------------
 
 Tasks::Tasks(ros::NodeHandle& n, double freq) : nh(n), rosFreq(freq), loop_rate(freq) {
@@ -93,13 +92,13 @@ Tasks::Tasks(ros::NodeHandle& n, double freq) : nh(n), rosFreq(freq), loop_rate(
   // Create an unique pointer for the instance of PathPlanner
   boustrophedonserver = make_unique<BoustrophedonServer>(nh);
 
-  //TODO: delet rviz dependency
+  //TODO(Tristan): delete rviz dependency
   point_pub = nh.advertise<geometry_msgs::PointStamped>("path_point", 1);
   pub_desired_vel_filtered = nh.advertise<visualization_msgs::Marker>("visualization_marker", 100);
   //------------------------------
 }
 
-bool Tasks::initShotcrete() {
+bool Tasks::initialize() {
   cout << "initialization shotcrete ..." << endl;
   string yaml_path = string(WP5_TASKS_DIR) + "/config/config.yaml";
   YAML::Node config = YAML::LoadFile(yaml_path);
@@ -134,7 +133,7 @@ bool Tasks::initShotcrete() {
   return checkInit;
 }
 
-bool Tasks::computePathShotcrete() {
+bool Tasks::computePath() {
   cout << "computing path ..." << endl;
 
   // extract polygons for boustrophedon
@@ -208,7 +207,7 @@ bool Tasks::computePathShotcrete() {
   return checkPath;
 }
 
-bool Tasks::goFirstPosition() {
+bool Tasks::goWorkingPosition() {
 
   vector<double> firstQuatPos = dynamicalSystem->getFirstQuatPos();
 
@@ -233,14 +232,13 @@ bool Tasks::goFirstPosition() {
     ros::spinOnce();
     loop_rate.sleep();
 
-        //TODO: delet rviz dependency
+    //TODO(Tristan): delete rviz dependency
     twistMarker(twistDesiredEigen, pairActualQuatPos.second, pub_desired_vel_filtered);
-
   }
   return checkFirstPosition;
 }
 
-bool Tasks::DoShotcrete() {
+bool Tasks::execute() {
   cout << "preforming shotcrete ..." << endl;
 
   while (ros::ok() && !checkFinish) {
@@ -266,16 +264,16 @@ bool Tasks::DoShotcrete() {
   return checkFinish;
 }
 
-void Tasks::setHome(vector<double> desiredJoint) { homeJoint = desiredJoint; }
+void Tasks::setHomingPosition(vector<double> desiredJoint) { homeJoint = desiredJoint; }
 
-bool Tasks::goHome() {
+bool Tasks::goHomingPosition() {
   cout << "Go Home..." << endl;
   // get home position
   pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm->getFK(homeJoint);
   Quaterniond homeQuat = pairHomeQuatPos.first;
   Vector3d homePos = pairHomeQuatPos.second;
-  vector<double> desiredQuatPos =
-      {homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
+  vector<double> desiredQuatPos = {
+      homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
 
   while (ros::ok() && !checkGoHome) {
     // set and get desired speed
@@ -290,7 +288,6 @@ bool Tasks::goHome() {
     checkGoHome = dynamicalSystem->checkLinearDs;
 
     VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
 
     vector<double> desiredJointSpeed = roboticArm->low_level_controller(stateJoints, twistDesiredEigen);
     rosInterface->send_state(desiredJointSpeed);

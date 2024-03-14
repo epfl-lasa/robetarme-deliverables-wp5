@@ -1,3 +1,5 @@
+#pragma once
+
 // clang-format off
 #include "Tasks.h"
 // clang-format on

@@ -12,26 +12,21 @@
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
 
-class Tasks {
+class TaskShotcrete {
 public:
-  enum Type { UNDEFINED, SHOTCRETE, SURFACE_FINISHING, SAND_BLASTING, MAM_REBARS };
+  Tasks(ros::NodeHandle& n, double freq);
+  bool computePathShotcrete();
+  bool goFirstPosition();
+  bool DoShotcrete();
+  bool initShotcrete();
+  bool goHome();
+  void setHome(std::vector<double> desiredJoint);
 
   bool checkInit = false;
-  bool checkWorkingPosition = false;
+  bool checkFirstPosition = false;
   bool checkFinish = false;
   bool checkPath = false;
   bool checkGoHome = false;
-
-  Tasks(ros::NodeHandle& n, double freq);
-
-  bool initialize() = 0;
-  bool execute() = 0;
-
-  bool computePath() = 0;
-  bool goHomingPosition() = 0;
-  bool goWorkingPosition() = 0;
-
-  void setHomingPosition(std::vector<double> desiredJoint);
 
 private:
   ros::NodeHandle nh;
@@ -43,22 +38,16 @@ private:
   ros::Publisher pub_desired_vel_filtered;
 
   double rosFreq;
-
   // Create an unique pointer for the instance of IRoboticArmBase
   std::unique_ptr<IRoboticArmBase> roboticArm = nullptr;
-
   // Create an unique pointer for the instance of RosInterfaceNoetic
   std::unique_ptr<RosInterfaceNoetic> rosInterface = nullptr;
-
   // Create an unique pointer for the instance of DynamicalSystem
   std::unique_ptr<DynamicalSystem> dynamicalSystem = nullptr;
-
   // Create an unique pointer for the instance of TargetExtraction
   std::unique_ptr<TargetExtraction> targetextraction = nullptr;
-
   // Create an unique pointer for the instance of PathPlanner
   std::unique_ptr<PathPlanner> pathplanner = nullptr;
-
   // Create an unique pointer for the instance of PathPlanner
   std::unique_ptr<BoustrophedonServer> boustrophedonserver = nullptr;
 };
