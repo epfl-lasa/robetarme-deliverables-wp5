@@ -47,6 +47,7 @@ VectorXd IRoboticArmBase::getTwistFromJointState(vector<double> posJoint, vector
   }
 
   VectorXd twistLinearAngular = jacMatrix * speedJointEigen;
+
   return twistLinearAngular;
 }
 
@@ -88,9 +89,9 @@ vector<double> IRoboticArmBase::getIDynamics(vector<double> vectJoint, VectorXd 
   vector<double> speedJointNext(nJoint);
 
   Vector3d angular_velocity(3);
-  angular_velocity << speedEigen(0), speedEigen(1), speedEigen(2);
   Vector3d linear_velocity(3);
-  linear_velocity << speedEigen(3), speedEigen(4), speedEigen(5);
+  linear_velocity << speedEigen(0), speedEigen(1), speedEigen(2);
+  angular_velocity << speedEigen(3), speedEigen(4), speedEigen(5);
 
   Map<VectorXd> posJoint_eigen(vectJoint.data(), vectJoint.size());
 
@@ -131,7 +132,7 @@ VectorXd IRoboticArmBase::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Ve
   double theta_gq = (-.5 / (4 * maxDq * maxDq)) * tmp_angular_vel.transpose() * tmp_angular_vel;
   Vector3d Omega_out = 2 * dsGain_ori * (1 + exp(theta_gq)) * tmp_angular_vel;
 
-  vector<double> V = {Omega_out[0], Omega_out[1], Omega_out[2], speed(0), speed(1), speed(2)};
+  vector<double> V = {speed(0), speed(1), speed(2), Omega_out[0], Omega_out[1], Omega_out[2]};
 
   double* pt = &V[0];
   VectorXd VOut = Map<VectorXd>(pt, 6);

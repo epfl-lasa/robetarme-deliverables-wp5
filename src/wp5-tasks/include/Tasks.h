@@ -1,11 +1,11 @@
 // clang-format off
 #include <pinocchio/fwd.hpp>
 // clang-format on
-#include "IRoboticArmBase.h"
 #include <ros/ros.h>
 
 #include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
+#include "IRoboticArmBase.h"
 #include "PathPlanner.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
@@ -32,6 +32,10 @@ private:
   ros::NodeHandle nh;
   ros::Rate loop_rate;
   std::vector<double> homeJoint;
+
+  //TODO(Tristan): delete rviz dependency
+  ros::Publisher point_pub;
+  ros::Publisher pub_desired_vel_filtered;
 
   double rosFreq;
   // Create an unique pointer for the instance of IRoboticArmBase
