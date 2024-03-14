@@ -94,10 +94,9 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   dVel(2) = dz * scaleVel;
 
   double dt = 1 / fs;
+  // cerr << "error" << (sqrt((pathPoint - realPosOffset).norm())) << endl;
 
-  centerLimitCycle += dVel * dt;
-
-  if (sqrt((pathPoint - centerLimitCycle).norm()) <= toleranceToNextPoint) {
+  if (sqrt((pathPoint - realPosOffset).norm()) <= toleranceToNextPoint) {
     dVel(0) = 0;
     dVel(1) = 0;
     dVel(2) = 0;

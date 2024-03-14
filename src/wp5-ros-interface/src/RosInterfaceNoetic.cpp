@@ -33,7 +33,7 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& nh, string robot) : nh_(
     YAML::Node robotNode = config[robotName];
 
     // Attempt to access the "njoint" field within the robot
-    int nJoint = robotNode["njoint"].as<int>();
+    nJoint = robotNode["njoint"].as<int>();
 
     string actualStateTopic = robotNode["joint_topic"].as<string>();
     string commandStateTopic = robotNode["joint_command"].as<string>();
@@ -96,7 +96,7 @@ tuple<vector<double>, vector<double>, vector<double>> RosInterfaceNoetic::receiv
 
 void RosInterfaceNoetic::send_state(vector<double>& data) {
 
-  std_msgs::Float64MultiArray nextSpeedJointMsg;
-  nextSpeedJointMsg.data = data;
-  pub_state_.publish(nextSpeedJointMsg);
+  std_msgs::Float64MultiArray nextJointMsg;
+  nextJointMsg.data = data;
+  pub_state_.publish(nextJointMsg);
 }

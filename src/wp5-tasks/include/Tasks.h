@@ -31,6 +31,10 @@ private:
   ros::Rate loop_rate;
   std::vector<double> homeJoint;
 
+//TODO: delet rviz dependency 
+  ros::Publisher point_pub;
+  ros::Publisher pub_desired_vel_filtered;
+
 
   double rosFreq;
   // Create an unique pointer for the instance of IRoboticArmBase

@@ -34,7 +34,7 @@ private:
   std::string robotName;
 
   bool init_joint;
-
+  int nJoint;
   ros::NodeHandle nh_;
   ros::Subscriber sub_state_;
   ros::Publisher pub_state_;
