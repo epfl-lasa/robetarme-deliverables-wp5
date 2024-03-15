@@ -32,8 +32,7 @@ private:
   std::vector<double> jointsPosition_;
   std::vector<double> jointsSpeed_;
   std::vector<double> jointsTorque_;
-  std::vector<double> torqueSensor_;    // Update the torque ve
-  std::vector<double> forceSensor_;
+  std::vector<double> wrenchSensor_; 
   std::string robotName_;
 
   bool initJoint_;

@@ -20,7 +20,7 @@ int main(int argc, char** argv) {
   double deltaTime = 0.001;
   double rosFreq = 1 / deltaTime;
   // init ros
-  ros::init(argc, argv, "main_tasks");
+  ros::init(argc, argv, "task_shotcrete");
   ros::NodeHandle nh;
 
   ros::Rate loop_rate(1 / deltaTime);
@@ -33,7 +33,7 @@ int main(int argc, char** argv) {
   tasks->computePathShotcrete();
 
   //init shotcrete
-  bool valid = tasks->initShotcrete();
+  bool valid = tasks->initTask("shotcrete");
   // tasks->goHome();
 
   if (valid) {

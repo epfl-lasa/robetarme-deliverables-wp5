@@ -117,6 +117,11 @@ public:
   virtual std::vector<double>
   lowLevelController(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,
                      Eigen::VectorXd& twist) = 0;
+  virtual std::vector<double>
+  lowLevelControllerSF(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,
+                     Eigen::VectorXd& twist, double ,std::vector<double>) = 0;
+
+
   std::vector<double> originalHomeJoint = {};
 
 protected:

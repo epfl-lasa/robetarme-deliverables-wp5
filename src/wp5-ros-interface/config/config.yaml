@@ -1,7 +1,7 @@
 Ur5:
   joint_topic: "/ur5/joint_states"
   joint_command: "/ur5/joint_group_vel_controller/command"
-  ft_topic: ""
+  ft_topic: "/robotiq_ft_wrench"
   number_joint: 6
 
 Iiwa7:

@@ -35,7 +35,8 @@ include_directories(
 
 # Add the main_temp node
 add_executable(wp5-main-temp-node
-  src/main_task.cpp
+  # src/main_task_shotcrete.cpp
+  src/main_task_sf.cpp
   src/Tasks.cpp  # Include the source file of TargetExtraction if it's in a separate file
 
 )

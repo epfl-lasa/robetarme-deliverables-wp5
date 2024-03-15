@@ -216,6 +216,7 @@ void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d t
   }
 }
 
+// void DynamicalSystem::setBiasForce(VectorXd meanWrenchFromSensor) { meanWrenchFromSensor_ = meanWrenchFromSensor; }
 void DynamicalSystem::setLinearSpeed(double speed) { linearVelExpected_ = speed; }
 void DynamicalSystem::setToleranceNextPoint(double tol) { toleranceToNextPoint_ = tol; }
 void DynamicalSystem::restartPath() { iFollow_ = 0; }
