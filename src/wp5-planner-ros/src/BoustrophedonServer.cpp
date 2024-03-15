@@ -14,9 +14,9 @@ using namespace std;
 
 BoustrophedonServer::BoustrophedonServer(ros::NodeHandle& n) : nh(n), client("plan_path", true) {
   // Advertise publishers
-  polygon_pub = nh.advertise<geometry_msgs::PolygonStamped>("/input_polygon", 1, true);
-  path_pub = nh.advertise<nav_msgs::Path>("/result_path", 1, true);
-  start_pub = nh.advertise<geometry_msgs::PoseStamped>("/start_pose", 1, true);
+  polygonPub = nh.advertise<geometry_msgs::PolygonStamped>("/input_polygon", 1, true);
+  pathPub = nh.advertise<nav_msgs::Path>("/result_path", 1, true);
+  startPub = nh.advertise<geometry_msgs::PoseStamped>("/start_pose", 1, true);
 }
 void BoustrophedonServer::setOptimumRad(double rad) { optimumRad = rad; }
 

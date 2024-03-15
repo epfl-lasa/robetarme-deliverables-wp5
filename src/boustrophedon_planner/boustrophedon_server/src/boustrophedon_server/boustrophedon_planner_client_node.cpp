@@ -1,20 +1,19 @@
-#include <ros/ros.h>
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
+#include <ros/ros.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
-#include <boustrophedon_msgs/PlanMowingPathAction.h>
 #include <boustrophedon_msgs/ConvertPlanToPath.h>
+#include <boustrophedon_msgs/PlanMowingPathAction.h>
 
 #include <geometry_msgs/PolygonStamped.h>
-#include <nav_msgs/Path.h>
 #include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Path.h>
 
 geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z);
 
 // server has a service to convert StripingPlan to Path, but all it does it call this method
-bool convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& striping_plan, nav_msgs::Path& path)
-{
+bool convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& striping_plan, nav_msgs::Path& path) {
   path.header.frame_id = striping_plan.header.frame_id;
   path.header.stamp = striping_plan.header.stamp;
 
@@ -34,23 +33,19 @@ bool convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& striping_
   //                  return pose;
   //                });
 
-  for (std::size_t i = 0; i < striping_plan.points.size(); i++)
-  {
+  for (std::size_t i = 0; i < striping_plan.points.size(); i++) {
     geometry_msgs::PoseStamped pose;
     pose.header.frame_id = striping_plan.header.frame_id;
     pose.header.stamp = striping_plan.header.stamp;
     pose.pose.position = striping_plan.points[i].point;
 
-    if (i < striping_plan.points.size() - 1)
-    {
+    if (i < striping_plan.points.size() - 1) {
       double dx = striping_plan.points[i + 1].point.x - striping_plan.points[i].point.x;
       double dy = striping_plan.points[i + 1].point.y - striping_plan.points[i].point.y;
       double dz = striping_plan.points[i + 1].point.z - striping_plan.points[i].point.z;
 
       pose.pose.orientation = headingToQuaternion(dx, dy, dz);
-    }
-    else
-    {
+    } else {
       pose.pose.orientation.x = 0.0;
       pose.pose.orientation.y = 0.0;
       pose.pose.orientation.z = 0.0;
@@ -65,24 +60,22 @@ bool convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& striping_
 
 bool got_initial_pose = false;
 geometry_msgs::PoseStamped initial_pose;
-void initialPoseCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr init_pose)
-{
+void initialPoseCallback(const geometry_msgs::PoseWithCovarianceStampedConstPtr init_pose) {
   initial_pose.header = init_pose->header;
   initial_pose.pose = init_pose->pose.pose;
   got_initial_pose = true;
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
   ros::init(argc, argv, "boustrophedon_planner_client");
   ros::NodeHandle n;
 
   actionlib::SimpleActionClient<boustrophedon_msgs::PlanMowingPathAction> client("plan_path",
-                                                                                 true);  // server name and spin thread
+                                                                                 true); // server name and spin thread
 
-  ros::Publisher polygon_pub = n.advertise<geometry_msgs::PolygonStamped>("/input_polygon", 1, true);
-  ros::Publisher path_pub = n.advertise<nav_msgs::Path>("/result_path", 1, true);
-  ros::Publisher start_pub = n.advertise<geometry_msgs::PoseStamped>("/start_pose", 1, true);
+  ros::Publisher polygonPub = n.advertise<geometry_msgs::PolygonStamped>("/input_polygon", 1, true);
+  ros::Publisher pathPub = n.advertise<nav_msgs::Path>("/result_path", 1, true);
+  ros::Publisher startPub = n.advertise<geometry_msgs::PoseStamped>("/start_pose", 1, true);
   ros::Subscriber init_pose =
       n.subscribe<geometry_msgs::PoseWithCovarianceStamped>("/initialpose", 1, initialPoseCallback);
 
@@ -90,7 +83,7 @@ int main(int argc, char** argv)
 
   ROS_INFO("Waiting for action server to start.");
   // wait for the action server to start
-  client.waitForServer();  // will wait for infinite time
+  client.waitForServer(); // will wait for infinite time
 
   ROS_INFO("Action server started");
 
@@ -111,14 +104,12 @@ int main(int argc, char** argv)
 
   goal.robot_position.pose.orientation.w = 1.0;
 
-  polygon_pub.publish(goal.property);
+  polygonPub.publish(goal.property);
 
   ROS_INFO_STREAM("Waiting for goal");
 
-  while (ros::ok())
-  {
-    if (got_initial_pose)
-    {
+  while (ros::ok()) {
+    if (got_initial_pose) {
       ros::Time start_time = ros::Time::now();
 
       goal.robot_position = initial_pose;
@@ -126,7 +117,7 @@ int main(int argc, char** argv)
       // goal.robot_position.pose.position.x = 1.0;
       // goal.robot_position.pose.position.y = 1.0;
 
-      start_pub.publish(goal.robot_position);
+      startPub.publish(goal.robot_position);
 
       client.sendGoal(goal);
       ROS_INFO_STREAM("Sending goal");
@@ -134,8 +125,7 @@ int main(int argc, char** argv)
       // wait for the action to return
       bool finished_before_timeout = client.waitForResult(ros::Duration(30.0));
 
-      if (!finished_before_timeout)
-      {
+      if (!finished_before_timeout) {
         ROS_INFO("Action did not finish before the time out.");
         continue;
       }
@@ -148,14 +138,13 @@ int main(int argc, char** argv)
       nav_msgs::Path path;
       convertStripingPlanToPath(result->plan, path);
 
-      path_pub.publish(path);
+      pathPub.publish(path);
 
       got_initial_pose = false;
 
       ros::Time end_time = ros::Time::now();
       ros::Duration elapsed_time = end_time - start_time;
       ROS_INFO_STREAM("Time elapsed: " << elapsed_time.toSec() << " seconds");
-
     }
     ros::spinOnce();
     loop_rate.sleep();
@@ -164,8 +153,7 @@ int main(int argc, char** argv)
   return 0;
 }
 
-geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z)
-{
+geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z) {
   // get orientation from heading vector
   const tf2::Vector3 heading_vector(x, y, z);
   const tf2::Vector3 origin(1, 0, 0);
@@ -175,8 +163,7 @@ geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z)
   tf2::Quaternion q(a.x(), a.y(), a.z(), w);
   q.normalize();
 
-  if (!std::isfinite(q.x()) || !std::isfinite(q.y()) || !std::isfinite(q.z()) || !std::isfinite(q.w()))
-  {
+  if (!std::isfinite(q.x()) || !std::isfinite(q.y()) || !std::isfinite(q.z()) || !std::isfinite(q.w())) {
     q.setX(0);
     q.setY(0);
     q.setZ(0);

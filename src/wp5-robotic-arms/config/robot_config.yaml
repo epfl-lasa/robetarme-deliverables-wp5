@@ -15,22 +15,7 @@ Iiwa7:
   tipJoint: "-"
   numberJoint: 7
   path_urdf: "/home/ros/ros_ws/src/controller_iiwa/urdf/iiwa.urdf"
-  stiffness:
-  - 30.0
-  - 30.0
-  - 25.0
-  - 25.0
-  - 25.0
-  - 20.0
-  - 20.0  
-  damping:
-  - 500.0
-  - 500.0
-  - 500.0
-  - 500.0
-  - 500.0
-  - 500.0
-  - 500.0
-
-
-
+  linear_principle_damping: 500.0
+  linear_orthogonal_damping: 100.0
+  angular_stiffness: 100.0
+  angular_damping: 100.0

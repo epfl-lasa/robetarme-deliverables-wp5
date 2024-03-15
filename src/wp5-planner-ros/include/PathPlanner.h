@@ -14,39 +14,38 @@
 class PathPlanner {
 public:
   std::vector<double> firstPos;
-  double sum_rad, optimum_radius;
+  double sumRad, optimumRadius;
 
   Eigen::Quaterniond targetQuat;
   Eigen::Vector3d targetPos;
   geometry_msgs::PoseStamped initialPose;
   geometry_msgs::PoseWithCovarianceStamped initialPoseMsg;
 
-  // PathPlanner(ros::NodeHandle& nh, Eigen::Quaterniond target_quat, Eigen::Vector3d target_pos, std::vector<Eigen::Vector3d> polygons_positions);
-  PathPlanner(ros::NodeHandle& nh);
-  void setTarget(Eigen::Quaterniond target_quat,
-                 Eigen::Vector3d target_pos,
-                 std::vector<Eigen::Vector3d> polygons_positions);
+  PathPlanner(ros::NodeHandle& n);
+  void setTarget(Eigen::Quaterniond targetOrientation,
+                 Eigen::Vector3d targetPosition,
+                 std::vector<Eigen::Vector3d> polygonsPos);
   double getOptimumRadius();
   geometry_msgs::PoseStamped getInitialPose();
-  geometry_msgs::PoseStamped get_initial_pos_ros_msg();
-  std::vector<Eigen::Vector3d> get_planner_points();
+  geometry_msgs::PoseStamped getInitialPosRosMsg();
+  std::vector<Eigen::Vector3d> getPlannerPoints();
   boustrophedon_msgs::PlanMowingPathGoal ComputeGoal();
   int optimization_parameter();
   void publishInitialPose();
-  nav_msgs::Path get_transformed_path(const nav_msgs::Path& originalPath);
-  void see_target_flat();
-  // void set_strategique_position();
-  bool convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& striping_plan, nav_msgs::Path& path);
+  nav_msgs::Path getPlannerPoints(const nav_msgs::Path& originalPath);
+  void seeTargetFlat();
+  nav_msgs::Path getTransformedPath(const nav_msgs::Path& originalPath);
+  bool convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& stripingPlan, nav_msgs::Path& path);
   std::vector<std::vector<double>> convertPathPlanToVectorVector(const nav_msgs::Path& path);
   geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z);
 
 private:
-  double flowRadius, limitCycleRadius, toolOffsetFromTarget, scaleFactor;
-  ros::NodeHandle nh;
+  double flowRadius_, limitCycleRadius_, scaleFactor_;
+  ros::NodeHandle nh_;
   ros::Publisher initialPosePub_;
-  ros::Publisher transformedPolygonPub;
-  std::vector<Eigen::Vector3d> polygonsPositions;
-  std::vector<Eigen::Vector3d> flatPolygons;
+  ros::Publisher transformedPolygonPub_;
+  std::vector<Eigen::Vector3d> polygonsPositions_;
+  std::vector<Eigen::Vector3d> flatPolygons_;
   Eigen::Vector3d findCenter(const std::vector<Eigen::Vector3d>& vertices);
   void scalePolygon(std::vector<Eigen::Vector3d>& vertices);
   double find_height();

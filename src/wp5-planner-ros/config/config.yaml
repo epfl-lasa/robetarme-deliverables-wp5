@@ -1,5 +1,5 @@
-width_target: 0.4
-height_target: 0.35
+widthTarget: 0.4
+heightTarget: 0.35
 
 flowRadius: 0.03
 limitCycleRadius: 0.05

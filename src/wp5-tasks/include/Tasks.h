@@ -27,28 +27,28 @@ public:
   bool checkGoHome = false;
 
 private:
-  ros::NodeHandle nh;
-  ros::Rate loop_rate;
-  std::vector<double> homeJoint;
+  ros::NodeHandle nh_;
+  ros::Rate loopRate_;
+  std::vector<double> homeJoint_;
 
 //TODO: delet rviz dependency 
-  ros::Publisher point_pub;
-  ros::Publisher pub_desired_vel_filtered;
+  ros::Publisher pointPub_;
+  ros::Publisher pubDesiredVelFiltered_;
 
 
-  double rosFreq;
+  double rosFreq_;
   // Create an unique pointer for the instance of IRoboticArmBase
-  std::unique_ptr<IRoboticArmBase> roboticArm = nullptr;
+  std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;
   // Create an unique pointer for the instance of RosInterfaceNoetic
-  std::unique_ptr<RosInterfaceNoetic> rosInterface = nullptr;
+  std::unique_ptr<RosInterfaceNoetic> rosInterface_ = nullptr;
   // Create an unique pointer for the instance of DynamicalSystem
-  std::unique_ptr<DynamicalSystem> dynamicalSystem = nullptr;
+  std::unique_ptr<DynamicalSystem> dynamicalSystem_ = nullptr;
   // Create an unique pointer for the instance of TargetExtraction
-  std::unique_ptr<TargetExtraction> targetextraction = nullptr;
+  std::unique_ptr<TargetExtraction> targetextraction_ = nullptr;
   // Create an unique pointer for the instance of PathPlanner
-  std::unique_ptr<PathPlanner> pathplanner = nullptr;
+  std::unique_ptr<PathPlanner> pathplanner_ = nullptr;
   // Create an unique pointer for the instance of PathPlanner
-  std::unique_ptr<BoustrophedonServer> boustrophedonserver = nullptr;
+  std::unique_ptr<BoustrophedonServer> boustrophedonserver_ = nullptr;
   
 
   };

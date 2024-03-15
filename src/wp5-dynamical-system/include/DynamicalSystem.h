@@ -51,5 +51,5 @@ private:
   Eigen::Vector4d desiredOriVelocityFiltered_;
 
   double toolOffsetFromTarget_, velocityLimit_;
-  bool targetReceived_ = false;
+  bool targetReceived__ = false;
 };

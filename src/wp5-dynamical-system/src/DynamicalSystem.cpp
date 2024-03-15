@@ -4,8 +4,6 @@
 using namespace std;
 using namespace Eigen;
 
-//TODO: add some warning if not wellinit
-
 DynamicalSystem::DynamicalSystem(double freq) {
   fs_ = freq;
   parameterInitialization();
