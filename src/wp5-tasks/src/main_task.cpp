@@ -1,6 +1,12 @@
 // clang-format off
 #include <pinocchio/fwd.hpp>
 // clang-format on
+
+#include <ros/ros.h>
+#include <yaml-cpp/yaml.h>
+
+#include <tuple>
+
 #include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"
@@ -8,60 +14,61 @@
 #include "RoboticArmUr5.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
-#include "Tasks.h"
-#include <ros/ros.h>
-#include <tuple>
+#include "TaskShotcrete.h"
 
 using namespace std;
 using namespace Eigen;
 
 int main(int argc, char** argv) {
-
+  bool valid = false;
   double deltaTime = 0.001;
   double rosFreq = 1 / deltaTime;
-  // init ros
+
+  // Init ros
   ros::init(argc, argv, "main_tasks");
   ros::NodeHandle nh;
+  ros::Rate loopRate(1 / deltaTime);
 
-  ros::Rate loop_rate(1 / deltaTime);
+  // Get task configuration
+  string yamlPath = string(WP5_TASKS_DIR) + "/config/config.yaml";
+  YAML::Node config = YAML::LoadFile(yamlPath);
+  string robotName = config["shotcrete"]["robot_name"].as<string>();
 
-  //init class for Tasks -----------------------------------------
-  unique_ptr<Tasks> tasks = nullptr;
-  tasks = make_unique<Tasks>(nh, rosFreq);
+  // Create an unique pointer for the instance of RosInterfaceNoetic
+  // rosInterface = make_unique<RosInterfaceNoetic>(nh, robotName);
 
-  // comput path -----------------------------------------
-  tasks->computePathShotcrete();
+  // Init class for Tasks
+  unique_ptr<TaskShotcrete> task = nullptr;
+  task = make_unique<TaskShotcrete>(nh, rosFreq);
 
-  //init shotcrete
-  bool valid = tasks->initShotcrete();
-  // tasks->goHome();
+  // Compute path
+  task->computePath();
 
+  // Init task
+  valid = task->initialize(robotName);
   if (valid) {
-    cout << "Iniitalization shotcrete  ok" << endl;
+    cout << "Iniitalization shotcrete ok" << endl;
   } else {
-    cout << "Iniitalization shotcrete  failed" << endl;
+    cout << "Iniitalization shotcrete failed" << endl;
     return 0;
   }
 
-  // go first position
-  valid = tasks->goFirstPosition();
+  // Go working position
+  valid = task->goWorkingPosition();
   if (valid) {
-    cout << "We are in the first position" << endl;
+    cout << "Robot in working position" << endl;
   } else {
-    cout << "failed to go into first position" << endl;
+    cout << "Failed to go into working position" << endl;
     return 0;
   }
 
-  // tasks->goHome();
-  // tasks->goFirstPosition();
-
-  // Do shotcrete
-  valid = tasks->DoShotcrete();
+  // Do task
+  valid = task->execute();
   if (valid) {
-    cout << "shotcrete Done" << endl;
+    cout << "Task Done" << endl;
   } else {
-    cout << "failed to perform shotcrete, go to home" << endl;
-    valid = tasks->goHome();
+    cout << "Task Failed : go to homing position" << endl;
+    valid = task->goHomingPosition();
 
     return 0;
   }

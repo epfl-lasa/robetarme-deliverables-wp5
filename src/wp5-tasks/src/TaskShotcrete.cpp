@@ -29,6 +29,4 @@ bool TaskShotcrete::goWorkingPosition() {
   return true;
 }
 
-void TaskShotcrete::setRoboticArm(vector<double> desiredJoint) { cout << "setRoboticArm()" << endl; }
-
 void TaskShotcrete::setHomingPosition(vector<double> desiredJoint) { cout << "setHomingPosition()" << endl; }

@@ -23,10 +23,8 @@ using namespace std;
 RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : nh_(n), robotName_(robotName) {
   // Load parameters from YAML file
   try {
-    std::string package_path = ros::package::getPath("wp5-ros-interface");
-
     // Load parameters from YAML file
-    std::string yamlPath = package_path + "/config/config.yaml";
+    string yamlPath = string(WP5_ROS_INTERFACE_DIR) + "/config/config.yaml";
     YAML::Node config = YAML::LoadFile(yamlPath);
 
     // Print information about robotName_ field
@@ -46,8 +44,7 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : n
     // ROS init
     subState_ = nh_.subscribe(actualStateTopic, 10, &RosInterfaceNoetic::jointStateCallback, this);
     pubState_ = nh_.advertise<std_msgs::Float64MultiArray>(commandStateTopic, 1000);
-  }
-  catch (const YAML::Exception& e) {
+  } catch (const YAML::Exception& e) {
     ROS_ERROR_STREAM("Error loading YAML file: " << e.what());
   }
 

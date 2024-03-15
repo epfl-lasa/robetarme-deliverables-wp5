@@ -2,8 +2,11 @@ cmake_minimum_required(VERSION 3.3)
 project(wp5_ros_interface VERSION 0.1.0 DESCRIPTION "Ros interface library to bind with specific ros version")
 
 add_compile_options(-O3)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
+
+# Save the path during compilation to solve inclusion problems with linked files
+add_definitions("-DWP5_ROS_INTERFACE_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp

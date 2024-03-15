@@ -14,7 +14,7 @@ public:
   Eigen::Vector3d pathPoint;
   DynamicalSystem(double freq);
   void parameterInitialization();
-  void set_path(std::vector<std::vector<double>> firstQuatPos);
+  void setPath(std::vector<std::vector<double>> firstQuatPos);
   void setCartPose(std::pair<Eigen::Quaterniond, Eigen::Vector3d>);
   std::pair<Eigen::Quaterniond, Eigen::Vector3d> getLinearDsOnePosition(std::vector<double> desiredQuatPos);
   std::pair<Eigen::Quaterniond, Eigen::Vector3d> getDsQuatSpeed();

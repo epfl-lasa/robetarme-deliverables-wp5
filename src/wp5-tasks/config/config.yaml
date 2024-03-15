@@ -1,7 +1,14 @@
+# Configuration to be used for the different tasks.
+# Possible robot_name to set, depending on the task :
+# - kuka_iiwa7
+# - ur5
+# - rokae_cr7
+# - cobod
+# Tristan Bonato : 2024-03-15
+
 shotcrete:
-  # robot_name: "Ur5"
-  robot_name: "Iiwa7"
+  robot_name: "kuka_iiwa7" # options: ur5 or kuka_iiw7
 surface_finishing:
-  robot_name: "Ur5"
+  robot_name: "ur5" # options: ur5 or kuka_iiw7
 metal_additive:
-  robot_name: "Cr7"
+  robot_name: "rokae_cr7" # options: rokae_cr7

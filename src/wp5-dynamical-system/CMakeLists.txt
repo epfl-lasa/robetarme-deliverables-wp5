@@ -9,7 +9,7 @@ add_definitions("-DWP5_DYNAMICAL_SYSTEM_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 # Add options
 add_compile_options(-O3)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
 
 # Find packages if any

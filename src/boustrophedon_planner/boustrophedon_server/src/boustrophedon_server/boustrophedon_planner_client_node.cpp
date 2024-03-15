@@ -1,14 +1,12 @@
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
-#include <ros/ros.h>
-#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
-
 #include <boustrophedon_msgs/ConvertPlanToPath.h>
 #include <boustrophedon_msgs/PlanMowingPathAction.h>
-
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/Path.h>
+#include <ros/ros.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z);
 
@@ -79,7 +77,7 @@ int main(int argc, char** argv) {
   ros::Subscriber init_pose =
       n.subscribe<geometry_msgs::PoseWithCovarianceStamped>("/initialpose", 1, initialPoseCallback);
 
-  ros::Rate loop_rate(10);
+  ros::Rate loopRate(10);
 
   ROS_INFO("Waiting for action server to start.");
   // wait for the action server to start
@@ -147,7 +145,7 @@ int main(int argc, char** argv) {
       ROS_INFO_STREAM("Time elapsed: " << elapsed_time.toSec() << " seconds");
     }
     ros::spinOnce();
-    loop_rate.sleep();
+    loopRate.sleep();
   }
 
   return 0;

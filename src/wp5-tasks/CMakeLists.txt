@@ -3,12 +3,11 @@ project(wp5_tasks VERSION 0.1.0 DESCRIPTION "Base task library decriving the tas
 
 # Add options
 add_compile_options(-O3)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
 
 # Save the path during compilation to solve inclusion problems with linked files
 add_definitions("-DWP5_TASKS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
-
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -38,28 +37,11 @@ include_directories(
   ${YAML_CPP_INCLUDE_DIR}
 )
 
-# Create a STATIC library instead of SHARED
-add_library(${PROJECT_NAME} STATIC
-  src/Tasks.cpp
-)
-
-# Set lib version
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    VERSION ${PROJECT_VERSION}
-)
-
-# Add include and src to include path to make includes easier in the code
-target_include_directories(${PROJECT_NAME} PRIVATE
-  Include
-  src
-  ${YAML_CPP_INCLUDE_DIR}
-)
-add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
-
 # Add the main_temp node
 add_executable(wp5_main_temp_node
   src/main_task.cpp
-  src/Tasks.cpp  # Include the source file of TargetExtraction if it's in a separate file
+  src/ITaskBase.cpp
+  src/TaskShotcrete.cpp
 )
 
 target_link_libraries(wp5_main_temp_node PRIVATE
@@ -67,5 +49,3 @@ target_link_libraries(wp5_main_temp_node PRIVATE
   ${control_libraries_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
 )
-
-export(PACKAGE ${PROJECT_NAME})

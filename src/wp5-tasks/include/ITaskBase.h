@@ -48,35 +48,37 @@ protected:
   bool goHomingPosition();
   bool goWorkingPosition();
 
-  void setRoboticArm(std::vector<double> desiredJoint);
   void setHomingPosition(std::vector<double> desiredJoint);
 
   // Create an unique pointer for the instance of RosInterfaceNoetic
   std::unique_ptr<RosInterfaceNoetic> rosInterface = nullptr;
 
 private:
-  ros::NodeHandle nh;
-  ros::Rate loopRate;
-  std::vector<double> homeJoint;
+  ros::NodeHandle nh_;
+  ros::Rate loopRate_;
+  std::vector<double> homeJoint_;
 
   //TODO(Tristan): delete rviz dependency
-  ros::Publisher pointPub;
-  ros::Publisher desiredVelFilteredPub;
+  ros::Publisher pointPub_;
+  ros::Publisher desiredVelFilteredPub_;
 
-  double rosFreq;
+  double rosFreq_;
 
   // Create an unique pointer for the instance of IRoboticArmBase
-  std::unique_ptr<IRoboticArmBase> roboticArm = nullptr;
+  std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;
+
+  // Create an unique pointer for the instance of RosInterfaceNoetic
+  std::unique_ptr<RosInterfaceNoetic> rosInterface_ = nullptr;
 
   // Create an unique pointer for the instance of DynamicalSystem
-  std::unique_ptr<DynamicalSystem> dynamicalSystem = nullptr;
+  std::unique_ptr<DynamicalSystem> dynamicalSystem_ = nullptr;
 
   // Create an unique pointer for the instance of TargetExtraction
-  std::unique_ptr<TargetExtraction> targetextraction = nullptr;
+  std::unique_ptr<TargetExtraction> targetExtraction_ = nullptr;
 
   // Create an unique pointer for the instance of PathPlanner
-  std::unique_ptr<PathPlanner> pathplanner = nullptr;
+  std::unique_ptr<PathPlanner> pathPlanner_ = nullptr;
 
   // Create an unique pointer for the instance of PathPlanner
-  std::unique_ptr<BoustrophedonServer> boustrophedonserver = nullptr;
+  std::unique_ptr<BoustrophedonServer> boustrophedonServer_ = nullptr;
 };

@@ -15,89 +15,92 @@ using namespace std;
 using namespace Eigen;
 
 //TODO(Tristant): RVIZ DEP
-void twistMarker(VectorXd twistDesiredEigen, Vector3d pos, ros::Publisher& marker_pub) {
-  std::array<double, 3> scale_linear = {0.01, 0.1, 0.5};
-  std::array<double, 4> color_linear = {1.0, 1.0, 0.0, 1.0}; // rgba, don't forget to set alpha
-  std::array<double, 3> color_angular = {1.0, 0.0, 0.0};     // rgb, alpha is taken from linear
+void twistMarker(VectorXd twistDesiredEigen, Vector3d pos, ros::Publisher& markerPub) {
+  std::array<double, 3> scaleLinear = {0.01, 0.1, 0.5};
+  std::array<double, 4> colorLinear = {1.0, 1.0, 0.0, 1.0}; // rgba, don't forget to set alpha
+  std::array<double, 3> colorAngular = {1.0, 0.0, 0.0};     // rgb, alpha is taken from linear
 
-  visualization_msgs::Marker linear_marker, angular_marker;
+  visualization_msgs::Marker linearMarker, angularMarker;
 
   // Linear twist arrow marker
-  linear_marker.header.frame_id = "iiwa_link_0"; // Set your desired frame ID
-  linear_marker.header.stamp = ros::Time();
-  linear_marker.ns = "twist";
-  linear_marker.id = 0;
-  linear_marker.type = visualization_msgs::Marker::ARROW;
-  linear_marker.action = visualization_msgs::Marker::ADD;
-  linear_marker.color.r = color_linear[0];
-  linear_marker.color.g = color_linear[1];
-  linear_marker.color.b = color_linear[2];
-  linear_marker.color.a = color_linear[3];
+  linearMarker.header.frame_id = "iiwa_link_0"; // Set your desired frame ID
+  linearMarker.header.stamp = ros::Time();
+  linearMarker.ns = "twist";
+  linearMarker.id = 0;
+  linearMarker.type = visualization_msgs::Marker::ARROW;
+  linearMarker.action = visualization_msgs::Marker::ADD;
+  linearMarker.color.r = colorLinear[0];
+  linearMarker.color.g = colorLinear[1];
+  linearMarker.color.b = colorLinear[2];
+  linearMarker.color.a = colorLinear[3];
 
-  linear_marker.scale.x = scale_linear[0]; // Arrow width
-  linear_marker.scale.y = scale_linear[1]; // Arrow head width
-  linear_marker.scale.z = scale_linear[2]; // Arrow head length
+  linearMarker.scale.x = scaleLinear[0]; // Arrow width
+  linearMarker.scale.y = scaleLinear[1]; // Arrow head width
+  linearMarker.scale.z = scaleLinear[2]; // Arrow head length
 
-  linear_marker.pose.orientation.w = 1.0;
-  linear_marker.pose.position.x = pos(0);
-  linear_marker.pose.position.y = pos(1);
-  linear_marker.pose.position.z = pos(2);
+  linearMarker.pose.orientation.w = 1.0;
+  linearMarker.pose.position.x = pos(0);
+  linearMarker.pose.position.y = pos(1);
+  linearMarker.pose.position.z = pos(2);
 
-  linear_marker.points.push_back(geometry_msgs::Point());
+  linearMarker.points.push_back(geometry_msgs::Point());
   geometry_msgs::Point point;
   point.x = twistDesiredEigen(3);
   point.y = twistDesiredEigen(4);
   point.z = twistDesiredEigen(5);
-  linear_marker.points.push_back(point);
+  linearMarker.points.push_back(point);
 
   // Angular twist arrow marker
-  angular_marker = linear_marker; // Copy settings from linear_marker
-  angular_marker.id += 1;
-  angular_marker.color.r = color_linear[0];
-  angular_marker.color.g = color_linear[1];
-  angular_marker.color.b = color_linear[2];
+  angularMarker = linearMarker; // Copy settings from linearMarker
+  angularMarker.id += 1;
+  angularMarker.color.r = colorAngular[0];
+  angularMarker.color.g = colorAngular[1];
+  angularMarker.color.b = colorAngular[2];
 
   // Angular twist direction
-  angular_marker.points.push_back(geometry_msgs::Point());
+  angularMarker.points.push_back(geometry_msgs::Point());
   point.x = twistDesiredEigen(0);
   point.y = twistDesiredEigen(1);
   point.z = twistDesiredEigen(2);
-  angular_marker.points.push_back(point);
+  angularMarker.points.push_back(point);
 
   // Publish markers
-  marker_pub.publish(linear_marker);
-  //marker_pub.publish(angular_marker);
+  markerPub.publish(linearMarker);
+  //markerPub.publish(angularMarker);
 }
 
 void publishPointStamped(const Vector3d& pathPoint, ros::Publisher pointPub) {
-  geometry_msgs::PointStamped point_stamped_msg;
-  point_stamped_msg.header.stamp = ros::Time::now();
-  point_stamped_msg.header.frame_id = "world"; // Set your desired frame_id
+  geometry_msgs::PointStamped pointStampedMsg;
+  pointStampedMsg.header.stamp = ros::Time::now();
+  pointStampedMsg.header.frame_id = "world"; // Set your desired frame_id
 
   // Assign Eigen vector components to PointStamped message
-  point_stamped_msg.point.x = pathPoint(0);
-  point_stamped_msg.point.y = pathPoint(1);
-  point_stamped_msg.point.z = pathPoint(2);
+  pointStampedMsg.point.x = pathPoint(0);
+  pointStampedMsg.point.y = pathPoint(1);
+  pointStampedMsg.point.z = pathPoint(2);
 
   // Publish the PointStamped message
-  pointPub.publish(point_stamped_msg);
+  pointPub.publish(pointStampedMsg);
 }
 
 //--------------------------------------------------------
 
-ITaskBase::ITaskBase(ros::NodeHandle& n, double freq) : nh(n), rosFreq(freq), loopRate(freq) {
+ITaskBase::ITaskBase(ros::NodeHandle& n, double freq) : nh_(n), rosFreq_(freq), loopRate_(freq) {
   // Create an unique pointer for the instance of DynamicalSystem
-  dynamicalSystem = make_unique<DynamicalSystem>(rosFreq);
+  dynamicalSystem_ = make_unique<DynamicalSystem>(rosFreq_);
+
   // Create an unique pointer for the instance of TargetExtraction
-  targetextraction = make_unique<TargetExtraction>(nh);
+  targetExtraction_ = make_unique<TargetExtraction>(nh_);
+
   // Create an unique pointer for the instance of PathPlanner
-  pathplanner = make_unique<PathPlanner>(nh);
+  pathPlanner_ = make_unique<PathPlanner>(nh_);
+
   // Create an unique pointer for the instance of PathPlanner
-  boustrophedonserver = make_unique<BoustrophedonServer>(nh);
+  boustrophedonServer_ = make_unique<BoustrophedonServer>(nh_);
 
   //TODO(Tristan): delete rviz dependency
-  pointPub = nh.advertise<geometry_msgs::PointStamped>("path_point", 1);
-  desiredVelFilteredPub = nh.advertise<visualization_msgs::Marker>("visualization_marker", 100);
+  pointPub_ = nh_.advertise<geometry_msgs::PointStamped>("path_point", 1);
+  desiredVelFilteredPub_ = nh_.advertise<visualization_msgs::Marker>("visualization_marker", 100);
   //------------------------------
 }
 
@@ -105,22 +108,22 @@ bool ITaskBase::initialize(std::string robotName) {
   cout << "initialization shotcrete ..." << endl;
 
   if (robotName == "Ur5") {
-    roboticArm = make_unique<RoboticArmUr5>();
-    if (roboticArm) {
+    roboticArm_ = make_unique<RoboticArmUr5>();
+    if (roboticArm_) {
       cout << "----------------------Ur5 chosen and well initializate----------------------------------" << endl;
       checkInit = true;
-      homeJoint = roboticArm->originalHomeJoint;
+      homeJoint_ = roboticArm_->originalHomeJoint;
     } else {
-      cout << "Error: roboticArm is null." << endl;
+      cout << "Error: roboticArm_ is null." << endl;
     }
   } else if (robotName == "Iiwa7") {
-    roboticArm = make_unique<RoboticArmIiwa7>();
-    if (roboticArm) {
+    roboticArm_ = make_unique<RoboticArmIiwa7>();
+    if (roboticArm_) {
       cout << "----------------------Iiwa7 chosen and well initializate----------------------------------" << endl;
       checkInit = true;
-      homeJoint = roboticArm->originalHomeJoint;
+      homeJoint_ = roboticArm_->originalHomeJoint;
     } else {
-      cout << "Error: roboticArm is null." << endl;
+      cout << "Error: roboticArm_ is null." << endl;
     }
   } else {
     cout << "Please define a valid robot to perform shotcrete" << endl;
@@ -133,44 +136,44 @@ bool ITaskBase::computePath() {
 
   // extract polygons for boustrophedon
   // WARNING: need the position of the target from Optitrack to continue
-  vector<Vector3d> polygons_positions = targetextraction->get_polygons();
-  Quaterniond quatTarget = targetextraction->get_quat_target();
-  Vector3d posTarget = targetextraction->get_pos_target();
-  targetextraction->see_target();
+  vector<Vector3d> polygonsPositions = targetExtraction_->getPolygons();
+  Quaterniond quatTarget = targetExtraction_->getQuatTarget();
+  Vector3d posTarget = targetExtraction_->getPosTarget();
+  targetExtraction_->seeTarget();
 
   // initialization
-  pathplanner->setTarget(quatTarget, posTarget, polygons_positions);
-  double optimum_radius = pathplanner->getOptimumRadius();
+  pathPlanner_->setTarget(quatTarget, posTarget, polygonsPositions);
+  double optimumRadius = pathPlanner_->getOptimumRadius();
 
-  boustrophedonserver->setOptimumRad(optimum_radius);
+  boustrophedonServer_->setOptimumRad(optimumRadius);
   // wait for the action server to startnew_rad
 
   cout << "Waiting for action server to start." << endl;
-  boustrophedonserver->initRosLaunch();
+  boustrophedonServer_->initRosLaunch();
 
   cout << "Action server started" << endl;
 
   boustrophedon_msgs::PlanMowingPathGoal goal;
-  goal = pathplanner->ComputeGoal();
-  boustrophedonserver->polygon_pub.publish(goal.property);
+  goal = pathPlanner_->ComputeGoal();
+  boustrophedonServer_->polygonPub.publish(goal.property);
 
   cout << "Waiting for goal" << endl;
 
   nav_msgs::Path path;
-  nav_msgs::Path path_transformed;
+  nav_msgs::Path pathTransformed;
 
   while (ros::ok() && !checkPath) {
     ros::Time start_time = ros::Time::now();
-    pathplanner->publishInitialPose();
-    goal.robot_position = pathplanner->getInitialPose();
-    boustrophedonserver->start_pub.publish(goal.robot_position);
-    boustrophedonserver->client.sendGoal(goal);
+    pathPlanner_->publishInitialPose();
+    goal.robot_position = pathPlanner_->getInitialPose();
+    boustrophedonServer_->startPub.publish(goal.robot_position);
+    boustrophedonServer_->client.sendGoal(goal);
     ROS_INFO_STREAM("Sending goal");
 
     // wait for the action to return
-    bool finished_before_timeout = boustrophedonserver->client.waitForResult(ros::Duration(30.0));
-    actionlib::SimpleClientGoalState state = boustrophedonserver->client.getState();
-    boustrophedon_msgs::PlanMowingPathResultConstPtr result = boustrophedonserver->client.getResult();
+    bool finishedBeforeTimeout = boustrophedonServer_->client.waitForResult(ros::Duration(30.0));
+    actionlib::SimpleClientGoalState state = boustrophedonServer_->client.getState();
+    boustrophedon_msgs::PlanMowingPathResultConstPtr result = boustrophedonServer_->client.getResult();
     if (result->plan.points.size() < 1) {
       ROS_INFO("Action did not finish before the time out.");
     } else {
@@ -179,24 +182,24 @@ bool ITaskBase::computePath() {
       cout << "Result with : " << result->plan.points.size() << endl;
 
       if (result->plan.points.size() > 2) {
-        pathplanner->convertStripingPlanToPath(result->plan, path);
+        pathPlanner_->convertStripingPlanToPath(result->plan, path);
 
-        path_transformed = pathplanner->get_transformed_path(path);
+        pathTransformed = pathPlanner_->getTransformedPath(path);
 
-        vector<vector<double>> vectorPathTransformed = pathplanner->convertPathPlanToVectorVector(path_transformed);
+        vector<vector<double>> vectorPathTransformed = pathPlanner_->convertPathPlanToVectorVector(pathTransformed);
 
         vector<double> firstQuatPos = vectorPathTransformed[0];
 
-        dynamicalSystem->set_path(vectorPathTransformed);
+        dynamicalSystem_->setPath(vectorPathTransformed);
 
-        boustrophedonserver->path_pub.publish(path_transformed);
+        boustrophedonServer_->pathPub.publish(pathTransformed);
 
-        boustrophedonserver->closeRosLaunch();
+        boustrophedonServer_->closeRosLaunch();
         checkPath = true;
       }
     }
     ros::spinOnce();
-    loopRate.sleep();
+    loopRate_.sleep();
   }
   cout << "path well compute" << endl;
   return checkPath;
@@ -204,31 +207,31 @@ bool ITaskBase::computePath() {
 
 bool ITaskBase::goWorkingPosition() {
 
-  vector<double> firstQuatPos = dynamicalSystem->getFirstQuatPos();
+  vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
 
   cout << "Go to first position :" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6] << endl;
 
   while (ros::ok() && !checkWorkingPosition) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface->receive_state();
+    stateJoints = rosInterface_->receiveState();
     vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm->getFK(actualJoint);
+    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
-    dynamicalSystem->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->getLinearDsOnePosition(firstQuatPos);
-    checkWorkingPosition = dynamicalSystem->checkLinearDs;
+    dynamicalSystem_->setCartPose(pairActualQuatPos);
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
+    checkWorkingPosition = dynamicalSystem_->checkLinearDs;
 
-    VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
 
-    vector<double> desiredJoint = roboticArm->low_level_controller(stateJoints, twistDesiredEigen);
-    rosInterface->send_state(desiredJoint);
+    vector<double> desiredJoint = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
+    rosInterface_->sendState(desiredJoint);
 
     ros::spinOnce();
-    loopRate.sleep();
+    loopRate_.sleep();
 
     //TODO(Tristan): delete rviz dependency
-    twistMarker(twistDesiredEigen, pairActualQuatPos.second, desiredVelFilteredPub);
+    twistMarker(twistDesiredEigen, pairActualQuatPos.second, desiredVelFilteredPub_);
   }
   return checkWorkingPosition;
 }
@@ -239,32 +242,33 @@ bool ITaskBase::execute() {
   while (ros::ok() && !checkFinish) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface->receive_state();
+    stateJoints = rosInterface_->receiveState();
     vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm->getFK(actualJoint);
+    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
-    dynamicalSystem->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->get_DS_quat_speed();
+    dynamicalSystem_->setCartPose(pairActualQuatPos);
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
 
-    checkFinish = dynamicalSystem->finish;
+    checkFinish = dynamicalSystem_->finish;
 
-    VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-    vector<double> desiredJointSpeed = roboticArm->low_level_controller(stateJoints, twistDesiredEigen);
+    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
 
-    rosInterface->send_state(desiredJointSpeed);
+    rosInterface_->sendState(desiredJointSpeed);
 
     ros::spinOnce();
-    loopRate.sleep();
+    loopRate_.sleep();
   }
   return checkFinish;
 }
 
-void ITaskBase::setHomingPosition(vector<double> desiredJoint) { homeJoint = desiredJoint; }
+void ITaskBase::setHomingPosition(vector<double> desiredJoint) { homeJoint_ = desiredJoint; }
 
 bool ITaskBase::goHomingPosition() {
+  dynamicalSystem_->init = false;
   cout << "Go Home..." << endl;
   // get home position
-  pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm->getFK(homeJoint);
+  pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm_->getFK(homeJoint_);
   Quaterniond homeQuat = pairHomeQuatPos.first;
   Vector3d homePos = pairHomeQuatPos.second;
   vector<double> desiredQuatPos = {
@@ -273,22 +277,22 @@ bool ITaskBase::goHomingPosition() {
   while (ros::ok() && !checkHomingPosition) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface->receive_state();
+    stateJoints = rosInterface_->receiveState();
     vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm->getFK(actualJoint);
+    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
-    dynamicalSystem->setCartPose(pairActualQuatPos);
+    dynamicalSystem_->setCartPose(pairActualQuatPos);
 
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->getLinearDsOnePosition(desiredQuatPos);
-    checkHomingPosition = dynamicalSystem->checkLinearDs;
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(desiredQuatPos);
+    checkHomingPosition = dynamicalSystem_->checkLinearDs;
 
-    VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
 
-    vector<double> desiredJointSpeed = roboticArm->low_level_controller(stateJoints, twistDesiredEigen);
-    rosInterface->send_state(desiredJointSpeed);
+    vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
+    rosInterface_->sendState(desiredJointSpeed);
 
     ros::spinOnce();
-    loopRate.sleep();
+    loopRate_.sleep();
   }
 
   return checkHomingPosition;

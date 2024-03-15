@@ -19,12 +19,21 @@
 #include <dynamical_systems/DynamicalSystemFactory.hpp>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <robot_model/Model.hpp>
 #include <sstream>
-
-// #include <trac_ik/trac_ik.hpp>
+#include <string>
 #include <vector>
+
+enum RobotType : int8_t {
+  ROBOT_UNDEFINED = -1,
+  KUKA_IIWA7,
+  UR5,
+  ROKAE_CR7,
+  COBOD,
+  NB_ROBOTS // Keep at the end of enum => number of types
+};
 
 /**
  * @brief Mother class to create all the prototype functions needed in different robotic arms.
@@ -33,6 +42,9 @@
  */
 class IRoboticArmBase {
 public:
+  inline static const std::map<std::string, RobotType> robotTypes{
+      {"kuka_iiwa7", KUKA_IIWA7}, {"ur5", UR5}, {"rokae_cr7", ROKAE_CR7}, {"cobod", COBOD}};
+
   /**
      * @brief Default constructor for IRoboticArmBase.
      */
