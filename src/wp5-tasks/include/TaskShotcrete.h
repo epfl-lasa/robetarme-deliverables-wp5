@@ -27,7 +27,7 @@ public:
 
   void setHomingPosition(std::vector<double> desiredJoint);
 
-  bool checkInit = false;
+  bool checkInitialization = false;
   bool checkFinish = false;
   bool checkPath = false;
 

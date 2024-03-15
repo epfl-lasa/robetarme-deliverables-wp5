@@ -86,6 +86,17 @@ void publishPointStamped(const Vector3d& pathPoint, ros::Publisher pointPub) {
 //--------------------------------------------------------
 
 ITaskBase::ITaskBase(ros::NodeHandle& n, double freq) : nh_(n), rosFreq_(freq), loopRate_(freq) {
+  internalFSM_ = make_unique<msm::back::state_machine<TaskFSM>>();
+
+  // Initialize and test the FSM
+  internalFSM_->start();
+  internalFSM_->process_event(Start());
+  internalFSM_->process_event(Initialized());
+  internalFSM_->process_event(Start());
+  internalFSM_->process_event(Finished());
+  internalFSM_->process_event(Start());
+  internalFSM_->process_event(Stop());
+
   // Create an unique pointer for the instance of DynamicalSystem
   dynamicalSystem_ = make_unique<DynamicalSystem>(rosFreq_);
 
@@ -111,7 +122,7 @@ bool ITaskBase::initialize(std::string robotName) {
     roboticArm_ = make_unique<RoboticArmUr5>();
     if (roboticArm_) {
       cout << "----------------------Ur5 chosen and well initializate----------------------------------" << endl;
-      checkInit = true;
+      checkInitialization = true;
       homeJoint_ = roboticArm_->originalHomeJoint;
     } else {
       cout << "Error: roboticArm_ is null." << endl;
@@ -120,7 +131,7 @@ bool ITaskBase::initialize(std::string robotName) {
     roboticArm_ = make_unique<RoboticArmIiwa7>();
     if (roboticArm_) {
       cout << "----------------------Iiwa7 chosen and well initializate----------------------------------" << endl;
-      checkInit = true;
+      checkInitialization = true;
       homeJoint_ = roboticArm_->originalHomeJoint;
     } else {
       cout << "Error: roboticArm_ is null." << endl;
@@ -128,7 +139,7 @@ bool ITaskBase::initialize(std::string robotName) {
   } else {
     cout << "Please define a valid robot to perform shotcrete" << endl;
   }
-  return checkInit;
+  return checkInitialization;
 }
 
 bool ITaskBase::computePath() {

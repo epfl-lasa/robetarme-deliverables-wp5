@@ -14,6 +14,7 @@
 #include "PathPlanner.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
+#include "TaskFSM.h"
 
 enum TaskType : int8_t {
   TASK_UNDEFINED = -1,
@@ -31,7 +32,7 @@ public:
                                                                 {"sand_blasting", SAND_BLASTING},
                                                                 {"mam_rebars", MAM_REBARS}};
 
-  bool checkInit = false;
+  bool checkInitialization = false;
   bool checkFinish = false;
   bool checkPath = false;
 
@@ -63,6 +64,9 @@ private:
   ros::Publisher desiredVelFilteredPub_;
 
   double rosFreq_;
+
+  // Create an unique pointer for the instance of IRoboticArmBase
+  std::unique_ptr<msm::back::state_machine<TaskFSM>> internalFSM_ = nullptr;
 
   // Create an unique pointer for the instance of IRoboticArmBase
   std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;

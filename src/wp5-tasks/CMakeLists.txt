@@ -17,6 +17,7 @@ find_package(catkin REQUIRED COMPONENTS
   wp5_dynamical_system
 )
 
+find_package(Boost REQUIRED COMPONENTS system)
 find_package(control_libraries 7.3.0 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
@@ -34,6 +35,7 @@ catkin_package(
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
   ${YAML_CPP_INCLUDE_DIR}
 )
 
@@ -47,5 +49,6 @@ add_executable(wp5_main_temp_node
 target_link_libraries(wp5_main_temp_node PRIVATE
   ${catkin_LIBRARIES}
   ${control_libraries_LIBRARIES}
+  ${Boost_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
 )
