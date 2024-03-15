@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   roboticArm = make_unique<RoboticArmUr5>();
   // Create an unique pointer for the instance of RosInterfaceNoetic
   unique_ptr<RosInterfaceNoetic> rosInterface = nullptr;
-  rosInterface = make_unique<RosInterfaceNoetic>(nh,"Ur5");
+  rosInterface = make_unique<RosInterfaceNoetic>(nh, "Ur5");
   // Create an unique pointer for the instance of DynamicalSystem
   unique_ptr<DynamicalSystem> dynamicalSystem = nullptr;
   dynamicalSystem = make_unique<DynamicalSystem>(1 / deltaTime);
@@ -62,16 +62,16 @@ int main(int argc, char** argv) {
 
   // extract polygons for boustrophedon
   // WARNING: need the position of the target from Optitrack to continue
-  vector<Vector3d> polygons_positions = targetextraction->get_polygons();
-  Quaterniond quatTarget = targetextraction->get_quat_target();
-  Vector3d posTarget = targetextraction->get_pos_target();
-  targetextraction->see_target();
+  vector<Vector3d> polygons_positions = targetextraction->getPolygons();
+  Quaterniond quatTarget = targetextraction->getQuatTarget();
+  Vector3d posTarget = targetextraction->getPosTarget();
+  targetextraction->seeTarget();
 
   // initialization
   pathplanner->setTarget(quatTarget, posTarget, polygons_positions);
-  double optimum_radius = pathplanner->getOptimumRadius();
+  double optimumRadius = pathplanner->getOptimumRadius();
 
-  boustrophedonserver->setOptimumRad(optimum_radius);
+  boustrophedonserver->setOptimumRad(optimumRadius);
   // wait for the action server to startnew_rad
 
   cout << "Waiting for action server to start." << endl;
@@ -81,7 +81,7 @@ int main(int argc, char** argv) {
 
   boustrophedon_msgs::PlanMowingPathGoal goal;
   goal = pathplanner->ComputeGoal();
-  boustrophedonserver->polygon_pub.publish(goal.property);
+  boustrophedonserver->polygonPub.publish(goal.property);
 
   cout << "Waiting for goal" << endl;
 
@@ -92,7 +92,7 @@ int main(int argc, char** argv) {
     ros::Time start_time = ros::Time::now();
     pathplanner->publishInitialPose();
     goal.robot_position = pathplanner->getInitialPose();
-    boustrophedonserver->start_pub.publish(goal.robot_position);
+    boustrophedonserver->startPub.publish(goal.robot_position);
     boustrophedonserver->client.sendGoal(goal);
     ROS_INFO_STREAM("Sending goal");
 
@@ -110,7 +110,7 @@ int main(int argc, char** argv) {
       if (result->plan.points.size() > 2) {
         pathplanner->convertStripingPlanToPath(result->plan, path);
 
-        path_transformed = pathplanner->get_transformed_path(path);
+        path_transformed = pathplanner->getTransformedPath(path);
 
         vector<vector<double>> vectorPathTransformed = pathplanner->convertPathPlanToVectorVector(path_transformed);
 
@@ -118,7 +118,7 @@ int main(int argc, char** argv) {
 
         dynamicalSystem->set_path(vectorPathTransformed);
 
-        boustrophedonserver->path_pub.publish(path_transformed);
+        boustrophedonserver->pathPub.publish(path_transformed);
 
         boustrophedonserver->closeRosLaunch();
         break;
@@ -133,17 +133,17 @@ int main(int argc, char** argv) {
   while (ros::ok()) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface->receive_state();
+    stateJoints = rosInterface->receiveState();
     vector<double> actualJoint = get<0>(stateJoints);
     pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm->getFK(actualJoint);
 
     dynamicalSystem->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->get_DS_quat_speed();
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->getDsQuatSpeed();
 
     VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-    vector<double> desiredJointSpeed = roboticArm->getIDynamics(actualJoint, twistDesiredEigen);
+    vector<double> desiredJointSpeed = roboticArm->getInvertVelocities(actualJoint, twistDesiredEigen);
 
-    // rosInterface->send_state(desiredJointSpeed);
+    // rosInterface->sendState(desiredJointSpeed);
 
     //ros checkup
     publishPointStamped(dynamicalSystem->pathPoint, point_pub);

@@ -14,35 +14,28 @@ using namespace Eigen;
 
 // Constructor definition
 PathPlanner::PathPlanner(ros::NodeHandle& n) :
-    initialPosePub_(nh.advertise<geometry_msgs::PoseWithCovarianceStamped>("/initialpose", 10)) {
-
-  nh = n;
-  transformedPolygonPub = nh.advertise<geometry_msgs::PolygonStamped>("/flat_polygon", 1, true);
+    initialPosePub_(nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("/initialpose", 10)) {
+  nh_ = n;
+  transformedPolygonPub_ = nh_.advertise<geometry_msgs::PolygonStamped>("/flat_polygon", 1, true);
   string package_path = ros::package::getPath("wp5-planner-ros");
   // Load parameters from YAML file
   string yaml_path = package_path + "/config/config.yaml";
   YAML::Node config = YAML::LoadFile(yaml_path);
 
   // Access parameters from the YAML file
-  limit_cycle_radius = config["limit_cycle_radius"].as<double>();
-  toolOffsetFromTarget = config["toolOffsetFromTarget"].as<double>();
-  flow_radius = config["flow_radius"].as<double>();
-  sum_rad = flow_radius + limit_cycle_radius;
-
-  // FROM DS  -------------------------------------
-  // pub_desired_vel_filtered = n.advertise<geometry_msgs::Pose>("/passive_control/vel_quat", 1);
-  // point_pub = nh.advertise<geometry_msgs::PointStamped>("path_point", 1);
-  // sub_real_pose= nh.subscribe<geometry_msgs::Pose>(robot_name + "/ee_info/Pose" , 1000, &DynamicalSystem::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
+  limitCycleRadius_ = config["limitCycleRadius"].as<double>();
+  flowRadius_ = config["flowRadius"].as<double>();
+  sumRad = flowRadius_ + limitCycleRadius_;
 }
 
-void PathPlanner::setTarget(Quaterniond target_quat, Vector3d target_pos, vector<Vector3d> polygons_positions) {
-  targetQuat = target_quat;
-  targetPos = target_pos;
-  polygonsPositions = polygons_positions;
+void PathPlanner::setTarget(Quaterniond targetOrientation, Vector3d targetPosition, vector<Vector3d> polygonsPos) {
+  targetQuat = targetOrientation;
+  targetPos = targetPosition;
+  polygonsPositions_ = polygonsPos;
   optimization_parameter();
 }
 
-double PathPlanner::getOptimumRadius() { return optimum_radius; }
+double PathPlanner::getOptimumRadius() { return optimumRadius; }
 
 geometry_msgs::PoseStamped PathPlanner::getInitialPose() { return initialPose; }
 
@@ -64,7 +57,7 @@ void PathPlanner::scalePolygon(vector<Vector3d>& vertices) {
   //calculate the sacelfactor
   Vector3d diff = center - vertices[0];
   double d = diff.norm();
-  double scaleFactor = (d - optimum_radius * 0.8) / d;
+  double scaleFactor_ = (d - optimumRadius * 0.8) / d;
 
   // Translate the polygon to the origin
   for (auto& vertex : vertices) {
@@ -73,7 +66,7 @@ void PathPlanner::scalePolygon(vector<Vector3d>& vertices) {
 
   // Apply scaling factor to the vertices
   for (auto& vertex : vertices) {
-    vertex *= scaleFactor;
+    vertex *= scaleFactor_;
   }
 
   // Translate the polygon back to its original position
@@ -82,29 +75,29 @@ void PathPlanner::scalePolygon(vector<Vector3d>& vertices) {
   }
 }
 
-vector<Vector3d> PathPlanner::get_planner_points() {
+vector<Vector3d> PathPlanner::getPlannerPoints() {
 
   vector<Vector3d> rotated_points;
 
-  PathPlanner::scalePolygon(polygonsPositions);
+  PathPlanner::scalePolygon(polygonsPositions_);
 
   Affine3d transformation = Translation3d(targetPos(0), targetPos(1), targetPos(2)) * targetQuat.conjugate();
 
-  MatrixXd points_matrix(polygonsPositions.size(), 3);
-  for (size_t i = 0; i < polygonsPositions.size(); ++i) {
-    Vector3d rotated_point = transformation.inverse() * polygonsPositions[i];
+  MatrixXd points_matrix(polygonsPositions_.size(), 3);
+  for (size_t i = 0; i < polygonsPositions_.size(); ++i) {
+    Vector3d rotated_point = transformation.inverse() * polygonsPositions_[i];
     rotated_points.push_back(rotated_point);
   }
   return rotated_points;
 }
 
 boustrophedon_msgs::PlanMowingPathGoal PathPlanner::ComputeGoal() {
-  flatPolygons = get_planner_points();
+  flatPolygons_ = getPlannerPoints();
 
-  Vector3d p1 = flatPolygons[0];
-  Vector3d p2 = flatPolygons[1];
-  Vector3d p3 = flatPolygons[2];
-  Vector3d p4 = flatPolygons[3];
+  Vector3d p1 = flatPolygons_[0];
+  Vector3d p2 = flatPolygons_[1];
+  Vector3d p3 = flatPolygons_[2];
+  Vector3d p4 = flatPolygons_[3];
 
   //polygon for the server
   boustrophedon_msgs::PlanMowingPathGoal goal;
@@ -138,7 +131,7 @@ boustrophedon_msgs::PlanMowingPathGoal PathPlanner::ComputeGoal() {
 }
 
 double PathPlanner::find_height() {
-  if (polygonsPositions.empty()) {
+  if (polygonsPositions_.empty()) {
     // Handle the case when there are no points
     return 0.0;
   }
@@ -149,7 +142,7 @@ double PathPlanner::find_height() {
   vector<Vector3d> lowestZPoints;
   vector<Vector3d> highestZPoints;
 
-  for (const auto& point : polygonsPositions) {
+  for (const auto& point : polygonsPositions_) {
     if (point.z() > maxZ) {
       maxZ = point.z();
       highestZPoints.clear();
@@ -175,14 +168,14 @@ int PathPlanner::optimization_parameter() {
   double D = find_height();
 
   if (D == 0.0) {
-    optimum_radius = sum_rad;
+    optimumRadius = sumRad;
     return 0;
   }
-  double d = sum_rad;
+  double d = sumRad;
   double n = D / d;
   int roundedNumber = round(n) + 4;
   double r_new = D / roundedNumber;
-  optimum_radius = r_new;
+  optimumRadius = r_new;
   return 1;
 }
 
@@ -192,7 +185,7 @@ void PathPlanner::publishInitialPose() {
   int imax = 0;
   int i = 0;
 
-  vector<Vector3d> points = polygonsPositions;
+  vector<Vector3d> points = polygonsPositions_;
   for (const auto& point : points) {
     if (point.z() > maxZ) {
       maxZ = point.z();
@@ -202,9 +195,9 @@ void PathPlanner::publishInitialPose() {
     }
     i++;
   }
-  vector<Vector3d> flatPolygons = get_planner_points();
-  Vector3d pointInitial = flatPolygons[imax];
-  see_target_flat();
+  vector<Vector3d> flatPolygons_ = getPlannerPoints();
+  Vector3d pointInitial = flatPolygons_[imax];
+  seeTargetFlat();
   cout << points[imax] << endl;
   double delta = 0.1;
   // Create a publisher for the /initialpose topic
@@ -230,7 +223,7 @@ void PathPlanner::publishInitialPose() {
   initialPose.pose = initialPoseMsg.pose.pose;
 }
 
-nav_msgs::Path PathPlanner::get_transformed_path(const nav_msgs::Path& originalPath) {
+nav_msgs::Path PathPlanner::getTransformedPath(const nav_msgs::Path& originalPath) {
   nav_msgs::Path transformedPath;
   Affine3d transformation = Translation3d(targetPos(0), targetPos(1), targetPos(2)) * targetQuat.conjugate();
   ;
@@ -247,11 +240,6 @@ nav_msgs::Path PathPlanner::get_transformed_path(const nav_msgs::Path& originalP
 
     // Apply transformation
     Vector3d transformedPosition = transformation * originalPosition;
-    // cout << originalOrientation.w() << endl;
-
-    // Convert the rotation matrix to a quaternion before applying the rotation
-    // Quaterniond transformedOrientation(transformation.rotation());
-    // transformedOrientation = transformedOrientation * originalOrientation;
     Quaterniond transformedOrientation = targetQuat;
 
     // Convert back to geometry_msgs types
@@ -279,56 +267,38 @@ nav_msgs::Path PathPlanner::get_transformed_path(const nav_msgs::Path& originalP
   return transformedPath;
 }
 
-void PathPlanner::see_target_flat() {
+void PathPlanner::seeTargetFlat() {
   geometry_msgs::PolygonStamped visualpolygonTarget;
   visualpolygonTarget.header.frame_id = "base";
   visualpolygonTarget.header.stamp = ros::Time::now();
 
-  for (const auto& point : flatPolygons) {
+  for (const auto& point : flatPolygons_) {
     geometry_msgs::Point32 msg_point;
     msg_point.x = point.x();
     msg_point.y = point.y();
     msg_point.z = point.z();
     visualpolygonTarget.polygon.points.push_back(msg_point);
   }
-  transformedPolygonPub.publish(visualpolygonTarget);
+  transformedPolygonPub_.publish(visualpolygonTarget);
 }
 
-// void PathPlanner::set_strategique_position(){
-//     // Set values for a initial orientation
-//     vector<double> parameter_quat = {targetQuat.x(),targetQuat.y(),targetQuat.z(),targetQuat.w()};
-//     nh.setParam("/initialQuat", parameter_quat);
-
-//     Matrix3d rotationMatrix = targetQuat.toRotationMatrix();
-//     Vector3d firstPosEigen(firstPos[0],firstPos[1],firstPos[2]);
-
-//     Vector3d parameter_pos3f = firstPosEigen - toolOffsetFromTarget  *  rotationMatrix.col(2);
-
-//     vector<double> parameter_pos;
-//     parameter_pos.reserve(parameter_pos3f.size());  // Reserve space for efficiency
-//     for (int i = 0; i < parameter_pos3f.size(); ++i) {
-//         parameter_pos.push_back(static_cast<double>(parameter_pos3f[i]));
-//     }
-//     nh.setParam("/initialPos", parameter_pos);
-//     nh.setParam("/finalPos", parameter_pos);
-// }
 // server has a service to convert StripingPlan to Path, but all it does it call this method
-bool PathPlanner::convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& striping_plan,
+bool PathPlanner::convertStripingPlanToPath(const boustrophedon_msgs::StripingPlan& stripingPlan,
                                             nav_msgs::Path& path) {
-  path.header.frame_id = striping_plan.header.frame_id;
-  path.header.stamp = striping_plan.header.stamp;
+  path.header.frame_id = stripingPlan.header.frame_id;
+  path.header.stamp = stripingPlan.header.stamp;
 
   path.poses.clear();
-  for (size_t i = 0; i < striping_plan.points.size(); i++) {
+  for (size_t i = 0; i < stripingPlan.points.size(); i++) {
     geometry_msgs::PoseStamped pose;
-    pose.header.frame_id = striping_plan.header.frame_id;
-    pose.header.stamp = striping_plan.header.stamp;
-    pose.pose.position = striping_plan.points[i].point;
+    pose.header.frame_id = stripingPlan.header.frame_id;
+    pose.header.stamp = stripingPlan.header.stamp;
+    pose.pose.position = stripingPlan.points[i].point;
 
-    if (i < striping_plan.points.size() - 1) {
-      double dx = striping_plan.points[i + 1].point.x - striping_plan.points[i].point.x;
-      double dy = striping_plan.points[i + 1].point.y - striping_plan.points[i].point.y;
-      double dz = striping_plan.points[i + 1].point.z - striping_plan.points[i].point.z;
+    if (i < stripingPlan.points.size() - 1) {
+      double dx = stripingPlan.points[i + 1].point.x - stripingPlan.points[i].point.x;
+      double dy = stripingPlan.points[i + 1].point.y - stripingPlan.points[i].point.y;
+      double dz = stripingPlan.points[i + 1].point.z - stripingPlan.points[i].point.z;
 
       pose.pose.orientation = headingToQuaternion(dx, dy, dz);
     } else {
@@ -343,13 +313,13 @@ bool PathPlanner::convertStripingPlanToPath(const boustrophedon_msgs::StripingPl
 
   return true;
 }
-vector<vector<double>> PathPlanner::convertPathPlanToVectorVector(const nav_msgs::Path& input_path) {
+vector<vector<double>> PathPlanner::convertPathPlanToVectorVector(const nav_msgs::Path& inputPath) {
 
-  size_t size = input_path.poses.size();
+  size_t size = inputPath.poses.size();
   vector<vector<double>> path;
 
   for (size_t i = 0; i < size; i++) {
-    geometry_msgs::PoseStamped pose = input_path.poses[i];
+    geometry_msgs::PoseStamped pose = inputPath.poses[i];
     vector<double> quatPos;
 
     quatPos.push_back(pose.pose.orientation.x);
@@ -369,11 +339,11 @@ vector<vector<double>> PathPlanner::convertPathPlanToVectorVector(const nav_msgs
 
 geometry_msgs::Quaternion PathPlanner::headingToQuaternion(double x, double y, double z) {
   // get orientation from heading vector
-  const tf2::Vector3 heading_vector(x, y, z);
+  const tf2::Vector3 headingVector(x, y, z);
   const tf2::Vector3 origin(1, 0, 0);
 
-  const auto w = (origin.length() * heading_vector.length()) + tf2::tf2Dot(origin, heading_vector);
-  const tf2::Vector3 a = tf2::tf2Cross(origin, heading_vector);
+  const auto w = (origin.length() * headingVector.length()) + tf2::tf2Dot(origin, headingVector);
+  const tf2::Vector3 a = tf2::tf2Cross(origin, headingVector);
   tf2::Quaternion q(a.x(), a.y(), a.z(), w);
   q.normalize();
 

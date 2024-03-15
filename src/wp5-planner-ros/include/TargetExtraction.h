@@ -11,18 +11,18 @@
 class TargetExtraction {
 public:
   TargetExtraction(ros::NodeHandle& nh);
-  std::vector<Eigen::Vector3d> get_polygons();
-  Eigen::Quaterniond get_quat_target();
-  Eigen::Vector3d get_pos_target();
-  void CC_vrpn_target(const geometry_msgs::PoseStamped::ConstPtr msg);
-  void see_target();
+  std::vector<Eigen::Vector3d> getPolygons();
+  Eigen::Quaterniond getQuatTarget();
+  Eigen::Vector3d getPosTarget();
+  void CCVrpnTarget(const geometry_msgs::PoseStamped::ConstPtr msg);
+  void seeTarget();
 
 private:
-  bool targetReceived = false;
-  double height_target, width_target;
-  Eigen::Quaterniond targetQuat;
-  Eigen::Vector3d targetPos;
-  std::vector<Eigen::Vector3d> polygons_positions;
-  ros::Subscriber poseTargetSub;
-  ros::Publisher originalPolygonPub;
+  bool targetReceived_ = false;
+  double heightTarget_, widthTarget_;
+  Eigen::Quaterniond targetQuat_;
+  Eigen::Vector3d targetPos_;
+  std::vector<Eigen::Vector3d> polygonsPositions_;
+  ros::Subscriber poseTargetSub_;
+  ros::Publisher originalPolygonPub_;
 };

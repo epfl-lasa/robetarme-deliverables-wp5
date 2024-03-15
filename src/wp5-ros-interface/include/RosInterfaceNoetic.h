@@ -20,22 +20,22 @@
 
 class RosInterfaceNoetic {
 public:
-  explicit RosInterfaceNoetic(ros::NodeHandle& nh, std::string robotName);
+  explicit RosInterfaceNoetic(ros::NodeHandle& n, std::string robotName);
 
-  std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> receive_state();
-  void send_state(std::vector<double>& data);
+  std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> receiveState();
+  void sendState(std::vector<double>& data);
 
 private:
   void jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);
 
-  std::vector<double> jointsPosition;
-  std::vector<double> jointsSpeed;
-  std::vector<double> jointsTorque;
-  std::string robotName;
+  std::vector<double> jointsPosition_;
+  std::vector<double> jointsSpeed_;
+  std::vector<double> jointsTorque_;
+  std::string robotName_;
 
-  bool init_joint;
-  int nJoint;
+  bool initJoint_;
+  int nJoint_;
   ros::NodeHandle nh_;
-  ros::Subscriber sub_state_;
-  ros::Publisher pub_state_;
+  ros::Subscriber subState_;
+  ros::Publisher pubState_;
 };

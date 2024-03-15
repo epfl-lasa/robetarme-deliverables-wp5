@@ -11,9 +11,9 @@ public:
   void initRosLaunch();
   void closeRosLaunch();
   void setOptimumRad(double rad);
-  ros::Publisher polygon_pub;
-  ros::Publisher path_pub;
-  ros::Publisher start_pub;
+  ros::Publisher polygonPub;
+  ros::Publisher pathPub;
+  ros::Publisher startPub;
   actionlib::SimpleActionClient<boustrophedon_msgs::PlanMowingPathAction> client;
 
 private:

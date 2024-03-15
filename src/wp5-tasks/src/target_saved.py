@@ -17,7 +17,7 @@ def publish_pose():
     # Create a PoseStamped message
     pose_msg = PoseStamped()
     pose_msg.header.frame_id = "base"
-    pose_msg.pose.position.x = -0.061671819088715774     - 0.4
+    pose_msg.pose.position.x = -0.061671819088715774  
     pose_msg.pose.position.y = -1.2231335817673443
     pose_msg.pose.position.z = 0.6230377347931229    
     pose_msg.pose.orientation.x = 0.7107592148598265

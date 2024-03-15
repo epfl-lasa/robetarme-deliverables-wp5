@@ -1,22 +1,21 @@
 #ifndef SRC_BOUSTROPHEDON_PLANNER_SERVER_H
 #define SRC_BOUSTROPHEDON_PLANNER_SERVER_H
 
-#include <ros/ros.h>
 #include <actionlib/server/simple_action_server.h>
-#include <tf/transform_listener.h>
+#include <ros/ros.h>
 #include <tf/transform_datatypes.h>
+#include <tf/transform_listener.h>
 
-#include <boustrophedon_msgs/PlanMowingPathAction.h>
 #include <boustrophedon_msgs/ConvertPlanToPath.h>
+#include <boustrophedon_msgs/PlanMowingPathAction.h>
 #include <nav_msgs/Odometry.h>
 
 #include "boustrophedon_server/cgal_utils.h"
-#include "boustrophedon_server/striping_planner.h"
 #include "boustrophedon_server/outline_planner.h"
+#include "boustrophedon_server/striping_planner.h"
 #include "cellular_decomposition/polygon_decomposer.h"
 
-class BoustrophedonPlannerServer
-{
+class BoustrophedonPlannerServer {
 public:
   BoustrophedonPlannerServer();
 
@@ -29,8 +28,8 @@ private:
   ros::NodeHandle private_node_handle_;
   Server action_server_;
   ros::ServiceServer conversion_server_;
-  ros::Publisher initial_polygon_publisher_;
-  ros::Publisher preprocessed_polygon_publisher_;
+  ros::Publisher initial_polygonPublisher_;
+  ros::Publisher preprocessed_polygonPublisher_;
   ros::Publisher path_points_publisher_;
   ros::Publisher polygon_points_publisher_;
 
@@ -66,4 +65,4 @@ private:
   void publishPolygonPoints(const Polygon& poly) const;
 };
 
-#endif  // SRC_BOUSTROPHEDON_PLANNER_SERVER_H
+#endif // SRC_BOUSTROPHEDON_PLANNER_SERVER_H

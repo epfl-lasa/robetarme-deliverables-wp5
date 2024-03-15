@@ -98,7 +98,7 @@ public:
      * @param speedEigen Vector of twist desired.
      * @return Vector representing the joint torques required for the given joint positions and velocities.
      */
-  std::vector<double> getIDynamics(std::vector<double> vectJoint, Eigen::VectorXd speedEigen);
+  std::vector<double> getInvertVelocities(std::vector<double> vectJoint, Eigen::VectorXd speedEigen);
   /**
      * @brief Function for computing twist with dynamical system.
      *
@@ -114,7 +114,7 @@ public:
   //  *
   //  * @param data Tuple containing vectors of joint positions, joint velocities, and joint efforts.
   //  */
-  virtual std::vector<double> low_level_controller(
+  virtual std::vector<double> lowLevelController(
       std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data, Eigen::VectorXd& twist) = 0;
   std::vector<double> originalHomeJoint = {};
 
@@ -123,18 +123,18 @@ protected:
      * @brief Initialization function for inverse kinematics.
      */
   // Protected members
-  std::string robotName = "";
-  std::vector<std::string> jointNames;
-  std::string baseLink = "";
-  std::string tipLink = "";
-  std::string tipJoint = "";
-  std::string referenceFrame = "";
-  std::string pathUrdf = "";
-  std::unique_ptr<robot_model::Model> model;
+  std::string robotName_ = "";
+  std::vector<std::string> jointNames_;
+  std::string baseLink_ = "";
+  std::string tipLink_ = "";
+  std::string tipJoint_ = "";
+  std::string referenceFrame_ = "";
+  std::string pathUrdf_ = "";
+  std::unique_ptr<robot_model::Model> model_;
 
-  std::string paramURDF = "";
-  int nJoint = 0;
-  struct robot_model::InverseKinematicsParameters paramsIK;
+  std::string paramURDFnJoint_ = "";
+  int nJoint_ = 0;
+  struct robot_model::InverseKinematicsParameters paramsIK_ = {};
 
   // ik -----------------
 
