@@ -1,14 +1,17 @@
 Ur5:
   joint_topic: "/ur5/joint_states"
   joint_command: "/ur5/joint_group_vel_controller/command"
+  ft_topic: ""
   number_joint: 6
 
 Iiwa7:
   joint_topic: "/iiwa/joint_states"
   joint_command: "/iiwa/TorqueController/command"
+  ft_topic: ""
   number_joint: 7
 
 Cobod:
   joint_topic: "/cobod/joint_states"
   joint_command: "/cobod/joint_group_vel_controller/command"
+  ft_topic: ""
   number_joint: 5

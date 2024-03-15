@@ -12,6 +12,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <geometry_msgs/WrenchStamped.h>
 #include <ros/package.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
@@ -27,15 +28,19 @@ public:
 
 private:
   void jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);
-
+  void FTCallback(const geometry_msgs::WrenchStamped::ConstPtr& msg);
   std::vector<double> jointsPosition_;
   std::vector<double> jointsSpeed_;
   std::vector<double> jointsTorque_;
+  std::vector<double> torqueSensor_;    // Update the torque ve
+  std::vector<double> forceSensor_;
   std::string robotName_;
 
   bool initJoint_;
+  bool initFTsensor_;
   int nJoint_;
   ros::NodeHandle nh_;
+  ros::Subscriber subFTsensor_;
   ros::Subscriber subState_;
   ros::Publisher pubState_;
 };

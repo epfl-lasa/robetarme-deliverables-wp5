@@ -34,6 +34,7 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : n
 
     // Attempt to access the "njoint" field within the robot
     nJoint_ = robotNode["number_joint"].as<int>();
+    string FTTopic = robotNode["ft_topic"].as<string>();
     string actualStateTopic = robotNode["joint_topic"].as<string>();
     string commandStateTopic = robotNode["joint_command"].as<string>();
 
@@ -44,6 +45,7 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : n
     initJoint_ = false;
 
     // ROS init
+    subFTsensor_ = nh_.subscribe(FTTopic, 10, &RosInterfaceNoetic::FTCallback, this);
     subState_ = nh_.subscribe(actualStateTopic, 10, &RosInterfaceNoetic::jointStateCallback, this);
     pubState_ = nh_.advertise<std_msgs::Float64MultiArray>(commandStateTopic, 1000);
   }
@@ -80,6 +82,17 @@ void RosInterfaceNoetic::jointStateCallback(const sensor_msgs::JointState::Const
 
   } else {
     ROS_WARN("Received joint positions are empty.");
+  }
+}
+
+void RosInterfaceNoetic::FTCallback(const geometry_msgs::WrenchStamped::ConstPtr& msg) {
+  if (msg->wrench.force.x != 0.0 || msg->wrench.force.y != 0.0 || msg->wrench.force.z != 0.0) {
+    forceSensor_ = {msg->wrench.force.x, msg->wrench.force.y, msg->wrench.force.z};     // Update the force vector
+    torqueSensor_ = {msg->wrench.torque.x, msg->wrench.torque.y, msg->wrench.torque.z}; // Update the torque vector
+    initFTsensor_ = true;
+
+  } else {
+    ROS_WARN("Received ftsensor data is empty.");
   }
 }
 
