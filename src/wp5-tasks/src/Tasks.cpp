@@ -31,7 +31,7 @@ void twistMarker(VectorXd twistDesiredEigen, Vector3d pos, ros::Publisher& marke
   linear_marker.color.a = 1.0; // Don't forget to set the alpha!
 
   linear_marker.scale.x = 0.01; // Arrow width
-  linear_marker.scale.y = 0.1; // Arrow head width
+  linear_marker.scale.y = 0.1;  // Arrow head width
   linear_marker.scale.z = 0.5;  // Arrow head length
 
   linear_marker.pose.orientation.w = 1.0;
@@ -79,7 +79,6 @@ void publishPointStamped(const Vector3d& pathPoint, ros::Publisher pointPub) {
   // Publish the PointStamped message
   pointPub.publish(point_stamped_msg);
 }
-
 
 //--------------------------------------------------------
 
@@ -212,7 +211,10 @@ bool Tasks::goFirstPosition() {
 
   vector<double> firstQuatPos = dynamicalSystem->getFirstQuatPos();
 
-  cout << "Go to first position :" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6] << endl;
+  cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
+       << endl;
+
+  dynamicalSystem->init = false;
 
   while (ros::ok() && !checkFirstPosition) {
     // set and get desired speed
@@ -233,15 +235,15 @@ bool Tasks::goFirstPosition() {
     ros::spinOnce();
     loop_rate.sleep();
 
-        //TODO: delet rviz dependency
+    //TODO: delet rviz dependency
     twistMarker(twistDesiredEigen, pairActualQuatPos.second, pub_desired_vel_filtered);
-
   }
   return checkFirstPosition;
 }
 
 bool Tasks::DoShotcrete() {
   cout << "preforming shotcrete ..." << endl;
+  dynamicalSystem->init = false;
 
   while (ros::ok() && !checkFinish) {
     // set and get desired speed
@@ -251,7 +253,7 @@ bool Tasks::DoShotcrete() {
     pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm->getFK(actualJoint);
 
     dynamicalSystem->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->get_DS_quat_speed();
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->getDsQuatSpeed();
 
     checkFinish = dynamicalSystem->finish;
 
@@ -269,6 +271,7 @@ bool Tasks::DoShotcrete() {
 void Tasks::setHome(vector<double> desiredJoint) { homeJoint = desiredJoint; }
 
 bool Tasks::goHome() {
+  dynamicalSystem->init = false;
   cout << "Go Home..." << endl;
   // get home position
   pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm->getFK(homeJoint);
@@ -290,7 +293,6 @@ bool Tasks::goHome() {
     checkGoHome = dynamicalSystem->checkLinearDs;
 
     VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
 
     vector<double> desiredJointSpeed = roboticArm->low_level_controller(stateJoints, twistDesiredEigen);
     rosInterface->send_state(desiredJointSpeed);

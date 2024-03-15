@@ -9,17 +9,17 @@ using namespace Eigen;
 
 DynamicalSystem::DynamicalSystem(double freq) {
   fs = freq;
-  parameter_initialization();
+  parameterInitialization();
 }
 
-void DynamicalSystem::parameter_initialization() {
+void DynamicalSystem::parameterInitialization() {
   velocityLimit = 1.5;
   // Load parameters from YAML file
   string yaml_path = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/config.yaml";
   YAML::Node config = YAML::LoadFile(yaml_path);
 
   // Access parameters from the YAML file
-  CycleRadiusLC = config["limit_cycle_radius"].as<double>();
+  CycleRadiusLC = config["limitCycleRadius"].as<double>();
   CycleSpeedLC = config["limit_cycle_speed"].as<double>();
   linearVelExpected = config["linear_speed"].as<double>();
   ConvergenceRateLC = config["conv_rate"].as<double>();
@@ -46,11 +46,11 @@ void DynamicalSystem::set_path(vector<vector<double>> pathInput) {
   desiredOriVelocityFiltered_(3) = firstQuatPos[3];
 }
 
-void DynamicalSystem::set_limitCycle_speed_conv(double angSpeed, double conv) {
+void DynamicalSystem::setLimitCycleSpeedConv(double angSpeed, double conv) {
   ConvergenceRateLC = conv;
   CycleSpeedLC = angSpeed;
 }
-void DynamicalSystem::set_limitCycle_radius(double rad) { CycleRadiusLC = rad; }
+void DynamicalSystem::setLimitCycleRadius(double rad) { CycleRadiusLC = rad; }
 
 void DynamicalSystem::setCartPose(pair<Quaterniond, Vector3d> pairQuatPos) {
 
@@ -93,9 +93,6 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   dVel(1) = dy * scaleVel;
   dVel(2) = dz * scaleVel;
 
-  double dt = 1 / fs;
-  // cerr << "error" << (sqrt((pathPoint - realPosOffset).norm())) << endl;
-
   if (sqrt((pathPoint - realPosOffset).norm()) <= toleranceToNextPoint) {
     dVel(0) = 0;
     dVel(1) = 0;
@@ -113,7 +110,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   return make_pair(desiredQuat, dVel);
 }
 
-pair<Quaterniond, Vector3d> DynamicalSystem::get_DS_quat_speed() {
+pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   double dx, dy, dz;
   double norm;
   double scaleVel;
@@ -178,7 +175,7 @@ void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d t
   for (int i = 0; i < 2; i++) a[i] = a[i] / norm_a;
 
   Vector3d velocity;
-  Vector3d pos_eig;
+  Vector3d posEig;
 
   //--- trans real ori to rotation matrix
   Quaterniond new_quat;
@@ -193,26 +190,26 @@ void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d t
 
   pos = pos - target_pose_cricleDS;
   for (size_t i = 0; i < 3; i++) {
-    pos_eig(i) = pos(i);
+    posEig(i) = pos(i);
   }
-  pos_eig = rotMat.transpose() * pos_eig;
-  for (int i = 0; i < 2; i++) pos_eig(i) = a[i] * pos_eig(i);
+  posEig = rotMat.transpose() * posEig;
+  for (int i = 0; i < 2; i++) posEig(i) = a[i] * posEig(i);
 
   double x_vel, y_vel, z_vel, R, T, cricle_plane_error;
 
   x_vel = 0;
   y_vel = 0;
-  z_vel = -ConvergenceRateLC * pos_eig(2);
+  z_vel = -ConvergenceRateLC * posEig(2);
 
-  R = sqrt(pos_eig(0) * pos_eig(0) + pos_eig(1) * pos_eig(1));
-  T = atan2(pos_eig(1), pos_eig(0));
+  R = sqrt(posEig(0) * posEig(0) + posEig(1) * posEig(1));
+  T = atan2(posEig(1), posEig(0));
 
   double Rdot = -ConvergenceRateLC * (R - CycleRadiusLC);
   double Tdot = CycleSpeedLC;
 
   x_vel = Rdot * cos(T) - R * Tdot * sin(T);
   y_vel = Rdot * sin(T) + R * Tdot * cos(T);
-  cricle_plane_error = pos_eig(2);
+  cricle_plane_error = posEig(2);
 
   velocity(0) = x_vel;
   velocity(1) = y_vel;
@@ -225,6 +222,6 @@ void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d t
   }
 }
 
-void DynamicalSystem::set_linear_speed(double speed) { linearVelExpected = speed; }
-void DynamicalSystem::set_tolerance_next_point(double tol) { toleranceToNextPoint = tol; }
-void DynamicalSystem::restart_path() { iFollow = 0; }
+void DynamicalSystem::setLinearSpeed(double speed) { linearVelExpected = speed; }
+void DynamicalSystem::setToleranceNextPoint(double tol) { toleranceToNextPoint = tol; }
+void DynamicalSystem::restartPath() { iFollow = 0; }

@@ -50,7 +50,7 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   feedback_state = state_representation::CartesianState(robotName, referenceFrame);
   JointState = state_representation::JointState(robotName, jointNames);
 
-  parameters.emplace_back(make_shared_parameter("linear_principle_damping", 100.0));
+  parameters.emplace_back(make_shared_parameter("linear_principle_damping", 500.0));
   parameters.emplace_back(make_shared_parameter("linear_orthogonal_damping", 100.0));
   parameters.emplace_back(make_shared_parameter("angular_stiffness", 100.0));
   parameters.emplace_back(make_shared_parameter("angular_damping", 100.0));

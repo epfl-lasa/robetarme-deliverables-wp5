@@ -44,7 +44,7 @@ int main(int argc, char** argv) {
   roboticArm = make_unique<RoboticArmUr5>();
   // Create an unique pointer for the instance of RosInterfaceNoetic
   unique_ptr<RosInterfaceNoetic> rosInterface = nullptr;
-  rosInterface = make_unique<RosInterfaceNoetic>(nh,"Ur5");
+  rosInterface = make_unique<RosInterfaceNoetic>(nh, "Ur5");
   // Create an unique pointer for the instance of DynamicalSystem
   unique_ptr<DynamicalSystem> dynamicalSystem = nullptr;
   dynamicalSystem = make_unique<DynamicalSystem>(1 / deltaTime);
@@ -138,7 +138,7 @@ int main(int argc, char** argv) {
     pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm->getFK(actualJoint);
 
     dynamicalSystem->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->get_DS_quat_speed();
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem->getDsQuatSpeed();
 
     VectorXd twistDesiredEigen = roboticArm->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
     vector<double> desiredJointSpeed = roboticArm->getIDynamics(actualJoint, twistDesiredEigen);

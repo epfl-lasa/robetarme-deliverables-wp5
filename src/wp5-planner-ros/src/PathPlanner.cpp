@@ -24,10 +24,9 @@ PathPlanner::PathPlanner(ros::NodeHandle& n) :
   YAML::Node config = YAML::LoadFile(yaml_path);
 
   // Access parameters from the YAML file
-  limit_cycle_radius = config["limit_cycle_radius"].as<double>();
-  toolOffsetFromTarget = config["toolOffsetFromTarget"].as<double>();
-  flow_radius = config["flow_radius"].as<double>();
-  sum_rad = flow_radius + limit_cycle_radius;
+  limitCycleRadius = config["limitCycleRadius"].as<double>();
+  flowRadius = config["flowRadius"].as<double>();
+  sum_rad = flowRadius + limitCycleRadius;
 
   // FROM DS  -------------------------------------
   // pub_desired_vel_filtered = n.advertise<geometry_msgs::Pose>("/passive_control/vel_quat", 1);

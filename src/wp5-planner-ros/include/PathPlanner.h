@@ -41,7 +41,7 @@ public:
   geometry_msgs::Quaternion headingToQuaternion(double x, double y, double z);
 
 private:
-  double flow_radius, limit_cycle_radius, toolOffsetFromTarget, scaleFactor;
+  double flowRadius, limitCycleRadius, toolOffsetFromTarget, scaleFactor;
   ros::NodeHandle nh;
   ros::Publisher initialPosePub_;
   ros::Publisher transformedPolygonPub;

@@ -13,17 +13,17 @@ public:
   bool checkLinearDs = false;
   Eigen::Vector3d pathPoint;
   DynamicalSystem(double freq);
-  void parameter_initialization();
+  void parameterInitialization();
   void set_path(std::vector<std::vector<double>> firstQuatPos);
   void setCartPose(std::pair<Eigen::Quaterniond, Eigen::Vector3d>);
   std::pair<Eigen::Quaterniond, Eigen::Vector3d> getLinearDsOnePosition(std::vector<double> desiredQuatPos);
-  std::pair<Eigen::Quaterniond, Eigen::Vector3d> get_DS_quat_speed();
+  std::pair<Eigen::Quaterniond, Eigen::Vector3d> getDsQuatSpeed();
   void updateLimitCycle3DPosVel_with2DLC(Eigen::Vector3d pose, Eigen::Vector3d target_pose_cricleDS);
-  void set_linear_speed(double speed);
-  void set_limitCycle_speed_conv(double angSpeed, double conv);
-  void set_limitCycle_radius(double rad);
-  void set_tolerance_next_point(double tol);
-  void restart_path();
+  void setLinearSpeed(double speed);
+  void setLimitCycleSpeedConv(double angSpeed, double conv);
+  void setLimitCycleRadius(double rad);
+  void setToleranceNextPoint(double tol);
+  void restartPath();
   std::vector<double> getFirstQuatPos();
 
 private:
