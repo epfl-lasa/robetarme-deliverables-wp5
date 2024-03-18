@@ -9,6 +9,7 @@
 #include <boost/msm/front/functor_row.hpp>
 #include <boost/msm/front/state_machine_def.hpp>
 
+#include "ITaskBase.h"
 #include "TaskFSM.h"
 
 namespace msm = boost::msm;
@@ -20,14 +21,14 @@ class Recover {};
 class SafetyTrigger {};
 
 // front-end: define the FSM structure
-class TaskSafeFSM : public msmf::state_machine_def<TaskSafeFSM> {
+class TaskSafeFSM : public msmf::state_machine_def<TaskSafeFSM, TaskFSM> {
 private:
   // List of FSM states
   class Running : public TaskFSM {};
   class SafetyIssue;
 
 public:
-  TaskSafeFSM(){};
+  TaskSafeFSM(std::shared_ptr<ITaskBase> task){};
 
   typedef msm::back::state_machine<TaskFSM> Task;
   typedef Task initial_state;

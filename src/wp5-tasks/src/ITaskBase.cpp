@@ -86,19 +86,6 @@ void publishPointStamped(const Vector3d& pathPoint, ros::Publisher pointPub) {
 //--------------------------------------------------------
 
 ITaskBase::ITaskBase(ros::NodeHandle& n, double freq) : nh_(n), rosFreq_(freq), loopRate_(freq) {
-  internalFSM_ = make_unique<msm::back::state_machine<TaskSafeFSM>>();
-
-  // Initialize and test the FSM
-  internalFSM_->start();
-  internalFSM_->process_event(Initialized());
-  internalFSM_->process_event(PathComputed());
-  internalFSM_->process_event(SafetyTrigger());
-  internalFSM_->process_event(Recover());
-  internalFSM_->process_event(Start());
-  internalFSM_->process_event(Finished());
-  internalFSM_->process_event(SafetyTrigger());
-  internalFSM_->process_event(Recover());
-
   // Create an unique pointer for the instance of DynamicalSystem
   dynamicalSystem_ = make_unique<DynamicalSystem>(rosFreq_);
 

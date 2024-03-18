@@ -14,6 +14,7 @@
 #include "RoboticArmUr5.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
+#include "TaskSafeFSM.h"
 #include "TaskShotcrete.h"
 
 using namespace std;
@@ -38,40 +39,53 @@ int main(int argc, char** argv) {
   // rosInterface = make_unique<RosInterfaceNoetic>(nh, robotName);
 
   // Init class for Tasks
-  unique_ptr<TaskShotcrete> task = nullptr;
-  task = make_unique<TaskShotcrete>(nh, rosFreq);
+  shared_ptr<TaskShotcrete> task = make_shared<TaskShotcrete>(nh, rosFreq);
 
   // Compute path
-  task->computePath();
+  // task->computePath();
 
-  // Init task
-  valid = task->initialize(robotName);
-  if (valid) {
-    cout << "Iniitalization shotcrete ok" << endl;
-  } else {
-    cout << "Iniitalization shotcrete failed" << endl;
-    return 0;
-  }
+  std::unique_ptr<msm::back::state_machine<TaskSafeFSM>> internalFSM_ =
+      make_unique<msm::back::state_machine<TaskSafeFSM>>(task);
 
-  // Go working position
-  valid = task->goWorkingPosition();
-  if (valid) {
-    cout << "Robot in working position" << endl;
-  } else {
-    cout << "Failed to go into working position" << endl;
-    return 0;
-  }
+  // Initialize and test the FSM
+  internalFSM_->start();
+  internalFSM_->process_event(Initialized());
+  internalFSM_->process_event(PathComputed());
+  internalFSM_->process_event(SafetyTrigger());
+  internalFSM_->process_event(Recover());
+  internalFSM_->process_event(Start());
+  internalFSM_->process_event(Finished());
+  internalFSM_->process_event(SafetyTrigger());
+  internalFSM_->process_event(Recover());
 
-  // Do task
-  valid = task->execute();
-  if (valid) {
-    cout << "Task Done" << endl;
-  } else {
-    cout << "Task Failed : go to homing position" << endl;
-    valid = task->goHomingPosition();
+  // // Init task
+  // valid = task->initialize(robotName);
+  // if (valid) {
+  //   cout << "Iniitalization shotcrete ok" << endl;
+  // } else {
+  //   cout << "Iniitalization shotcrete failed" << endl;
+  //   return 0;
+  // }
 
-    return 0;
-  }
+  // // Go working position
+  // valid = task->goWorkingPosition();
+  // if (valid) {
+  //   cout << "Robot in working position" << endl;
+  // } else {
+  //   cout << "Failed to go into working position" << endl;
+  //   return 0;
+  // }
+
+  // // Do task
+  // valid = task->execute();
+  // if (valid) {
+  //   cout << "Task Done" << endl;
+  // } else {
+  //   cout << "Task Failed : go to homing position" << endl;
+  //   valid = task->goHomingPosition();
+
+  //   return 0;
+  // }
 
   return 0;
 }

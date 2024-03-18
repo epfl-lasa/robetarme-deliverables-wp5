@@ -6,6 +6,8 @@
 
 #include <ros/ros.h>
 
+#include <memory>
+
 #include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"

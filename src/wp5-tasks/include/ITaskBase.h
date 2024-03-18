@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 
 #include <map>
+#include <memory>
 
 #include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
@@ -14,7 +15,6 @@
 #include "PathPlanner.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
-#include "TaskSafeFSM.h"
 
 enum TaskType : int8_t {
   TASK_UNDEFINED = -1,
@@ -25,7 +25,7 @@ enum TaskType : int8_t {
   NB_TASKS // Keep at the end of enum => number of types
 };
 
-class ITaskBase : public TaskFSM {
+class ITaskBase {
 public:
   inline static const std::map<std::string, TaskType> taskTypes{{"shotcrete", SHOTCRETE},
                                                                 {"surface_finishing", SURFACE_FINISHING},
@@ -64,9 +64,6 @@ private:
   ros::Publisher desiredVelFilteredPub_;
 
   double rosFreq_;
-
-  // Create an unique pointer for the instance of IRoboticArmBase
-  std::unique_ptr<msm::back::state_machine<TaskSafeFSM>> internalFSM_ = nullptr;
 
   // Create an unique pointer for the instance of IRoboticArmBase
   std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;

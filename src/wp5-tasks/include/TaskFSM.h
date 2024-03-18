@@ -9,6 +9,13 @@
 #include <boost/msm/front/functor_row.hpp>
 #include <boost/msm/front/state_machine_def.hpp>
 
+// Other
+#include <iostream>
+#include <memory>
+#include <string>
+
+#include "ITaskBase.h"
+
 namespace msm = boost::msm;
 namespace msmf = msm::front;
 namespace mp11 = boost::mp11;
@@ -22,6 +29,8 @@ class Finished {};
 // front-end: define the FSM structure
 class TaskFSM : public msmf::state_machine_def<TaskFSM> {
 private:
+  std::shared_ptr<ITaskBase> currentTask_;
+
   // List of FSM states
   class Initializing;
   class ComputingPath;
@@ -29,7 +38,7 @@ private:
   class Executing;
 
 public:
-  TaskFSM(){};
+  TaskFSM(std::shared_ptr<ITaskBase> task) : currentTask_(task){};
 
   typedef Initializing initial_state;
 
