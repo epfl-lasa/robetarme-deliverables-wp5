@@ -11,8 +11,7 @@
 #pragma once
 
 #include "IRoboticArmBase.h"
-#include "controllers/ControllerFactory.hpp"
-#include "state_representation/parameters/ParameterInterface.hpp"
+
 
 /**
  * @brief Child class to create all the prototype fonctions needed in the different robotic arms.
@@ -25,8 +24,11 @@ public:
   std::vector<double>
   lowLevelController(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
                      Eigen::VectorXd& twist) override;
-std::vector<double> lowLevelControllerSF(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
-                                                     Eigen::VectorXd& desiredTwist, double test, std::vector<double> wrenchFromSensor) override;
+  std::vector<double>
+  lowLevelControllerSF(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
+                       Eigen::VectorXd& desiredTwist,
+                       double test,
+                       std::vector<double> wrenchFromSensor) override;
 
 protected:
   state_representation::CartesianState commandState_;

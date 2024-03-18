@@ -10,9 +10,7 @@
  */
 
 #include "RoboticArmIiwa7.h"
-#include "state_representation/space/cartesian/CartesianState.hpp"
-#include "state_representation/space/joint/JointState.hpp"
-#include <yaml-cpp/yaml.h>
+
 
 using namespace controllers;
 using namespace state_representation;
@@ -39,7 +37,6 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   double tolerance = 1e-3;
   unsigned int maxNumberOfIterations = 1000;
   paramsIK_ = {damp, alpha, gamma, margin, tolerance, maxNumberOfIterations};
-  Eigen::ArrayXd torques(nJoint_);
 
   commandState_ = state_representation::CartesianState(robotName_, referenceFrame_);
   feedbackState_ = state_representation::CartesianState(robotName_, referenceFrame_);
@@ -121,8 +118,9 @@ vector<double> RoboticArmIiwa7::lowLevelControllerSF(tuple<vector<double>, vecto
   auto commandOutput = twistCtrl_->compute_command(commandState_, feedbackState_);
   Eigen::VectorXd wrench = commandOutput.get_wrench();
 
+  //TODO: change with good equyation for force
   //  wrench(2) =   wrench(2) + goalwrench[2] - (wrenchFromSensor[2]- biaswrench[2]);
-  wrench(2) = wrench(2) + test;
+  wrench(1) = wrench(1) + test;
 
   Eigen::VectorXd EigentorqueCommand = jacobianObject.transpose() * wrench;
 

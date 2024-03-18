@@ -14,7 +14,10 @@
 // clang-format off
 #include <pinocchio/fwd.hpp>
 // clang-format on
-
+#include "controllers/ControllerFactory.hpp"
+#include "state_representation/parameters/ParameterInterface.hpp"
+#include "state_representation/space/cartesian/CartesianState.hpp"
+#include "state_representation/space/joint/JointState.hpp"
 #include <cmath>
 #include <dynamical_systems/DynamicalSystemFactory.hpp>
 #include <eigen3/Eigen/Dense>
@@ -22,6 +25,7 @@
 #include <memory>
 #include <robot_model/Model.hpp>
 #include <sstream>
+#include <yaml-cpp/yaml.h>
 
 // #include <trac_ik/trac_ik.hpp>
 #include <vector>
@@ -119,8 +123,9 @@ public:
                      Eigen::VectorXd& twist) = 0;
   virtual std::vector<double>
   lowLevelControllerSF(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,
-                     Eigen::VectorXd& twist, double ,std::vector<double>) = 0;
-
+                       Eigen::VectorXd& twist,
+                       double,
+                       std::vector<double>) = 0;
 
   std::vector<double> originalHomeJoint = {};
 

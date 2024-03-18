@@ -47,11 +47,15 @@ vector<double> RoboticArmUr5::lowLevelController(tuple<vector<double>, vector<do
 }
 
 //TODO:implement sfcontroller
-vector<double> RoboticArmUr5::lowLevelControllerSF(
-    std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
-    Eigen::VectorXd& desiredTwist,
-    double test,
-    std::vector<double> wrenchFromSensor) {
-  vector<double> fake = {};
-  return fake;
+vector<double> RoboticArmUr5::lowLevelControllerSF(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,
+                                                   Eigen::VectorXd& desiredTwist,
+                                                   double test,
+                                                   vector<double> wrenchFromSensor) {
+
+  vector<double>& retrievedPosition = get<0>(stateJoints);
+  Eigen::VectorXd twist = desiredTwist;
+  twist(1) = twist(1) + test;
+
+  vector<double> desiredJointSpeed = IRoboticArmBase::getInvertVelocities(retrievedPosition, twist);
+  return desiredJointSpeed;
 }

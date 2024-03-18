@@ -19,7 +19,6 @@
  */
 class RoboticArmUr5 : public IRoboticArmBase {
 public:
-  // TODO: implement all the public members, accessible from everyone owning a class object
   explicit RoboticArmUr5();
   std::vector<double>
   lowLevelController(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
@@ -31,7 +30,10 @@ public:
                        std::vector<double> wrenchFromSensor) override;
 
 protected:
-  // TODO: implement all the protected members, accessible from its own and herited classes
+  state_representation::CartesianState commandState_;
+  state_representation::CartesianState feedbackState_;
+  std::shared_ptr<controllers::IController<state_representation::CartesianState>> twistCtrl_;
+  std::list<std::shared_ptr<state_representation::ParameterInterface>> parameters_;
 
 private:
 };

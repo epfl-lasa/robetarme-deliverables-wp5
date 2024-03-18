@@ -102,6 +102,7 @@ void RosInterfaceNoetic::FTCallback(const geometry_msgs::WrenchStamped::ConstPtr
 
   } else {
     ROS_WARN("Received ftsensor data is empty.");
+    wrenchSensor_ = {0,0,0,0,0,0};
   }
 }
 
@@ -113,6 +114,11 @@ tuple<vector<double>, vector<double>, vector<double>> RosInterfaceNoetic::receiv
       make_tuple(jointsPosition_, jointsSpeed_, jointsTorque_);
 
   return stateJoints;
+}
+
+vector<double> RosInterfaceNoetic::receiveWrench() {
+  ros::spinOnce();
+  return wrenchSensor_;
 }
 
 void RosInterfaceNoetic::sendState(vector<double>& data) {

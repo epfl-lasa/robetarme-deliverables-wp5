@@ -20,7 +20,7 @@ public:
   bool goHome();
   void setHome(std::vector<double> desiredJoint);
   bool TestSF();
-
+  void set_bias();
 
   bool checkInit = false;
   bool checkFirstPosition = false;
@@ -32,6 +32,7 @@ private:
   ros::NodeHandle nh_;
   ros::Rate loopRate_;
   std::vector<double> homeJoint_;
+  std::vector<double> biasWrench_;
 
   //TODO: delet rviz dependency
   ros::Publisher pointPub_;
@@ -50,4 +51,6 @@ private:
   std::unique_ptr<PathPlanner> pathplanner_ = nullptr;
   // Create an unique pointer for the instance of PathPlanner
   std::unique_ptr<BoustrophedonServer> boustrophedonserver_ = nullptr;
+
+  std::vector<double> decoderWrench();
 };

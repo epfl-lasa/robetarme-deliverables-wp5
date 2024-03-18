@@ -37,12 +37,16 @@ int main(int argc, char** argv) {
   // tasks->goHome();
 
   if (valid) {
-    cout << "Iniitalization shotcrete  ok" << endl;
+    cout << "Iniitalization surface_finishing  ok" << endl;
   } else {
-    cout << "Iniitalization shotcrete  failed" << endl;
+    cout << "Iniitalization surface_finishing  failed" << endl;
     return 0;
   }
 
+  tasks->set_bias();
+  
+
+  tasks->TestSF();
 
   return 0;
 }

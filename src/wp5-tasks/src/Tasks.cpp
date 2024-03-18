@@ -66,7 +66,6 @@ void twistMarker(VectorXd twistDesiredEigen, Vector3d pos, ros::Publisher& marke
 }
 
 void publishPointStamped(const Vector3d& pathPoint, ros::Publisher pointPub) {
-
   geometry_msgs::PointStamped point_stamped_msg;
   point_stamped_msg.header.stamp = ros::Time::now();
   point_stamped_msg.header.frame_id = "world"; // Set your desired frame_id
@@ -99,15 +98,12 @@ Tasks::Tasks(ros::NodeHandle& n, double freq) : nh_(n), rosFreq_(freq), loopRate
 }
 
 bool Tasks::initTask(string taskName) {
-  cout << "initialization shotcrete ..." << endl;
+  cout << "initialization " << taskName << " ..." << endl;
   string yamlPath = string(WP5_TASKS_DIR) + "/config/config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file
   string robotName = config[taskName]["robot_name"].as<string>();
-
-  // Create an unique pointer for the instance of RosInterfaceNoetic
-  rosInterface_ = make_unique<RosInterfaceNoetic>(nh_, robotName);
 
   if (robotName == "Ur5") {
     roboticArm_ = make_unique<RoboticArmUr5>();
@@ -130,6 +126,8 @@ bool Tasks::initTask(string taskName) {
   } else {
     cout << "Please define a valid robot to perform shotcrete" << endl;
   }
+  // Create an unique pointer for the instance of RosInterfaceNoetic
+  rosInterface_ = make_unique<RosInterfaceNoetic>(nh_, robotName);
   return checkInit;
 }
 
@@ -208,7 +206,6 @@ bool Tasks::computePathShotcrete() {
 }
 
 bool Tasks::goFirstPosition() {
-
   vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
 
   cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
@@ -304,10 +301,54 @@ bool Tasks::goHome() {
   return checkGoHome;
 }
 
+void Tasks::set_bias() {
+  int meanNum = 300;
+  std::cout << "Recording F/T sensor bias. Please do not touch the robot for 3 seconds..." << std::endl;
+
+  // Initialize wrenchActual and receivedWrench vectors
+  std::vector<double> wrenchActual(6, 0.0); // Assuming 6 elements in the wrench
+  std::vector<double> receivedWrench = rosInterface_->receiveWrench();
+
+  int meanIteration = 0;
+  while (ros::ok() && (meanIteration < meanNum)) {
+    for (size_t i = 0; i < wrenchActual.size(); ++i) {
+      wrenchActual[i] += receivedWrench[i] / meanNum;
+    }
+    meanIteration += 1;
+  }
+
+  // Assign the calculated bias to biasWrench_
+  biasWrench_ = wrenchActual;
+
+  // Print all elements of the biasWrench_ vector
+  std::cout << "Recording F/T sensor bias done:" << std::endl;
+  for (size_t i = 0; i < biasWrench_.size(); ++i) {
+    std::cout << "biasWrench_[" << i << "] = " << biasWrench_[i] << std::endl;
+  }
+}
+
+vector<double> Tasks::decoderWrench() {
+  vector<double> receivedWrench = rosInterface_->receiveWrench();
+
+  for (size_t i = 0; i < receivedWrench.size(); ++i) {
+    receivedWrench[i] -= biasWrench_[i];
+  }
+
+  vector<double> outputTwist(6, 0.0);
+  for (size_t i = 0; i < receivedWrench.size(); ++i) {
+    if (receivedWrench[i] > 5) {
+      outputTwist[i] = -0.15;
+    } else if (receivedWrench[i] < -5) {
+      outputTwist[i] = 0.15;
+    } else {
+      outputTwist[i] = 0;
+    }
+  }
+
+  return outputTwist;
+}
 bool Tasks::TestSF() {
-
   vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
-
   cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
        << endl;
 
@@ -325,11 +366,16 @@ bool Tasks::TestSF() {
     dynamicalSystem_->checkLinearDs;
 
     VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
     //TEST
+    vector<double> forceInput(6, 0.0);
+    forceInput = decoderWrench();
+    for (size_t i = 0; i < forceInput.size(); ++i) {
+      std::cout << "forceInput[" << i << "] = " << forceInput[i] << std::endl;
+    }
+
     vector<double> wrenchFromSensor = {};
     vector<double> desiredJoint =
-        roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, 10, wrenchFromSensor);
+        roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, forceInput[2], wrenchFromSensor);
     //--------
 
     rosInterface_->sendState(desiredJoint);
