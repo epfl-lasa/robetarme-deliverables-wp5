@@ -15,9 +15,6 @@ namespace mp11 = boost::mp11;
 using namespace std;
 using namespace msm::front;
 
-// TODO(lmunier) : Change for more privacy and safety
-static bool checkFSMInitialization_;
-
 // List of FSM events
 class Start {};
 class Stop {};
@@ -27,9 +24,6 @@ class Finished {};
 // front-end: define the FSM structure
 class TaskFSM : public msm::front::state_machine_def<TaskFSM> {
 private:
-public:
-  TaskFSM() { checkFSMInitialization_ = false; };
-
   // List of FSM states
   class Idle;
   class Initializing;
@@ -37,13 +31,23 @@ public:
   class Running;
   class Stopped;
 
+  bool checkFSMInitialization_ = false;
+
+public:
+  TaskFSM(){};
+
+  bool getCheckFSMInitialization() { return checkFSMInitialization_; }
+
+  void setCheckFSMInitialization(bool checkInit) { checkFSMInitialization_ = checkInit; }
+
   // Guard condition
   class isInitialized {
+
   public:
     template <class EVT, class FSM, class SourceState, class TargetState>
-    bool operator()(EVT const& evt, FSM&, SourceState&, TargetState&) {
+    bool operator()(EVT const& evt, FSM& fsm, SourceState&, TargetState&) {
       // return true if the system is initialized, false otherwise
-      return checkFSMInitialization_;
+      return fsm.getCheckFSMInitialization();
     }
   };
 
@@ -87,12 +91,12 @@ class TaskFSM::Initializing : public msm::front::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    checkFSMInitialization_ = true;
     std::cout << "Entering: Initializing" << std::endl;
   }
 
   template <class Event, class FSM>
   void on_exit(Event const& event, FSM& fsm) {
+    fsm.setCheckFSMInitialization(true);
     std::cout << "Leaving: Initializing" << std::endl;
   }
 };
