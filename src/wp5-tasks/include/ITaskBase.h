@@ -25,7 +25,7 @@ enum TaskType : int8_t {
   NB_TASKS // Keep at the end of enum => number of types
 };
 
-class ITaskBase {
+class ITaskBase : public TaskFSM {
 public:
   inline static const std::map<std::string, TaskType> taskTypes{{"shotcrete", SHOTCRETE},
                                                                 {"surface_finishing", SURFACE_FINISHING},
