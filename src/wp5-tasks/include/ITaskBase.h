@@ -14,7 +14,7 @@
 #include "PathPlanner.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
-#include "TaskFSM.h"
+#include "TaskSafeFSM.h"
 
 enum TaskType : int8_t {
   TASK_UNDEFINED = -1,
@@ -66,7 +66,7 @@ private:
   double rosFreq_;
 
   // Create an unique pointer for the instance of IRoboticArmBase
-  std::unique_ptr<msm::back::state_machine<TaskFSM>> internalFSM_ = nullptr;
+  std::unique_ptr<msm::back::state_machine<TaskSafeFSM>> internalFSM_ = nullptr;
 
   // Create an unique pointer for the instance of IRoboticArmBase
   std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;

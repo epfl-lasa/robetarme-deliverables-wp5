@@ -14,7 +14,7 @@ namespace msmf = msm::front;
 namespace mp11 = boost::mp11;
 
 // List of FSM events
-class Run {};
+class Start {};
 class Initialized {};
 class PathComputed {};
 class Finished {};
@@ -26,7 +26,7 @@ private:
   class Initializing;
   class ComputingPath;
   class Ready;
-  class Running;
+  class Executing;
 
 public:
   TaskFSM(){};
@@ -35,17 +35,17 @@ public:
 
   // Each row correspond to : Start, Event, Next, Action, Guard
   using transition_table = mp11::mp_list<
-      // Initializing --------------------------------------
+      // Initializing -----------------------------------------
       msmf::Row<Initializing, Initialized, ComputingPath, msmf::none, msmf::none>,
 
-      // ComputingPath -------------------------------------
+      // ComputingPath ----------------------------------------
       msmf::Row<ComputingPath, PathComputed, Ready, msmf::none, msmf::none>,
 
-      // Ready ---------------------------------------------
-      msmf::Row<Ready, Run, Running, msmf::none, msmf::none>,
+      // Ready ------------------------------------------------
+      msmf::Row<Ready, Start, Executing, msmf::none, msmf::none>,
 
-      // Running -------------------------------------------
-      msmf::Row<Running, Finished, Ready, msmf::none, msmf::none>>;
+      // Executing --------------------------------------------
+      msmf::Row<Executing, Finished, Ready, msmf::none, msmf::none>>;
 };
 
 // The list of FSM states
@@ -53,12 +53,12 @@ class TaskFSM::Initializing : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: Initializing" << std::endl;
+    std::cout << "Entering: TaskFSM - Initializing" << std::endl;
   }
 
   template <class Event, class FSM>
   void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: Initializing" << std::endl;
+    std::cout << "Leaving: TaskFSM - Initializing" << std::endl;
   }
 };
 
@@ -66,12 +66,12 @@ class TaskFSM::ComputingPath : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: ComputingPath" << std::endl;
+    std::cout << "Entering: TaskFSM - ComputingPath" << std::endl;
   }
 
   template <class Event, class FSM>
   void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: ComputingPath" << std::endl;
+    std::cout << "Leaving: TaskFSM - ComputingPath" << std::endl;
   }
 };
 
@@ -79,24 +79,24 @@ class TaskFSM::Ready : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: Ready" << std::endl;
+    std::cout << "Entering: TaskFSM - Ready" << std::endl;
   }
 
   template <class Event, class FSM>
   void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: Ready" << std::endl;
+    std::cout << "Leaving: TaskFSM - Ready" << std::endl;
   }
 };
 
-class TaskFSM::Running : public msmf::state<> {
+class TaskFSM::Executing : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: Running" << std::endl;
+    std::cout << "Entering: TaskFSM - Executing" << std::endl;
   }
 
   template <class Event, class FSM>
   void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: Running" << std::endl;
+    std::cout << "Leaving: TaskFSM - Executing" << std::endl;
   }
 };
