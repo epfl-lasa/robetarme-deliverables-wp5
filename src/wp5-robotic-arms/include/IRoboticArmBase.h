@@ -145,7 +145,9 @@ protected:
   std::string paramURDFnJoint_ = "";
   int nJoint_ = 0;
   struct robot_model::InverseKinematicsParameters paramsIK_ = {};
-
+  Eigen::VectorXd transformWrenchToBase(const Eigen::VectorXd& wrench_end_effector,
+                                        const Eigen::Vector3d& position_end_effector,
+                                        const Eigen::Quaterniond& orientation_end_effector_to_base);
   // ik -----------------
 
   // int rc = 0;

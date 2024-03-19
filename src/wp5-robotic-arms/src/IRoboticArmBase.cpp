@@ -177,6 +177,26 @@ Matrix<double, 4, 1> IRoboticArmBase::quaternionProduct(Matrix<double, 4, 1> q1,
   return q;
 }
 
+Eigen::VectorXd IRoboticArmBase::transformWrenchToBase(const Eigen::VectorXd& wrench_end_effector, const Eigen::Vector3d& position_end_effector, const Eigen::Quaterniond& orientation_end_effector_to_base) {
+    // Extract rotation quaternion from end effector to base transformation
+    Eigen::Matrix3d rotation_matrix = orientation_end_effector_to_base.toRotationMatrix();
+    // Extract force and torque from wrench
+    Eigen::Vector3d force_end_effector = wrench_end_effector.head<3>();
+    Eigen::Vector3d torque_end_effector = wrench_end_effector.tail<3>();
+    // Transform wrench to the base frame
+
+    Eigen::Vector3d force_base = rotation_matrix * force_end_effector;
+    Eigen::Vector3d torque_base = rotation_matrix * torque_end_effector;
+    // Calculate wrench position relative to the base
+    Eigen::Vector3d force_position_base = position_end_effector.cross(force_base);
+    Eigen::Vector3d torque_position_base = torque_base + position_end_effector.cross(force_base);
+    // Combine transformed force and torque into a single vector
+    Eigen::VectorXd wrench_base(6);
+    wrench_base << force_position_base(0),force_position_base(1),force_position_base(2), torque_position_base(0),torque_position_base(1),torque_position_base(2);
+
+
+    return wrench_base;
+}
 // function for the inverse kinematic  ------------------------------------------------------------------------
 
 // pair<int, vector<double>> IRoboticArmBase::getIK(vector<double> actualJoint, vector<double> vectorQuatPos ) {

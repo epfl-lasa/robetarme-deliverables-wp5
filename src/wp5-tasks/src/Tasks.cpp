@@ -331,23 +331,25 @@ void Tasks::set_bias() {
 
 Eigen::VectorXd Tasks::decoderWrench() {
   vector<double> receivedWrench = rosInterface_->receiveWrench();
+  Eigen::VectorXd outTwist(6);
   for (size_t i = 0; i < receivedWrench.size(); ++i) {
     receivedWrench[i] -= biasWrench_[i];
-    cout << "receivedWrench[i]:" << receivedWrench[i] << endl;
     if (receivedWrench[i] > 1) {
-      outputTwist_(i) = -receivedWrench[i] * 0.05;
-      if (outputTwist_(i) < -0.15) {
-        outputTwist_(i) = -0.15;
+      outTwist(i) = -receivedWrench[i] * 0.05;
+      if (outTwist(i) < -0.15) {
+        outTwist(i) = -0.15;
       }
     } else if (receivedWrench[i] < -1) {
-      outputTwist_(i) = receivedWrench[i] * 0.05;
-      if (outputTwist_(i) > 0.15) {
-        outputTwist_(i) = 0.15;
+      outTwist(i) = receivedWrench[i] * 0.05;
+      if (outTwist(i) > 0.15) {
+        outTwist(i) = 0.15;
       }
     } else {
-      outputTwist_(i) = 0;
+      outTwist(i) = 0;
     }
   }
+  double alpha = 0.25;
+  outputTwist_ = alpha *outputTwist_ + (1-alpha)* outTwist;
   return outputTwist_;
 }
 
