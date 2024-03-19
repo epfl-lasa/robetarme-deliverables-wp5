@@ -304,7 +304,7 @@ bool Tasks::goHome() {
 }
 
 void Tasks::set_bias() {
-  int meanNum = 300;
+  int meanNum = 500;
   std::cout << "Recording F/T sensor bias. Please do not touch the robot for 3 seconds..." << std::endl;
 
   // Initialize wrenchActual and receivedWrench vectors
@@ -334,13 +334,13 @@ Eigen::VectorXd Tasks::decoderWrench() {
   Eigen::VectorXd outTwist(6);
   for (size_t i = 0; i < receivedWrench.size(); ++i) {
     receivedWrench[i] -= biasWrench_[i];
-    if (receivedWrench[i] > 1) {
-      outTwist(i) = -receivedWrench[i] * 0.05;
+    if (receivedWrench[i] > 5) {
+      outTwist(i) = -receivedWrench[i] * 0.01;
       if (outTwist(i) < -0.15) {
         outTwist(i) = -0.15;
       }
-    } else if (receivedWrench[i] < -1) {
-      outTwist(i) = receivedWrench[i] * 0.05;
+    } else if (receivedWrench[i] < -5) {
+      outTwist(i) = receivedWrench[i] * 0.01;
       if (outTwist(i) > 0.15) {
         outTwist(i) = 0.15;
       }
@@ -349,7 +349,7 @@ Eigen::VectorXd Tasks::decoderWrench() {
     }
   }
   double alpha = 0.25;
-  outputTwist_ = alpha *outputTwist_ + (1-alpha)* outTwist;
+  outputTwist_ = alpha * outputTwist_ + (1 - alpha) * outTwist;
   return outputTwist_;
 }
 
