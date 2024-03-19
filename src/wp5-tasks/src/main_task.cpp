@@ -47,6 +47,12 @@ int main(int argc, char** argv) {
 
   // Initialize and test the FSM
   internalFSM_.start();
+  internalFSM_.process_event(PathComputed());
+  internalFSM_.process_event(ErrorTrigger());
+  internalFSM_.process_event(Start());
+  internalFSM_.process_event(Finished());
+  internalFSM_.process_event(ErrorAcknowledgement());
+  internalFSM_.process_event(Start());
 
   // // Init task
   // valid = task->initialize(robotName);

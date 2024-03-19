@@ -26,6 +26,9 @@ class Initialized {};
 class PathComputed {};
 class Finished {};
 
+class ErrorTrigger {};
+class ErrorAcknowledgement {};
+
 // front-end: define the FSM structure
 class TaskFSM : public msmf::state_machine_def<TaskFSM> {
 private:
@@ -39,7 +42,8 @@ private:
   class Exit;
 
   class Safe;
-  class Error;
+  class AllOk;
+  class ErrorMode;
 
 protected:
   std::shared_ptr<ITaskBase> currentTask_;
@@ -47,7 +51,7 @@ protected:
 public:
   TaskFSM(std::shared_ptr<ITaskBase> task) : currentTask_(task) { std::cout << "Inside TaskFSM : " << std::endl; };
 
-  typedef Initializing initial_state;
+  typedef mp11::mp_list<AllOk, Initializing> initial_state;
 
   // Each row correspond to : Start, Event, Next, Action, Guard
   using transition_table = mp11::mp_list<
@@ -61,7 +65,11 @@ public:
       msmf::Row<Ready, Start, AutoExecuting, msmf::none, msmf::none>,
 
       // AutoExecuting --------------------------------------------
-      msmf::Row<AutoExecuting, Finished, Ready, msmf::none, msmf::none>>;
+      msmf::Row<AutoExecuting, Finished, Ready, msmf::none, msmf::none>,
+
+      // Error ------------------------------------------------
+      msmf::Row<AllOk, ErrorTrigger, ErrorMode, msmf::none, msmf::none>,
+      msmf::Row<ErrorMode, ErrorAcknowledgement, AllOk, msmf::none, msmf::none>>;
 };
 
 typedef msm::back::state_machine<TaskFSM> taskFsm_;
@@ -177,15 +185,28 @@ public:
   }
 };
 
-class TaskFSM::Error : public msmf::state<> {
+class TaskFSM::AllOk : public msm::front::state<> {
 public:
   template <class Event, class FSM>
-  void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: TaskFSM - Error" << std::endl;
+  void on_entry(Event const&, FSM&) {
+    std::cout << "starting: AllOk" << std::endl;
   }
 
   template <class Event, class FSM>
-  void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: TaskFSM - Error" << std::endl;
+  void on_exit(Event const&, FSM&) {
+    std::cout << "finishing: AllOk" << std::endl;
+  }
+};
+
+class TaskFSM::ErrorMode : public msm::front::interrupt_state<ErrorAcknowledgement> {
+public:
+  template <class Event, class FSM>
+  void on_entry(Event const&, FSM&) {
+    std::cout << "starting: ErrorMode" << std::endl;
+  }
+
+  template <class Event, class FSM>
+  void on_exit(Event const&, FSM&) {
+    std::cout << "finishing: ErrorMode" << std::endl;
   }
 };

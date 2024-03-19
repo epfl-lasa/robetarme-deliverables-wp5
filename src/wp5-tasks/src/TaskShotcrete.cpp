@@ -42,7 +42,7 @@ bool TaskShotcrete::initialize(std::string robotName) {
   //   cout << "Please define a valid robot to perform shotcrete" << endl;
   // }
   // return checkInitialization;
-  ros::Duration(3).sleep();
+  ros::Duration(1).sleep();
   return true;
 }
 
@@ -72,7 +72,7 @@ bool TaskShotcrete::execute() {
 
   // return checkFinish;
 
-  ros::Duration(0.3).sleep();
+  ros::Duration(3).sleep();
   return true;
 }
 
