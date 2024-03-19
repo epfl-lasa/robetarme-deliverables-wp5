@@ -4,7 +4,10 @@
 #include <pinocchio/fwd.hpp>
 // clang-format on
 
+#include <geometry_msgs/Point.h>        //<----------to remove
+#include <geometry_msgs/PointStamped.h> //<----------to remove
 #include <ros/ros.h>
+#include <yaml-cpp/yaml.h>
 
 #include <map>
 #include <memory>
@@ -13,8 +16,11 @@
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"
 #include "PathPlanner.h"
+#include "RoboticArmIiwa7.h"
+#include "RoboticArmUr5.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
+#include "visualization_msgs/Marker.h"
 
 enum TaskType : int8_t {
   TASK_UNDEFINED = -1,
@@ -39,47 +45,27 @@ public:
   bool checkHomingPosition = false;
   bool checkWorkingPosition = false;
 
-  ITaskBase(ros::NodeHandle& n, double freq);
-  bool initialize(std::string robotName);
+  ITaskBase(ros::NodeHandle& nh, double freq);
+
+  virtual bool initialize(std::string robotName) = 0;
+  virtual bool computePath() = 0;
+  virtual bool execute() = 0;
+
+  virtual bool goHomingPosition() = 0;
+  virtual bool goWorkingPosition() = 0;
+
+  virtual void setHomingPosition(std::vector<double> desiredJoint) = 0;
 
 protected:
-  bool execute();
-  bool computePath();
-
-  bool goHomingPosition();
-  bool goWorkingPosition();
-
-  void setHomingPosition(std::vector<double> desiredJoint);
-
-  // Create an unique pointer for the instance of RosInterfaceNoetic
-  std::unique_ptr<RosInterfaceNoetic> rosInterface = nullptr;
-
-private:
   ros::NodeHandle nh_;
   ros::Rate loopRate_;
-  std::vector<double> homeJoint_;
-
-  //TODO(Tristan): delete rviz dependency
-  ros::Publisher pointPub_;
-  ros::Publisher desiredVelFilteredPub_;
 
   double rosFreq_;
+  std::vector<double> homeJoint_;
 
   // Create an unique pointer for the instance of IRoboticArmBase
   std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;
 
   // Create an unique pointer for the instance of RosInterfaceNoetic
   std::unique_ptr<RosInterfaceNoetic> rosInterface_ = nullptr;
-
-  // Create an unique pointer for the instance of DynamicalSystem
-  std::unique_ptr<DynamicalSystem> dynamicalSystem_ = nullptr;
-
-  // Create an unique pointer for the instance of TargetExtraction
-  std::unique_ptr<TargetExtraction> targetExtraction_ = nullptr;
-
-  // Create an unique pointer for the instance of PathPlanner
-  std::unique_ptr<PathPlanner> pathPlanner_ = nullptr;
-
-  // Create an unique pointer for the instance of PathPlanner
-  std::unique_ptr<BoustrophedonServer> boustrophedonServer_ = nullptr;
 };

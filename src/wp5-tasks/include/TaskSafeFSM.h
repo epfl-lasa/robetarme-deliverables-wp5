@@ -21,26 +21,28 @@ class Recover {};
 class SafetyTrigger {};
 
 // front-end: define the FSM structure
-class TaskSafeFSM : public msmf::state_machine_def<TaskSafeFSM, TaskFSM> {
+class TaskSafeFSM : public msmf::state_machine_def<TaskSafeFSM> {
 private:
   // List of FSM states
-  class Running : public TaskFSM {};
   class SafetyIssue;
 
 public:
-  TaskSafeFSM(std::shared_ptr<ITaskBase> task){};
+  TaskSafeFSM(int test) : task(test) { std::cout << "Inside TaskSafeFSM : " << test << std::endl; };
 
-  typedef msm::back::state_machine<TaskFSM> Task;
-  typedef Task initial_state;
+  typedef task_fsm_ initial_state;
 
-  // Each row correspond to : Start, Event, Next, Action, Guard
   using transition_table = mp11::mp_list<
-      // Task ----------------------------------------------
-      msmf::Row<Task, SafetyTrigger, SafetyIssue, msmf::none, msmf::none>,
+      // Running ----------------------------------------------
+      msmf::Row<task_fsm_, SafetyTrigger, SafetyIssue, msmf::none, msmf::none>,
 
       // SafetyIssue ------------------------------------------
-      msmf::Row<SafetyIssue, Recover, Task, msmf::none, msmf::none>>;
+      msmf::Row<SafetyIssue, Recover, task_fsm_, msmf::none, msmf::none>>;
+
+private:
+  task_fsm_ task;
 };
+
+typedef msm::back::state_machine<TaskSafeFSM> task_safe_fsm_;
 
 class TaskSafeFSM::SafetyIssue : public msmf::state<> {
 public:

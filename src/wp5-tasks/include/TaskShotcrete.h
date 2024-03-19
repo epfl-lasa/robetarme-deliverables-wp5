@@ -29,19 +29,6 @@ public:
 
   void setHomingPosition(std::vector<double> desiredJoint);
 
-  bool checkInitialization = false;
-  bool checkFinish = false;
-  bool checkPath = false;
-
-  bool checkHomingPosition = false;
-  bool checkWorkingPosition = false;
-
-  // Create an unique pointer for the instance of IRoboticArmBase
-  std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;
-
-  // Create an unique pointer for the instance of RosInterfaceNoetic
-  std::unique_ptr<RosInterfaceNoetic> rosInterface_ = nullptr;
-
 private:
   // Create an unique pointer for the instance of DynamicalSystem
   std::unique_ptr<DynamicalSystem> dynamicalSystem_ = nullptr;

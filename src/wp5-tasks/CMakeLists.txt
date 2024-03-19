@@ -52,3 +52,14 @@ target_link_libraries(wp5_main_temp_node PRIVATE
   ${Boost_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
 )
+
+# Test, to be removed
+add_executable(test_node
+  src/test.cpp
+)
+
+target_link_libraries(test_node PRIVATE
+  ${catkin_LIBRARIES}
+  ${Boost_LIBRARIES}
+)
+

@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="wp5_tasks" type="test_node"
+        name="test_node"
+        output="screen" />
+</launch>

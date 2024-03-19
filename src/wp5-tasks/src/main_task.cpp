@@ -14,7 +14,7 @@
 #include "RoboticArmUr5.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
-#include "TaskSafeFSM.h"
+#include "TaskFSM.h"
 #include "TaskShotcrete.h"
 
 using namespace std;
@@ -39,24 +39,14 @@ int main(int argc, char** argv) {
   // rosInterface = make_unique<RosInterfaceNoetic>(nh, robotName);
 
   // Init class for Tasks
-  shared_ptr<TaskShotcrete> task = make_shared<TaskShotcrete>(nh, rosFreq);
 
   // Compute path
   // task->computePath();
 
-  std::unique_ptr<msm::back::state_machine<TaskSafeFSM>> internalFSM_ =
-      make_unique<msm::back::state_machine<TaskSafeFSM>>(task);
+  taskFsm_ internalFSM_(make_shared<TaskShotcrete>(nh, rosFreq));
 
   // Initialize and test the FSM
-  internalFSM_->start();
-  internalFSM_->process_event(Initialized());
-  internalFSM_->process_event(PathComputed());
-  internalFSM_->process_event(SafetyTrigger());
-  internalFSM_->process_event(Recover());
-  internalFSM_->process_event(Start());
-  internalFSM_->process_event(Finished());
-  internalFSM_->process_event(SafetyTrigger());
-  internalFSM_->process_event(Recover());
+  internalFSM_.start();
 
   // // Init task
   // valid = task->initialize(robotName);
