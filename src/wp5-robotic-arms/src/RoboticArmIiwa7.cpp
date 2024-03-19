@@ -11,7 +11,6 @@
 
 #include "RoboticArmIiwa7.h"
 
-
 using namespace controllers;
 using namespace state_representation;
 using namespace std;
@@ -92,8 +91,7 @@ vector<double> RoboticArmIiwa7::lowLevelController(tuple<vector<double>, vector<
 
 vector<double> RoboticArmIiwa7::lowLevelControllerSF(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,
                                                      Eigen::VectorXd& desiredTwist,
-                                                     double test,
-                                                     vector<double> wrenchFromSensor) {
+                                                     Eigen::VectorXd& delaTwist) {
 
   //set_up the feeedback_State
   vector<double>& retrievedPosition = get<0>(stateJoints);
@@ -119,8 +117,7 @@ vector<double> RoboticArmIiwa7::lowLevelControllerSF(tuple<vector<double>, vecto
   Eigen::VectorXd wrench = commandOutput.get_wrench();
 
   //TODO: change with good equyation for force
-  //  wrench(2) =   wrench(2) + goalwrench[2] - (wrenchFromSensor[2]- biaswrench[2]);
-  wrench(1) = wrench(1) + test;
+  wrench(1) = wrench(1) + delaTwist(1);
 
   Eigen::VectorXd EigentorqueCommand = jacobianObject.transpose() * wrench;
 

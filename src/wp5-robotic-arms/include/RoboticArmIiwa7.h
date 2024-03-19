@@ -12,7 +12,6 @@
 
 #include "IRoboticArmBase.h"
 
-
 /**
  * @brief Child class to create all the prototype fonctions needed in the different robotic arms.
  *
@@ -27,8 +26,7 @@ public:
   std::vector<double>
   lowLevelControllerSF(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
                        Eigen::VectorXd& desiredTwist,
-                       double test,
-                       std::vector<double> wrenchFromSensor) override;
+                       Eigen::VectorXd& wrenchFromSensor) override;
 
 protected:
   state_representation::CartesianState commandState_;

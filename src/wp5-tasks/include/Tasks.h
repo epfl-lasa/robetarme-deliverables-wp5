@@ -33,6 +33,7 @@ private:
   ros::Rate loopRate_;
   std::vector<double> homeJoint_;
   std::vector<double> biasWrench_;
+  Eigen::VectorXd outputTwist_;
 
   //TODO: delet rviz dependency
   ros::Publisher pointPub_;
@@ -52,5 +53,5 @@ private:
   // Create an unique pointer for the instance of PathPlanner
   std::unique_ptr<BoustrophedonServer> boustrophedonserver_ = nullptr;
 
-  std::vector<double> decoderWrench();
+  Eigen::VectorXd decoderWrench();
 };

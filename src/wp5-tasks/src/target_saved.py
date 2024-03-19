@@ -9,7 +9,7 @@ def publish_data():
 
     # Create publishers for the PoseStamped and WrenchStamped messages
     pose_publisher = rospy.Publisher('/vrpn_client_node/TargetRobetarme/pose_transform', PoseStamped, queue_size=10)
-    wrench_publisher = rospy.Publisher('/robotiq_ft_sensor', WrenchStamped, queue_size=10)
+    wrench_publisher = rospy.Publisher('/robotiq_ft_wrench', WrenchStamped, queue_size=10)
 
     # Set the publishing rate (adjust as needed)
     rate = rospy.Rate(10)  # 10 Hz
@@ -30,7 +30,7 @@ def publish_data():
     wrench_msg.header.frame_id = "robotiq_ft_frame_id"  # Set the appropriate frame ID
     wrench_msg.wrench.force.x = -40  # Modify force values as needed
     wrench_msg.wrench.force.y = 57
-    wrench_msg.wrench.force.z = -37
+    wrench_msg.wrench.force.z = -36
     wrench_msg.wrench.torque.x = -0.6  # Modify torque values as needed
     wrench_msg.wrench.torque.y = 0.14
     wrench_msg.wrench.torque.z = -0.8

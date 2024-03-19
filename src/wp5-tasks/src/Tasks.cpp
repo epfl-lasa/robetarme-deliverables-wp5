@@ -95,6 +95,8 @@ Tasks::Tasks(ros::NodeHandle& n, double freq) : nh_(n), rosFreq_(freq), loopRate
   pointPub_ = nh_.advertise<geometry_msgs::PointStamped>("path_point", 1);
   pubDesiredVelFiltered_ = nh_.advertise<visualization_msgs::Marker>("visualization_marker", 100);
   //------------------------------
+
+  outputTwist_ = Eigen::VectorXd(6);
 }
 
 bool Tasks::initTask(string taskName) {
@@ -327,26 +329,28 @@ void Tasks::set_bias() {
   }
 }
 
-vector<double> Tasks::decoderWrench() {
+Eigen::VectorXd Tasks::decoderWrench() {
   vector<double> receivedWrench = rosInterface_->receiveWrench();
-
   for (size_t i = 0; i < receivedWrench.size(); ++i) {
     receivedWrench[i] -= biasWrench_[i];
-  }
-
-  vector<double> outputTwist(6, 0.0);
-  for (size_t i = 0; i < receivedWrench.size(); ++i) {
-    if (receivedWrench[i] > 5) {
-      outputTwist[i] = -0.15;
-    } else if (receivedWrench[i] < -5) {
-      outputTwist[i] = 0.15;
+    cout << "receivedWrench[i]:" << receivedWrench[i] << endl;
+    if (receivedWrench[i] > 1) {
+      outputTwist_(i) = -receivedWrench[i] * 0.05;
+      if (outputTwist_(i) < -0.15) {
+        outputTwist_(i) = -0.15;
+      }
+    } else if (receivedWrench[i] < -1) {
+      outputTwist_(i) = receivedWrench[i] * 0.05;
+      if (outputTwist_(i) > 0.15) {
+        outputTwist_(i) = 0.15;
+      }
     } else {
-      outputTwist[i] = 0;
+      outputTwist_(i) = 0;
     }
   }
-
-  return outputTwist;
+  return outputTwist_;
 }
+
 bool Tasks::TestSF() {
   vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
   cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
@@ -367,15 +371,10 @@ bool Tasks::TestSF() {
 
     VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
     //TEST
-    vector<double> forceInput(6, 0.0);
-    forceInput = decoderWrench();
-    for (size_t i = 0; i < forceInput.size(); ++i) {
-      std::cout << "forceInput[" << i << "] = " << forceInput[i] << std::endl;
-    }
-
-    vector<double> wrenchFromSensor = {};
-    vector<double> desiredJoint =
-        roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, forceInput[2], wrenchFromSensor);
+    Eigen::VectorXd deltaTwist;
+    deltaTwist = decoderWrench();
+    cout << deltaTwist << endl;
+    vector<double> desiredJoint = roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, deltaTwist);
     //--------
 
     rosInterface_->sendState(desiredJoint);
