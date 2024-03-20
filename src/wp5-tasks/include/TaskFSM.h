@@ -21,9 +21,9 @@ namespace msmf = msm::front;
 namespace mp11 = boost::mp11;
 
 // List of FSM events
-class Start {};
 class Initialized {};
 class PathComputed {};
+class Start {};
 class Finished {};
 
 class ErrorTrigger {};
@@ -35,9 +35,30 @@ private:
   // List of FSM states
   class Initializing;
   class Planning;
-  class Ready;
-  class HumanShared;
-  class AutoExecuting;
+
+  class Ready : public msmf::state<> {
+  public:
+    enum ShareMode : uint8_t { NONE = 0, FOLLOWING, AUTOMATIC };
+    ShareMode getShareMode() { return shareMode_; }
+
+    void setShareMode(ShareMode share) { shareMode_ = share; }
+
+    template <class Event, class FSM>
+    void on_entry(Event const& event, FSM& fsm) {
+      std::cout << "Entering: TaskFSM - Ready" << std::endl;
+    }
+
+    template <class Event, class FSM>
+    void on_exit(Event const& event, FSM& fsm) {
+      std::cout << "Leaving: TaskFSM - Ready" << std::endl;
+    }
+
+  private:
+    ShareMode shareMode_ = ShareMode::NONE;
+  };
+
+  class HumanSharing;
+  class Executing;
   class Homing;
   class Exit;
 
@@ -46,10 +67,77 @@ private:
   class ErrorMode;
 
 protected:
+  bool exit_ = true;
+  bool homed_ = false;
+  bool ready_ = false;
+
+  std::string error_ = "";
   std::shared_ptr<ITaskBase> currentTask_;
 
 public:
   TaskFSM(std::shared_ptr<ITaskBase> task) : currentTask_(task) { std::cout << "Inside TaskFSM : " << std::endl; };
+
+  bool getExit() { return exit_; }
+  bool getHomed() { return homed_; }
+  bool getReady() { return ready_; }
+
+  std::string getError() { return error_; }
+  std::shared_ptr<ITaskBase> getCurrentTask() { return currentTask_; }
+
+  void setExit(bool exit) { exit_ = exit; }
+  void setHome(bool homed) { homed_ = homed; }
+  void setReady(bool ready) { ready_ = ready; }
+
+  void setError(std::string error) { error_ = error; }
+
+  // Actions
+  class goWorkingPosition {
+  public:
+    template <class EVT, class FSM, class SourceState, class TargetState>
+    void operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+      bool feedback = fsm.getCurrentTask()->goWorkingPosition();
+
+      if (feedback) {
+        fsm.setReady(true);
+      } else {
+        fsm.setError("Error: Task goWorkingPosition failed");
+        fsm.process_event(ErrorTrigger());
+      }
+    }
+  };
+
+  // Guard condition
+  class isSharing {
+  public:
+    template <class EVT, class FSM, class SourceState, class TargetState>
+    bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+      return src.getShareMode() > TaskFSM::Ready::ShareMode::NONE;
+    }
+  };
+
+  class isReady {
+  public:
+    template <class EVT, class FSM, class SourceState, class TargetState>
+    bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+      return fsm.getReady();
+    }
+  };
+
+  class isHomed {
+  public:
+    template <class EVT, class FSM, class SourceState, class TargetState>
+    bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+      return fsm.getHomed();
+    }
+  };
+
+  class isExiting {
+  public:
+    template <class EVT, class FSM, class SourceState, class TargetState>
+    bool operator()(EVT const& evt, FSM& fsm, SourceState& src, TargetState& tgt) {
+      return fsm.getExit();
+    }
+  };
 
   typedef mp11::mp_list<AllOk, Initializing> initial_state;
 
@@ -59,13 +147,18 @@ public:
       msmf::Row<Initializing, Initialized, Planning, msmf::none, msmf::none>,
 
       // Planning ---------------------------------------------
-      msmf::Row<Planning, PathComputed, Ready, msmf::none, msmf::none>,
+      msmf::Row<Planning, PathComputed, Ready, goWorkingPosition, msmf::none>,
 
       // Ready ------------------------------------------------
-      msmf::Row<Ready, Start, AutoExecuting, msmf::none, msmf::none>,
+      msmf::Row<Ready, Start, HumanSharing, msmf::none, msmf::euml::And_<isSharing, isReady>>,
+      msmf::Row<Ready, Start, Executing, msmf::none, msmf::euml::And_<msmf::euml::Not_<isSharing>, isReady>>,
 
-      // AutoExecuting --------------------------------------------
-      msmf::Row<AutoExecuting, Finished, Ready, msmf::none, msmf::none>,
+      // Executing --------------------------------------------
+      msmf::Row<Executing, Finished, Ready, goWorkingPosition, msmf::euml::Not_<isExiting>>,
+      msmf::Row<Executing, Finished, Homing, msmf::none, isExiting>,
+
+      // Homing -----------------------------------------------
+      msmf::Row<Homing, msmf::none, Exit, msmf::none, isHomed>,
 
       // Error ------------------------------------------------
       msmf::Row<AllOk, ErrorTrigger, ErrorMode, msmf::none, msmf::none>,
@@ -79,18 +172,14 @@ class TaskFSM::Initializing : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: TaskFSM - Initializing" << std::endl;
-    bool feedback = fsm.currentTask_->initialize("shotcrete");
+    bool feedback = fsm.getCurrentTask()->initialize();
 
     if (feedback) {
       fsm.process_event(Initialized());
+    } else {
+      fsm.setError("Error: Task initialization failed");
+      fsm.process_event(ErrorTrigger());
     }
-    std::cout << "Entering 2: TaskFSM - Initializing" << std::endl;
-  }
-
-  template <class Event, class FSM>
-  void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: TaskFSM - Initializing" << std::endl;
   }
 };
 
@@ -98,51 +187,42 @@ class TaskFSM::Planning : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: TaskFSM - Planning" << std::endl;
-  }
+    bool feedback = fsm.getCurrentTask()->computePath();
 
-  template <class Event, class FSM>
-  void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: TaskFSM - Planning" << std::endl;
-  }
-};
-
-class TaskFSM::Ready : public msmf::state<> {
-public:
-  template <class Event, class FSM>
-  void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: TaskFSM - Ready" << std::endl;
-  }
-
-  template <class Event, class FSM>
-  void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: TaskFSM - Ready" << std::endl;
+    if (feedback) {
+      fsm.process_event(PathComputed());
+    } else {
+      fsm.setError("Error: Path computation failed");
+      fsm.process_event(ErrorTrigger());
+    }
   }
 };
 
-class TaskFSM::HumanShared : public msmf::state<> {
+class TaskFSM::HumanSharing : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: TaskFSM - HumanShared" << std::endl;
+    std::cout << "Entering: TaskFSM - HumanSharing" << std::endl;
   }
 
   template <class Event, class FSM>
   void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: TaskFSM - HumanShared" << std::endl;
+    std::cout << "Leaving: TaskFSM - HumanSharing" << std::endl;
   }
 };
 
-class TaskFSM::AutoExecuting : public msmf::state<> {
+class TaskFSM::Executing : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: TaskFSM - AutoExecuting" << std::endl;
-  }
+    bool feedback = fsm.getCurrentTask()->execute();
 
-  template <class Event, class FSM>
-  void on_exit(Event const& event, FSM& fsm) {
-    std::cout << "Leaving: TaskFSM - AutoExecuting" << std::endl;
+    if (feedback) {
+      fsm.process_event(Finished());
+    } else {
+      fsm.setError("Error: Task execution failed");
+      fsm.process_event(ErrorTrigger());
+    }
   }
 };
 
@@ -150,7 +230,12 @@ class TaskFSM::Homing : public msmf::state<> {
 public:
   template <class Event, class FSM>
   void on_entry(Event const& event, FSM& fsm) {
-    std::cout << "Entering: TaskFSM - Homing" << std::endl;
+    bool feedback = fsm.getCurrentTask()->goHomingPosition();
+
+    if (!feedback) {
+      fsm.setError("Error: Task homing failed");
+      fsm.process_event(ErrorTrigger());
+    }
   }
 
   template <class Event, class FSM>

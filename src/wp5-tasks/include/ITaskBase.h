@@ -45,9 +45,9 @@ public:
   bool checkHomingPosition = false;
   bool checkWorkingPosition = false;
 
-  ITaskBase(ros::NodeHandle& nh, double freq);
+  ITaskBase(ros::NodeHandle& nh, double freq, std::string robotName);
 
-  virtual bool initialize(std::string robotName) = 0;
+  virtual bool initialize() = 0;
   virtual bool computePath() = 0;
   virtual bool execute() = 0;
 

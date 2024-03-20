@@ -28,9 +28,9 @@
 
 enum RobotType : int8_t {
   ROBOT_UNDEFINED = -1,
-  KUKA_IIWA7,
+  IIWA7,
   UR5,
-  ROKAE_CR7,
+  CR7,
   COBOD,
   NB_ROBOTS // Keep at the end of enum => number of types
 };
@@ -43,7 +43,7 @@ enum RobotType : int8_t {
 class IRoboticArmBase {
 public:
   inline static const std::map<std::string, RobotType> robotTypes{
-      {"kuka_iiwa7", KUKA_IIWA7}, {"ur5", UR5}, {"rokae_cr7", ROKAE_CR7}, {"cobod", COBOD}};
+      {"Iiwa7", IIWA7}, {"Ur5", UR5}, {"Cr7", CR7}, {"Cobod", COBOD}};
 
   /**
      * @brief Default constructor for IRoboticArmBase.
@@ -54,6 +54,8 @@ public:
      * @brief Destructor for IRoboticArmBase.
      */
   virtual ~IRoboticArmBase() = default;
+
+  std::string getName() { return robotName_; }
 
   std::vector<double> getHomeJoint();
 

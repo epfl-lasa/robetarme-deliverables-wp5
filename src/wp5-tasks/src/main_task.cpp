@@ -33,55 +33,17 @@ int main(int argc, char** argv) {
   // Get task configuration
   string yamlPath = string(WP5_TASKS_DIR) + "/config/config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
+
   string robotName = config["shotcrete"]["robot_name"].as<string>();
 
-  // Create an unique pointer for the instance of RosInterfaceNoetic
-  // rosInterface = make_unique<RosInterfaceNoetic>(nh, robotName);
+  // Create an unique pointer for the instance of TaskFSM
+  std::shared_ptr<TaskShotcrete> taskShotcrete = std::make_shared<TaskShotcrete>(nh, rosFreq, robotName);
 
-  // Init class for Tasks
-
-  // Compute path
-  // task->computePath();
-
-  taskFsm_ internalFSM_(make_shared<TaskShotcrete>(nh, rosFreq));
+  taskFsm_ internalFSM_(taskShotcrete);
 
   // Initialize and test the FSM
   internalFSM_.start();
-  internalFSM_.process_event(PathComputed());
-  internalFSM_.process_event(ErrorTrigger());
   internalFSM_.process_event(Start());
-  internalFSM_.process_event(Finished());
-  internalFSM_.process_event(ErrorAcknowledgement());
-  internalFSM_.process_event(Start());
-
-  // // Init task
-  // valid = task->initialize(robotName);
-  // if (valid) {
-  //   cout << "Iniitalization shotcrete ok" << endl;
-  // } else {
-  //   cout << "Iniitalization shotcrete failed" << endl;
-  //   return 0;
-  // }
-
-  // // Go working position
-  // valid = task->goWorkingPosition();
-  // if (valid) {
-  //   cout << "Robot in working position" << endl;
-  // } else {
-  //   cout << "Failed to go into working position" << endl;
-  //   return 0;
-  // }
-
-  // // Do task
-  // valid = task->execute();
-  // if (valid) {
-  //   cout << "Task Done" << endl;
-  // } else {
-  //   cout << "Task Failed : go to homing position" << endl;
-  //   valid = task->goHomingPosition();
-
-  //   return 0;
-  // }
 
   return 0;
 }

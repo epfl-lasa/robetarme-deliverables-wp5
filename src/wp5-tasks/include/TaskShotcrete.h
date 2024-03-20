@@ -7,6 +7,7 @@
 #include <ros/ros.h>
 
 #include <memory>
+#include <string>
 
 #include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
@@ -18,9 +19,9 @@
 
 class TaskShotcrete : public ITaskBase {
 public:
-  TaskShotcrete(ros::NodeHandle& n, double freq);
+  TaskShotcrete(ros::NodeHandle& n, double freq, std::string robotName);
 
-  bool initialize(std::string robotName);
+  bool initialize();
   bool execute();
   bool computePath();
 
