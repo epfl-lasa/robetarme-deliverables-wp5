@@ -44,6 +44,7 @@ add_executable(wp5_main_temp_node
   src/main_task_shotcrete.cpp
   src/ITaskBase.cpp
   src/TaskShotcrete.cpp
+  src/TaskSurfaceFinishing.cpp
 )
 
 # add_executable(wp5_main_temp_node

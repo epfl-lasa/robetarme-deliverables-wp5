@@ -15,7 +15,9 @@
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
 #include "TaskFSM.h"
+#include "TaskFactory.h"
 #include "TaskShotcrete.h"
+#include "TaskSurfaceFinishing.h"
 
 using namespace std;
 using namespace Eigen;
@@ -33,12 +35,14 @@ int main(int argc, char** argv) {
   string yamlPath = string(WP5_TASKS_DIR) + "/config/config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
 
-  string robotName = config["shotcrete"]["robot_name"].as<string>();
+  string taskType = "shotcrete";
+  string robotName = config[taskType]["robot_name"].as<string>();
 
   // Create an unique pointer for the instance of TaskFSM
-  std::shared_ptr<TaskShotcrete> taskShotcrete = std::make_shared<TaskShotcrete>(nh, rosFreq, robotName);
+  TaskFactory taskFactory;
+  std::shared_ptr<ITaskBase> task = taskFactory.createTask(taskType, nh, rosFreq, robotName);
 
-  taskFsm_ internalFSM_(taskShotcrete);
+  taskFsm_ internalFSM_(task);
 
   // Initialize and test the FSM
   internalFSM_.start();

@@ -205,7 +205,7 @@ bool TaskSurfaceFinishing::TestSF() {
     getRosLoopRate_().sleep();
 
     //TODO: delet rviz dependency
-    twistMarker(twistDesiredEigen, pairActualQuatPos.second, pubDesiredVelFiltered_);
+    // twistMarker(twistDesiredEigen, pairActualQuatPos.second, pubDesiredVelFiltered_);
   }
   return dynamicalSystem_->checkLinearDs();
 }
