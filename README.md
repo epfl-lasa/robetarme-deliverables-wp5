@@ -35,7 +35,14 @@ You can directly use the packages as a static library in your codebase. Simply i
 
 - Convenience Functions:
 
-We've prepared some convenience functions for easy integration into your projects. These functions are well-documented using Doxygen. You can find the documentation here.
+We've prepared a set of convenience functions to streamline the integration of tasks into your projects. These functions are designed to simplify common operations and enhance ease of use. Some examples include:
+
+- Initialize Task: Initializes the task environment, setting up necessary parameters and configurations.
+- Homing: Moves the robotic system to a predefined home position for safe starting or ending of tasks.
+- DoTask: Executes the specified task, handling all necessary actions and interactions.
+- GoPosition: Navigates the robotic system to a designated position within the workspace.
+
+These functions are well-documented using Doxygen. You can find the documentation here.
 
 - Finite State Machine (FSM):
 
