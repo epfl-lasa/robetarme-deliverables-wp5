@@ -1,6 +1,12 @@
 // clang-format off
 #include <pinocchio/fwd.hpp>
 // clang-format on
+
+#include <ros/ros.h>
+#include <yaml-cpp/yaml.h>
+
+#include <tuple>
+
 #include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"
@@ -8,63 +14,36 @@
 #include "RoboticArmUr5.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
-#include "Tasks.h"
-#include <ros/ros.h>
-#include <tuple>
+#include "TaskFSM.h"
+#include "TaskShotcrete.h"
 
 using namespace std;
 using namespace Eigen;
 
 int main(int argc, char** argv) {
-
+  bool valid = false;
   double deltaTime = 0.001;
   double rosFreq = 1 / deltaTime;
-  // init ros
+
+  // Init ros
   ros::init(argc, argv, "main_tasks");
   ros::NodeHandle nh;
+  ros::Rate loopRate(1 / deltaTime);
 
-  ros::Rate loop_rate(1 / deltaTime);
+  // Get task configuration
+  string yamlPath = string(WP5_TASKS_DIR) + "/config/config.yaml";
+  YAML::Node config = YAML::LoadFile(yamlPath);
 
-  //init class for Tasks -----------------------------------------
-  unique_ptr<Tasks> tasks = nullptr;
-  tasks = make_unique<Tasks>(nh, rosFreq);
+  string robotName = config["shotcrete"]["robot_name"].as<string>();
 
-  // comput path -----------------------------------------
-  tasks->computePathShotcrete();
+  // Create an unique pointer for the instance of TaskFSM
+  std::shared_ptr<TaskShotcrete> taskShotcrete = std::make_shared<TaskShotcrete>(nh, rosFreq, robotName);
 
-  //init shotcrete
-  bool valid = tasks->initShotcrete();
-  // tasks->goHome();
+  taskFsm_ internalFSM_(taskShotcrete);
 
-  if (valid) {
-    cout << "Iniitalization shotcrete  ok" << endl;
-  } else {
-    cout << "Iniitalization shotcrete  failed" << endl;
-    return 0;
-  }
-
-  // go first position
-  valid = tasks->goFirstPosition();
-  if (valid) {
-    cout << "We are in the first position" << endl;
-  } else {
-    cout << "failed to go into first position" << endl;
-    return 0;
-  }
-
-  // tasks->goHome();
-  // tasks->goFirstPosition();
-
-  // Do shotcrete
-  valid = tasks->DoShotcrete();
-  if (valid) {
-    cout << "shotcrete Done" << endl;
-  } else {
-    cout << "failed to perform shotcrete, go to home" << endl;
-    valid = tasks->goHome();
-
-    return 0;
-  }
+  // Initialize and test the FSM
+  internalFSM_.start();
+  internalFSM_.process_event(Start());
 
   return 0;
 }

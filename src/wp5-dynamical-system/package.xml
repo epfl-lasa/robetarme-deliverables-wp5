@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>wp5-dynamical-system</name>
+    <name>wp5_dynamical_system</name>
     <version>1.0.0</version>
     <description>Drivers to use different robotic arms</description>
 

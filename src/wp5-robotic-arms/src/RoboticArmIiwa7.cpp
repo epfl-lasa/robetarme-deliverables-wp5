@@ -5,14 +5,16 @@
  * @version 0.1
  * @date 2024-02-27
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  *
  */
 
 #include "RoboticArmIiwa7.h"
+
+#include <yaml-cpp/yaml.h>
+
 #include "state_representation/space/cartesian/CartesianState.hpp"
 #include "state_representation/space/joint/JointState.hpp"
-#include <yaml-cpp/yaml.h>
 
 using namespace controllers;
 using namespace state_representation;
@@ -20,12 +22,12 @@ using namespace std;
 
 RoboticArmIiwa7::RoboticArmIiwa7() {
   pathUrdf_ = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/iiwa7.urdf";
-  robotName_ = "iiwa7";
+  robotName_ = "Iiwa7";
   tipLink_ = "iiwa_link_ee";
   tipJoint_ = "iiwa_joint_ee";
   baseLink_ = "iiwa_link_0";
-  jointNames_ =
-      {"iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6", "iiwa_joint_7"};
+  jointNames_ = {
+      "iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6", "iiwa_joint_7"};
   referenceFrame_ = "iiwa_link_0";
   nJoint_ = 7;
   originalHomeJoint = vector<double>(nJoint_, 0.0);
@@ -53,8 +55,6 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   double linearOrthogonalDamping = robotNode["linear_orthogonal_damping"].as<double>();
   double angularStiffness = robotNode["angular_stiffness"].as<double>();
   double angularDamping = robotNode["angular_damping"].as<double>();
-
-
 
   parameters_.emplace_back(make_shared_parameter("linear_principle_damping", linearPrincipledamping));
   parameters_.emplace_back(make_shared_parameter("linear_orthogonal_damping", linearOrthogonalDamping));

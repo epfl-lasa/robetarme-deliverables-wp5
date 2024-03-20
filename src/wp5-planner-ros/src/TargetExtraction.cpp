@@ -2,10 +2,11 @@
 
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/Pose.h>
-#include <iostream>
 #include <nav_msgs/Path.h>
 #include <ros/package.h>
 #include <yaml-cpp/yaml.h>
+
+#include <iostream>
 
 using namespace std;
 using namespace Eigen;
@@ -16,13 +17,10 @@ TargetExtraction::TargetExtraction(ros::NodeHandle& nh) :
         nh.subscribe("/vrpn_client_node/TargetRobetarme/pose_transform", 10, &TargetExtraction::CCVrpnTarget, this)) {
 
   originalPolygonPub_ = nh.advertise<geometry_msgs::PolygonStamped>("/original_polygon", 1, true);
-  // Get the path to the package
-  string package_path =
-      ros::package::getPath("wp5-planner-ros"); // Replace "your_package" with your actual package name
 
   // Load parameters from YAML file
-  string yaml_path = package_path + "/config/config.yaml";
-  YAML::Node config = YAML::LoadFile(yaml_path);
+  string yamlPath = string(WP5_PLANNER_ROS_DIR) + "/config/config.yaml";
+  YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file
   heightTarget_ = config["heightTarget"].as<double>();

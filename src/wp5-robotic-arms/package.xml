@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <package format="2">
-    <name>wp5-robotic-arms-drivers</name>
+    <name>wp5_robotic_arms_drivers</name>
     <version>1.0.0</version>
     <description>Drivers to use different robotic arms</description>
 
@@ -48,7 +48,6 @@
     <!-- Use doc_depend for packages you need only for building documentation: -->
     <!--   <doc_depend>doxygen</doc_depend> -->
     <buildtool_depend>catkin</buildtool_depend>
-
 
 
     <!-- <exec_depend>gpio_manager</exec_depend> -->

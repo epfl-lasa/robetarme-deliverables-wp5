@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2024-02-27
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  *
  */
 #pragma once
@@ -21,9 +21,9 @@ class RoboticArmUr5 : public IRoboticArmBase {
 public:
   // TODO: implement all the public members, accessible from everyone owning a class object
   explicit RoboticArmUr5();
-  std::vector<double>
-  lowLevelController(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
-                     Eigen::VectorXd& twist) override;
+  std::vector<double> lowLevelController(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
+      Eigen::VectorXd& twist) override;
 
 protected:
   // TODO: implement all the protected members, accessible from its own and herited classes

@@ -1,4 +1,5 @@
 #include "DynamicalSystem.h"
+
 #include <yaml-cpp/yaml.h>
 
 using namespace std;
@@ -11,8 +12,8 @@ DynamicalSystem::DynamicalSystem(double freq) {
 
 void DynamicalSystem::parameterInitialization() {
   // Load parameters from YAML file
-  string yaml_path = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/config.yaml";
-  YAML::Node config = YAML::LoadFile(yaml_path);
+  string yamlPath = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/config.yaml";
+  YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file
   CycleRadiusLC_ = config["limitCycleRadius"].as<double>();
@@ -24,9 +25,10 @@ void DynamicalSystem::parameterInitialization() {
   toolOffsetFromTarget_ = config["toolOffsetFromTarget"].as<double>();
   velocityLimit_ = config["velocityLimit"].as<double>();
 }
+
 std::vector<double> DynamicalSystem::getFirstQuatPos() { return firstQuatPos_; }
 
-void DynamicalSystem::set_path(vector<vector<double>> pathInput) {
+void DynamicalSystem::setPath(vector<vector<double>> pathInput) {
   desiredPath_ = pathInput;
 
   firstQuatPos_ = desiredPath_.front();

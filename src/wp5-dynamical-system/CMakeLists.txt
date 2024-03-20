@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(wp5-dynamical-system VERSION 0.1.0 DESCRIPTION "Drivers library to manage dynamical system")
+project(wp5_dynamical_system VERSION 0.1.0 DESCRIPTION "Drivers library to manage dynamical system")
 
 if(POLICY CMP0057)
   cmake_policy(SET CMP0057 NEW)
@@ -9,7 +9,7 @@ add_definitions("-DWP5_DYNAMICAL_SYSTEM_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 # Add options
 add_compile_options(-O3)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
 
 # Find packages if any

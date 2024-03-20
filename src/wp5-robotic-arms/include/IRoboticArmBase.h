@@ -6,7 +6,7 @@
  * @version 0.1
  * @date 2024-03-07
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  */
 
 #pragma once
@@ -19,12 +19,21 @@
 #include <dynamical_systems/DynamicalSystemFactory.hpp>
 #include <eigen3/Eigen/Dense>
 #include <iostream>
+#include <map>
 #include <memory>
 #include <robot_model/Model.hpp>
 #include <sstream>
-
-// #include <trac_ik/trac_ik.hpp>
+#include <string>
 #include <vector>
+
+enum RobotType : int8_t {
+  ROBOT_UNDEFINED = -1,
+  IIWA7,
+  UR5,
+  CR7,
+  COBOD,
+  NB_ROBOTS // Keep at the end of enum => number of types
+};
 
 /**
  * @brief Mother class to create all the prototype functions needed in different robotic arms.
@@ -33,6 +42,9 @@
  */
 class IRoboticArmBase {
 public:
+  inline static const std::map<std::string, RobotType> robotTypes{
+      {"Iiwa7", IIWA7}, {"Ur5", UR5}, {"Cr7", CR7}, {"Cobod", COBOD}};
+
   /**
      * @brief Default constructor for IRoboticArmBase.
      */
@@ -42,6 +54,8 @@ public:
      * @brief Destructor for IRoboticArmBase.
      */
   virtual ~IRoboticArmBase() = default;
+
+  std::string getName() { return robotName_; }
 
   std::vector<double> getHomeJoint();
 
@@ -114,9 +128,8 @@ public:
   //  *
   //  * @param data Tuple containing vectors of joint positions, joint velocities, and joint efforts.
   //  */
-  virtual std::vector<double>
-  lowLevelController(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,
-                     Eigen::VectorXd& twist) = 0;
+  virtual std::vector<double> lowLevelController(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data, Eigen::VectorXd& twist) = 0;
   std::vector<double> originalHomeJoint = {};
 
 protected:
@@ -157,8 +170,9 @@ private:
      * @param t .
      * @return quaternion
      */
-  Eigen::Matrix<double, 4, 1>
-  slerpQuaternion(Eigen::Matrix<double, 4, 1>& q1, Eigen::Matrix<double, 4, 1>& q2, double t);
+  Eigen::Matrix<double, 4, 1> slerpQuaternion(Eigen::Matrix<double, 4, 1>& q1,
+                                              Eigen::Matrix<double, 4, 1>& q2,
+                                              double t);
 
   /**
      * @brief Function fo computing the quaternion product.

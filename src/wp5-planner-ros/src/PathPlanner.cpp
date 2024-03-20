@@ -1,13 +1,14 @@
 #include "PathPlanner.h"
 
-#include <cstdlib>
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/Pose.h>
-#include <iostream>
 #include <ros/package.h>
-#include <string>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <yaml-cpp/yaml.h>
+
+#include <cstdlib>
+#include <iostream>
+#include <string>
 
 using namespace std;
 using namespace Eigen;
@@ -17,10 +18,10 @@ PathPlanner::PathPlanner(ros::NodeHandle& n) :
     initialPosePub_(nh_.advertise<geometry_msgs::PoseWithCovarianceStamped>("/initialpose", 10)) {
   nh_ = n;
   transformedPolygonPub_ = nh_.advertise<geometry_msgs::PolygonStamped>("/flat_polygon", 1, true);
-  string package_path = ros::package::getPath("wp5-planner-ros");
+
   // Load parameters from YAML file
-  string yaml_path = package_path + "/config/config.yaml";
-  YAML::Node config = YAML::LoadFile(yaml_path);
+  string yamlPath = string(WP5_PLANNER_ROS_DIR) + "/config/config.yaml";
+  YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file
   limitCycleRadius_ = config["limitCycleRadius"].as<double>();
@@ -233,10 +234,8 @@ nav_msgs::Path PathPlanner::getTransformedPath(const nav_msgs::Path& originalPat
   for (const auto& pose : originalPath.poses) {
     // Convert pose to Eigen types for transformation
     Vector3d originalPosition(pose.pose.position.x, pose.pose.position.y, pose.pose.position.z);
-    Quaterniond originalOrientation(pose.pose.orientation.w,
-                                    pose.pose.orientation.x,
-                                    pose.pose.orientation.y,
-                                    pose.pose.orientation.z);
+    Quaterniond originalOrientation(
+        pose.pose.orientation.w, pose.pose.orientation.x, pose.pose.orientation.y, pose.pose.orientation.z);
 
     // Apply transformation
     Vector3d transformedPosition = transformation * originalPosition;

@@ -6,17 +6,18 @@
  * @version 0.1
  * @date 2024-03-07
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  *
  */
 #include "IRoboticArmBase.h"
 
 #include <OsqpEigen/OsqpEigen.h>
+#include <yaml-cpp/yaml.h>
+
 #include <state_representation/space/cartesian/CartesianPose.hpp>
 #include <state_representation/space/cartesian/CartesianTwist.hpp>
 #include <state_representation/space/joint/JointPositions.hpp>
 #include <state_representation/space/joint/JointVelocities.hpp>
-#include <yaml-cpp/yaml.h>
 
 using namespace std;
 using namespace Eigen;
@@ -126,7 +127,8 @@ VectorXd IRoboticArmBase::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Ve
 
   Vector3d tmp_angular_vel = temp_angVel.segment(1, 3);
   double maxDq = 0.2;
-  if (tmp_angular_vel.norm() > maxDq) tmp_angular_vel = maxDq * tmp_angular_vel.normalized();
+  if (tmp_angular_vel.norm() > maxDq)
+    tmp_angular_vel = maxDq * tmp_angular_vel.normalized();
 
   double dsGain_ori = 0.50;
   double theta_gq = (-.5 / (4 * maxDq * maxDq)) * tmp_angular_vel.transpose() * tmp_angular_vel;

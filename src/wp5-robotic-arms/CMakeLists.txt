@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.3)
-project(wp5-robotic-arms-drivers VERSION 0.1.0 DESCRIPTION "Drivers library to manage different robotic arms")
+project(wp5_robotic_arms_drivers VERSION 0.1.0 DESCRIPTION "Drivers library to manage different robotic arms")
 
 if(POLICY CMP0057)
   cmake_policy(SET CMP0057 NEW)
@@ -7,7 +7,7 @@ endif()
 
 # Add options
 add_compile_options(-O3)
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
 
 # Save the path during compilation to solve inclusion problems with linked files
