@@ -3,7 +3,8 @@
 using namespace std;
 using namespace Eigen;
 
-TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, string robotName) : ITaskBase(nh, freq, robotName) {
+TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, string robotName) :
+    ITaskBase(nh, freq, robotName) {
   // Create an unique pointer for the instance of DynamicalSystem
   dynamicalSystem_ = make_unique<DynamicalSystem>(rosFreq_);
 
@@ -61,7 +62,7 @@ bool TaskSurfaceFinishing::execute() {
 
     checkFinish = dynamicalSystem_->finish;
 
-    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
     vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
 
     rosInterface_->sendState(desiredJointSpeed);
@@ -171,7 +172,7 @@ bool TaskSurfaceFinishing::goHomingPosition() {
 
     checkHomingPosition = dynamicalSystem_->checkLinearDs;
 
-    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
 
     vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
     rosInterface_->sendState(desiredJointSpeed);
@@ -202,7 +203,7 @@ bool TaskSurfaceFinishing::goWorkingPosition() {
     pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
     checkWorkingPosition = dynamicalSystem_->checkLinearDs;
 
-    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
 
     vector<double> desiredJoint = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
     rosInterface_->sendState(desiredJoint);
@@ -214,4 +215,6 @@ bool TaskSurfaceFinishing::goWorkingPosition() {
   return checkWorkingPosition;
 }
 
-void TaskSurfaceFinishing::setHomingPosition(vector<double> desiredJoint) { cout << "setHomingPosition()" << endl; }
+void TaskSurfaceFinishing::setHomingPosition(vector<double> desiredJoint) {
+  cout << "set joints HomingPosition()" << endl;
+}

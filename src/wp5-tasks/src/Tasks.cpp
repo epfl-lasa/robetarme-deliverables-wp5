@@ -1,13 +1,15 @@
 #include "Tasks.h"
+
 #include <yaml-cpp/yaml.h>
 // include all the robot needeed
 #include "RoboticArmIiwa7.h"
 #include "RoboticArmUr5.h"
 
 //TODO: remove rviz dependency
-#include "visualization_msgs/Marker.h"
 #include <geometry_msgs/Point.h>        //<----------to remove
 #include <geometry_msgs/PointStamped.h> //<----------to remove
+
+#include "visualization_msgs/Marker.h"
 
 using namespace std;
 using namespace Eigen;
@@ -226,7 +228,7 @@ bool Tasks::goFirstPosition() {
     pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
     checkFirstPosition = dynamicalSystem_->checkLinearDs;
 
-    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
 
     vector<double> desiredJoint = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
     rosInterface_->sendState(desiredJoint);
@@ -256,7 +258,7 @@ bool Tasks::DoShotcrete() {
 
     checkFinish = dynamicalSystem_->finish;
 
-    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
 
     vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
 
@@ -277,8 +279,8 @@ bool Tasks::goHome() {
   pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm_->getFK(homeJoint_);
   Quaterniond homeQuat = pairHomeQuatPos.first;
   Vector3d homePos = pairHomeQuatPos.second;
-  vector<double> desiredQuatPos =
-      {homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
+  vector<double> desiredQuatPos = {
+      homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
 
   while (ros::ok() && !checkGoHome) {
     // set and get desired speed
@@ -292,7 +294,7 @@ bool Tasks::goHome() {
     pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(desiredQuatPos);
     checkGoHome = dynamicalSystem_->checkLinearDs;
 
-    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
 
     vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
     rosInterface_->sendState(desiredJointSpeed);
@@ -378,7 +380,7 @@ bool Tasks::TestSF() {
     pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
     dynamicalSystem_->checkLinearDs;
 
-    VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
     //TEST
     Eigen::VectorXd deltaTwist;
     deltaTwist = decoderWrench();

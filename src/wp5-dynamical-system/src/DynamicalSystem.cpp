@@ -139,8 +139,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     // cerr << "error" << (sqrt((pathPoint - centerLimitCycle_).norm())) << endl;
     if (sqrt((pathPoint - centerLimitCycle_).norm()) <= toleranceToNextPoint_) {
       iFollow_ += 1;
-      cout << "target number: " << iFollow_ << "reached"<< endl;
-
+      cout << "target number: " << iFollow_ << "reached" << endl;
     }
     updateLimitCycle3DPosVel_with2DLC(realPosOffset_, centerLimitCycle_);
 
@@ -218,6 +217,75 @@ void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d t
   for (int i = 0; i < 3; i++) {
     desiredVel_[i] = velocity(i);
   }
+}
+
+VectorXd DynamicalSystem::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Vector3d> pairQuatPos) {
+  Quaterniond quat2 = pairQuatPos.first;
+  Vector3d speed = pairQuatPos.second;
+  //orientation
+  Vector4d q1, q2;
+  q1 << quat1.w(), quat1.x(), quat1.y(), quat1.z(); //qw,qx,qy,qz
+  q2 << quat2.w(), quat2.x(), quat2.y(), quat2.z(); //qw,qx,qy,qz
+
+  Vector4d dqd = slerpQuaternion(q1, q2, 0.5);
+  Vector4d deltaQ = dqd - q1;
+
+  Vector4d qconj = q1;
+  qconj.segment(1, 3) = -1 * qconj.segment(1, 3);
+  Vector4d temp_angVel = quaternionProduct(deltaQ, qconj);
+
+  Vector3d tmp_angular_vel = temp_angVel.segment(1, 3);
+  double maxDq = 0.2;
+  if (tmp_angular_vel.norm() > maxDq)
+    tmp_angular_vel = maxDq * tmp_angular_vel.normalized();
+
+  double dsGain_ori = 0.50;
+  double theta_gq = (-.5 / (4 * maxDq * maxDq)) * tmp_angular_vel.transpose() * tmp_angular_vel;
+  Vector3d Omega_out = 2 * dsGain_ori * (1 + exp(theta_gq)) * tmp_angular_vel;
+
+  vector<double> V = {speed(0), speed(1), speed(2), Omega_out[0], Omega_out[1], Omega_out[2]};
+
+  double* pt = &V[0];
+  VectorXd VOut = Map<VectorXd>(pt, 6);
+
+  return VOut;
+}
+
+Matrix<double, 4, 1> DynamicalSystem::slerpQuaternion(Matrix<double, 4, 1>& q1, Matrix<double, 4, 1>& q2, double t) {
+  Matrix<double, 4, 1> q;
+
+  // Change sign of q2 if dot product of the two quaternions is negative => allows interpolating along the shortest path
+  if (q1.dot(q2) < 0.0) {
+    q2 = -q2;
+  }
+
+  double dotProduct = q1.dot(q2);
+  if (dotProduct > 1.0) {
+    dotProduct = 1.0;
+  } else if (dotProduct < -1.0) {
+    dotProduct = -1.0;
+  }
+
+  double omega = acos(dotProduct);
+
+  if (fabs(omega) < numeric_limits<double>::epsilon()) {
+    q = q1.transpose() + t * (q2 - q1).transpose();
+  } else {
+    q = (sin((1 - t) * omega) * q1 + sin(t * omega) * q2) / sin(omega);
+  }
+
+  return q;
+}
+
+Matrix<double, 4, 1> DynamicalSystem::quaternionProduct(Matrix<double, 4, 1> q1, Matrix<double, 4, 1> q2) {
+  Matrix<double, 4, 1> q;
+  q(0) = q1(0) * q2(0) - (q1.segment(1, 3)).dot(q2.segment(1, 3));
+
+  Matrix<double, 3, 1> q1Im = (q1.segment(1, 3));
+  Matrix<double, 3, 1> q2Im = (q2.segment(1, 3));
+  q.segment(1, 3) = q1(0) * q2Im + q2(0) * q1Im + q1Im.cross(q2Im);
+
+  return q;
 }
 
 // void DynamicalSystem::setBiasForce(VectorXd meanWrenchFromSensor) { meanWrenchFromSensor_ = meanWrenchFromSensor; }

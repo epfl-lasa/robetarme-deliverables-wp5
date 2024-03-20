@@ -25,6 +25,8 @@ public:
   void setToleranceNextPoint(double tol);
   void restartPath();
   std::vector<double> getFirstQuatPos();
+  Eigen::VectorXd getTwistFromDS(Eigen::Quaterniond quat1, std::pair<Eigen::Quaterniond, Eigen::Vector3d> pairQuatPos);
+
   // void setBiasForce(Eigen::VectorXd meanWrenchFromSensor);
 
 private:
@@ -55,4 +57,10 @@ private:
 
   double toolOffsetFromTarget_, velocityLimit_;
   bool targetReceived__ = false;
+
+  Eigen::Matrix<double, 4, 1> slerpQuaternion(Eigen::Matrix<double, 4, 1>& q1,
+                                              Eigen::Matrix<double, 4, 1>& q2,
+                                              double t);
+
+  Eigen::Matrix<double, 4, 1> quaternionProduct(Eigen::Matrix<double, 4, 1> q1, Eigen::Matrix<double, 4, 1> q2);
 };

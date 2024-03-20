@@ -119,15 +119,7 @@ public:
      * @return Vector representing the joint torques required for the given joint positions and velocities.
      */
   std::vector<double> getInvertVelocities(std::vector<double> vectJoint, Eigen::VectorXd speedEigen);
-  /**
-     * @brief Function for computing twist with dynamical system.
-     *
-     * @param Pos Vector representing the current position.
-     * @param quat2 Vector representing the target quaternion.
-     * @param speed Vector representing the target speed.
-     * @return Vector representing the computed speed.
-     */
-  Eigen::VectorXd getTwistFromDS(Eigen::Quaterniond quat1, std::pair<Eigen::Quaterniond, Eigen::Vector3d> pairQuatPos);
+
 
   // /**
   //  * @brief Low-level controller function for the robotic arm.
@@ -177,22 +169,5 @@ protected:
   // void initIK();
 
 private:
-  /**
-     * @brief Function to interpolating quaternion along the shortest path.
-     * @param q1 First quaternion.
-     * @param q2 Second quaternion.
-     * @param t .
-     * @return quaternion
-     */
-  Eigen::Matrix<double, 4, 1> slerpQuaternion(Eigen::Matrix<double, 4, 1>& q1,
-                                              Eigen::Matrix<double, 4, 1>& q2,
-                                              double t);
 
-  /**
-     * @brief Function fo computing the quaternion product.
-     * @param q1 First quaternion.
-     * @param q2 Second quaternion.
-     * @return quaternion product
-     */
-  Eigen::Matrix<double, 4, 1> quaternionProduct(Eigen::Matrix<double, 4, 1> q1, Eigen::Matrix<double, 4, 1> q2);
 };
