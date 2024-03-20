@@ -121,6 +121,6 @@ USER ${USER}
 RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${HOME}/catkin_ws && catkin build"
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 RUN echo "source ${HOME}/catkin_ws/devel/setup.bash" >> ~/.bashrc
-# RUN echo export ROS_MASTER_URI=http://10.42.0.187:11311 >> ~/.bashrc
-# RUN echo export ROS_IP=128.178.145.217 >> ~/.bashrc
+RUN echo export ROS_MASTER_URI=http://10.42.0.187:11311 >> ~/.bashrc
+RUN echo export ROS_IP=128.178.145.217 >> ~/.bashrc
 WORKDIR /home/${USER}/catkin_ws

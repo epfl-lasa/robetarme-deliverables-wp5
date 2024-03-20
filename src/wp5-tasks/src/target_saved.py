@@ -9,7 +9,7 @@ def publish_data():
 
     # Create publishers for the PoseStamped and WrenchStamped messages
     pose_publisher = rospy.Publisher('/vrpn_client_node/TargetRobetarme/pose_transform', PoseStamped, queue_size=10)
-    wrench_publisher = rospy.Publisher('/robotiq_ft_wrench', WrenchStamped, queue_size=10)
+    #wrench_publisher = rospy.Publisher('/robotiq_ft_wrench', WrenchStamped, queue_size=10)
 
     # Set the publishing rate (adjust as needed)
     rate = rospy.Rate(10)  # 10 Hz
@@ -43,7 +43,7 @@ def publish_data():
 
         # Publish the messages
         pose_publisher.publish(pose_msg)
-        wrench_publisher.publish(wrench_msg)
+        #wrench_publisher.publish(wrench_msg)
 
         # Sleep to control the publishing rate
         rate.sleep()

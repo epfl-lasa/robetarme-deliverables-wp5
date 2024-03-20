@@ -54,7 +54,9 @@ vector<double> RoboticArmUr5::lowLevelControllerSF(tuple<vector<double>, vector<
   Eigen::VectorXd twist = desiredTwist;
   Eigen::VectorXd deltaTwistFromWrenchTransfrom =
       transformWrenchToBase(deltaTwistFromWrench, pairFK.second, pairFK.first);
-  twist = twist + deltaTwistFromWrench;
+  cout << deltaTwistFromWrenchTransfrom << endl;
+
+  twist = twist + deltaTwistFromWrenchTransfrom;
   vector<double> desiredJointSpeed = IRoboticArmBase::getInvertVelocities(retrievedPosition, twist);
   return desiredJointSpeed;
 }

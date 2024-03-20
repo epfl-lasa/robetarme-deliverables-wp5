@@ -334,34 +334,38 @@ void Tasks::set_bias() {
 Eigen::VectorXd Tasks::decoderWrench() {
   vector<double> receivedWrench = rosInterface_->receiveWrench();
   Eigen::VectorXd outTwist(6);
+  double alpha = 0.25;
   for (size_t i = 0; i < receivedWrench.size(); ++i) {
     receivedWrench[i] -= biasWrench_[i];
     if (receivedWrench[i] > 5) {
-      outTwist(i) = -receivedWrench[i] * 0.01;
-      if (outTwist(i) < -0.15) {
-        outTwist(i) = -0.15;
-      }
+      outTwist(i) = receivedWrench[i] * 0.01;
+
     } else if (receivedWrench[i] < -5) {
       outTwist(i) = receivedWrench[i] * 0.01;
-      if (outTwist(i) > 0.15) {
-        outTwist(i) = 0.15;
-      }
+
     } else {
       outTwist(i) = 0;
     }
   }
-  double alpha = 0.25;
   outputTwist_ = alpha * outputTwist_ + (1 - alpha) * outTwist;
+
+  for (size_t i = 0; i < outputTwist_.size(); ++i) {
+    if (outputTwist_(i) < -0.15) {
+      outputTwist_(i) = -0.15;
+    }
+    if (outputTwist_(i) > 0.15) {
+      outputTwist_(i) = 0.15;
+    }
+  }
   return outputTwist_;
 }
 
 bool Tasks::TestSF() {
+  dynamicalSystem_->init = false;
   set_bias();
   vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
   cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
        << endl;
-
-  dynamicalSystem_->init = false;
 
   while (ros::ok() && !checkFirstPosition) {
     // set and get desired speed
@@ -378,7 +382,6 @@ bool Tasks::TestSF() {
     //TEST
     Eigen::VectorXd deltaTwist;
     deltaTwist = decoderWrench();
-    cout << deltaTwist << endl;
     vector<double> desiredJoint = roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, deltaTwist);
     //--------
 
