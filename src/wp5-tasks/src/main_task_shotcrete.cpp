@@ -22,35 +22,15 @@ using namespace Eigen;
 
 int main(int argc, char** argv) {
   bool valid = false;
-  double deltaTime = 0.001;
-  double rosFreq = 1 / deltaTime;
+  double rosFreq = 300;
   // init ros
   ros::init(argc, argv, "task_shotcrete");
   ros::NodeHandle nh;
-  ros::Rate loopRate(1 / deltaTime);
+  ros::Rate loopRate(rosFreq);
 
   // Get task configuration
   string yamlPath = string(WP5_TASKS_DIR) + "/config/config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
-  ros::Rate loop_rate(1 / deltaTime);
-
-  //init class for Tasks -----------------------------------------
-  unique_ptr<Tasks> tasks = nullptr;
-  tasks = make_unique<Tasks>(nh, rosFreq);
-
-  // comput path -----------------------------------------
-  tasks->computePathShotcrete();
-
-  //init shotcrete
-  bool valid = tasks->initTask("shotcrete");
-  // tasks->goHome();
-
-  if (valid) {
-    cout << "Iniitalization shotcrete  ok" << endl;
-  } else {
-    cout << "Iniitalization shotcrete  failed" << endl;
-    return 0;
-  }
 
   string robotName = config["shotcrete"]["robot_name"].as<string>();
 

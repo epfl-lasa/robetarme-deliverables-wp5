@@ -41,10 +41,16 @@ include_directories(
 
 # Add the main_temp node
 add_executable(wp5_main_temp_node
-  src/main_task.cpp
+  src/main_task_shotcrete.cpp
   src/ITaskBase.cpp
   src/TaskShotcrete.cpp
 )
+
+# add_executable(wp5_main_temp_node
+#   src/main_task_surface_finishing.cpp
+#   src/ITaskBase.cpp
+#   src/TaskShotcrete.cpp
+# )
 
 target_link_libraries(wp5_main_temp_node PRIVATE
   ${catkin_LIBRARIES}

@@ -1,6 +1,10 @@
 // clang-format off
 #include <pinocchio/fwd.hpp>
 // clang-format on
+#include <ros/ros.h>
+
+#include <tuple>
+
 #include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"
@@ -9,8 +13,6 @@
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
 #include "Tasks.h"
-#include <ros/ros.h>
-#include <tuple>
 
 using namespace std;
 using namespace Eigen;
@@ -41,7 +43,6 @@ int main(int argc, char** argv) {
     cout << "Iniitalization surface_finishing  failed" << endl;
     return 0;
   }
-
 
   tasks->TestSF();
 

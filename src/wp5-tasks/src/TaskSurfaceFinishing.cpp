@@ -1,9 +1,9 @@
-#include "TaskShotcrete.h"
+#include "TaskSurfaceFinishing.h"
 
 using namespace std;
 using namespace Eigen;
 
-TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName) : ITaskBase(nh, freq, robotName) {
+TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, string robotName) : ITaskBase(nh, freq, robotName) {
   // Create an unique pointer for the instance of DynamicalSystem
   dynamicalSystem_ = make_unique<DynamicalSystem>(rosFreq_);
 
@@ -17,7 +17,7 @@ TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName)
   boustrophedonServer_ = make_unique<BoustrophedonServer>(nh_);
 }
 
-bool TaskShotcrete::initialize() {
+bool TaskSurfaceFinishing::initialize() {
   cout << "initialization shotcrete ..." << endl;
 
   // if (roboticArm_->getName() == "Ur5") {
@@ -46,7 +46,7 @@ bool TaskShotcrete::initialize() {
   return checkInitialization;
 }
 
-bool TaskShotcrete::execute() {
+bool TaskSurfaceFinishing::execute() {
   cout << "preforming shotcrete ..." << endl;
   dynamicalSystem_->init = false;
   while (ros::ok() && !checkFinish) {
@@ -73,7 +73,7 @@ bool TaskShotcrete::execute() {
   return checkFinish;
 }
 
-bool TaskShotcrete::computePath() {
+bool TaskSurfaceFinishing::computePath() {
   cout << "computing path ..." << endl;
 
   // extract polygons for boustrophedon
@@ -148,7 +148,7 @@ bool TaskShotcrete::computePath() {
   return checkPath;
 }
 
-bool TaskShotcrete::goHomingPosition() {
+bool TaskSurfaceFinishing::goHomingPosition() {
   dynamicalSystem_->init = false;
   dynamicalSystem_->checkLinearDs = false;
   cout << "Go Home..." << endl;
@@ -183,7 +183,7 @@ bool TaskShotcrete::goHomingPosition() {
   return checkHomingPosition;
 }
 
-bool TaskShotcrete::goWorkingPosition() {
+bool TaskSurfaceFinishing::goWorkingPosition() {
   dynamicalSystem_->init = false;
   dynamicalSystem_->checkLinearDs = false;
 
@@ -214,4 +214,4 @@ bool TaskShotcrete::goWorkingPosition() {
   return checkWorkingPosition;
 }
 
-void TaskShotcrete::setHomingPosition(vector<double> desiredJoint) { cout << "setHomingPosition()" << endl; }
+void TaskSurfaceFinishing::setHomingPosition(vector<double> desiredJoint) { cout << "setHomingPosition()" << endl; }
