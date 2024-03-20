@@ -17,13 +17,12 @@ using namespace Eigen;
 
 int main(int argc, char** argv) {
 
-  double deltaTime = 0.001;
-  double rosFreq = 1 / deltaTime;
+  double rosFreq = 300;
   // init ros
   ros::init(argc, argv, "task_surface");
   ros::NodeHandle nh;
 
-  ros::Rate loop_rate(1 / deltaTime);
+  ros::Rate loop_rate(300);
 
   //init class for Tasks -----------------------------------------
   unique_ptr<Tasks> tasks = nullptr;
@@ -43,8 +42,6 @@ int main(int argc, char** argv) {
     return 0;
   }
 
-  tasks->set_bias();
-  
 
   tasks->TestSF();
 

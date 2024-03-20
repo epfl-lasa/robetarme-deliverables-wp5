@@ -304,19 +304,21 @@ bool Tasks::goHome() {
 }
 
 void Tasks::set_bias() {
-  int meanNum = 500;
+  int meanNum = 1000;
   std::cout << "Recording F/T sensor bias. Please do not touch the robot for 3 seconds..." << std::endl;
 
   // Initialize wrenchActual and receivedWrench vectors
   std::vector<double> wrenchActual(6, 0.0); // Assuming 6 elements in the wrench
-  std::vector<double> receivedWrench = rosInterface_->receiveWrench();
+  std::vector<double> receivedWrench;
 
   int meanIteration = 0;
   while (ros::ok() && (meanIteration < meanNum)) {
+    receivedWrench = rosInterface_->receiveWrench();
     for (size_t i = 0; i < wrenchActual.size(); ++i) {
       wrenchActual[i] += receivedWrench[i] / meanNum;
     }
     meanIteration += 1;
+    loopRate_.sleep();
   }
 
   // Assign the calculated bias to biasWrench_
@@ -354,6 +356,7 @@ Eigen::VectorXd Tasks::decoderWrench() {
 }
 
 bool Tasks::TestSF() {
+  set_bias();
   vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
   cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
        << endl;
