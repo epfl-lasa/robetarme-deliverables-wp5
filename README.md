@@ -7,6 +7,7 @@ The repository comprises multiple packages written in C++. Currently, it is desi
 ## Installation
 
 To install the dependencies, you have two options:
+
 Using Docker Compose:
 We utilize Docker Compose for managing the Docker container. Follow these steps to set up the environment at the roots of the folder:
 
