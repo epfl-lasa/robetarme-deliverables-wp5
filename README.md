@@ -27,8 +27,25 @@ Manual Installation:
 If you prefer to install the dependencies directly onto your machine, you can use the provided scripts. Navigate to the scripts directory and run the appropriate script for your operating systemChoose the method that best fits your needs and environment to get started with the Robetarme WP5 Deliverable repository.
 ## Usage
 
-Once the dependencies are installed, you can start using the codebase. Each package contains its own set of functionalities. Refer to the documentation within each package for detailed usage instructions.
-## Packages
+There are several ways you can utilize the packages within this repository:
+
+- Static Library Integration:
+
+You can directly use the packages as a static library in your codebase. Simply include the necessary headers and link against the compiled library.
+
+- Convenience Functions:
+
+We've prepared some convenience functions for easy integration into your projects. These functions are well-documented using Doxygen. You can find the documentation here.
+
+- Finite State Machine (FSM):
+
+For the shotcrete task, we've implemented a Finite State Machine (FSM) that manages all the functions for you. This simplifies the task execution process and provides an organized workflow. Currently, the FSM is under development for the metal additive and surface finishing tasks.
+
+- Special Docker for Triggering FSM:
+
+Additionally, we provide a special Docker container designed to run an action and wait for specific commands to trigger the Finite State Machine (FSM). This container streamlines the execution process and facilitates seamless integration with the FSM functionality.
+
+Choose the method that best fits your project requirements and workflow. Don't hesitate to refer to the documentation for detailed information on each function and module.## Packages
 
 Here's a brief overview of the library included in this repository:
 
