@@ -22,7 +22,7 @@ using namespace std;
 
 RoboticArmIiwa7::RoboticArmIiwa7() {
   pathUrdf_ = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/iiwa7.urdf";
-  robotName_ = "iiwa7";
+  robotName_ = "Iiwa7";
   tipLink_ = "iiwa_link_ee";
   tipJoint_ = "iiwa_joint_ee";
   baseLink_ = "iiwa_link_0";

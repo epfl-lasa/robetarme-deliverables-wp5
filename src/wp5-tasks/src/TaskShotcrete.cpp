@@ -20,7 +20,8 @@ TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName)
 bool TaskShotcrete::initialize() {
   cout << "initialization shotcrete ..." << endl;
 
-  if (roboticArm_->getName() == "Ur5") {
+  // if (roboticArm_->getName() == "Ur5") {
+  if (true) {
     roboticArm_ = make_unique<RoboticArmUr5>();
     if (roboticArm_) {
       cout << "----------------------Ur5 chosen and well initializate----------------------------------" << endl;
@@ -47,7 +48,7 @@ bool TaskShotcrete::initialize() {
 
 bool TaskShotcrete::execute() {
   cout << "preforming shotcrete ..." << endl;
-
+  dynamicalSystem_->init = false;
   while (ros::ok() && !checkFinish) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
@@ -149,6 +150,7 @@ bool TaskShotcrete::computePath() {
 
 bool TaskShotcrete::goHomingPosition() {
   dynamicalSystem_->init = false;
+  dynamicalSystem_->checkLinearDs = false;
   cout << "Go Home..." << endl;
   // get home position
   pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm_->getFK(homeJoint_);
@@ -165,8 +167,8 @@ bool TaskShotcrete::goHomingPosition() {
     pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
     dynamicalSystem_->setCartPose(pairActualQuatPos);
-
     pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(desiredQuatPos);
+    
     checkHomingPosition = dynamicalSystem_->checkLinearDs;
 
     VectorXd twistDesiredEigen = roboticArm_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
@@ -183,9 +185,10 @@ bool TaskShotcrete::goHomingPosition() {
 
 bool TaskShotcrete::goWorkingPosition() {
   vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
+  cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
+       << endl;
 
-  cout << "Go to first position :" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6] << endl;
-
+  dynamicalSystem_->init = false;
   while (ros::ok() && !checkWorkingPosition) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;

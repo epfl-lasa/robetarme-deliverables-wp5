@@ -20,7 +20,7 @@ using namespace std;
 
 RoboticArmUr5::RoboticArmUr5() {
   pathUrdf_ = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/ur5.urdf";
-  robotName_ = "ur5_robot";
+  robotName_ = "Ur5";
   tipLink_ = "tool0";
   tipJoint_ = "wrist_3_joint";
   baseLink_ = "base";
@@ -28,7 +28,7 @@ RoboticArmUr5::RoboticArmUr5() {
       "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
   referenceFrame_ = "base";
   nJoint_ = 6;
-  originalHomeJoint = vector<double>(nJoint_, 0.0);
+  originalHomeJoint = {0.0, -1.57, 0.0, -1.57, 0.0, 0.0};
   model_ = make_unique<robot_model::Model>(robotName_, pathUrdf_);
   double damp = 1e-6;
   double alpha = 0.5;

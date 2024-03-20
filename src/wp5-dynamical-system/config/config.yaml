@@ -1,12 +1,12 @@
 
 flowRadius: 0.03
 limitCycleRadius: 0.03
-limitCycleSpeed: 6
+limitCycleSpeed: 9
 convRate: 10
 
-linearSpeed: 0.1
+linearSpeed: 0.05
 
-toolOffsetFromTarget: 0.9
+toolOffsetFromTarget: 0.7
 
-toleranceToNextPoint: 0.15
+toleranceToNextPoint: 0.1
 velocityLimit: 1.5
