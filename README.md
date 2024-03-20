@@ -8,10 +8,7 @@ The repository comprises multiple packages written in C++. Currently, it is desi
 
 To install the dependencies, you have two options:
     Using Docker Compose:
-
     We utilize Docker Compose for managing the Docker container. Follow these steps to set up the environment at the roots of the folder:
-
-    bash
 
     # Build the Docker containers
     docker-compose build
@@ -22,12 +19,12 @@ To install the dependencies, you have two options:
     # Access the Docker container's shell
     docker exec -it robetarme-deliverables-wp5-ros-1 bash
 
-    This will set up the necessary environment within Docker for running the codebase.
 
+This will set up the necessary environment within Docker for running the codebase.
 
-Manual Installation:
+    Manual Installation:
 
-    If you prefer to install the dependencies directly onto your machine, you can use the provided scripts. Navigate to the scripts directory and run the appropriate script for your operating systemChoose the method that best fits your needs and environment to get started with the Robetarme WP5 Deliverable repository.
+If you prefer to install the dependencies directly onto your machine, you can use the provided scripts. Navigate to the scripts directory and run the appropriate script for your operating systemChoose the method that best fits your needs and environment to get started with the Robetarme WP5 Deliverable repository.
 ## Usage
 
 Once the dependencies are installed, you can start using the codebase. Each package contains its own set of functionalities. Refer to the documentation within each package for detailed usage instructions.
