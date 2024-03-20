@@ -135,10 +135,12 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     double dt = 1 / fs_;
 
     centerLimitCycle_ += dVel * dt;
-    cerr << "target number: " << iFollow_ << endl;
-    cerr << "error" << (sqrt((pathPoint - centerLimitCycle_).norm())) << endl;
+    // cerr << "target number: " << iFollow_ << endl;
+    // cerr << "error" << (sqrt((pathPoint - centerLimitCycle_).norm())) << endl;
     if (sqrt((pathPoint - centerLimitCycle_).norm()) <= toleranceToNextPoint_) {
       iFollow_ += 1;
+      cout << "target number: " << iFollow_ << "reached"<< endl;
+
     }
     updateLimitCycle3DPosVel_with2DLC(realPosOffset_, centerLimitCycle_);
 
