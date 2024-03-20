@@ -32,13 +32,13 @@ Once the dependencies are installed, you can start using the codebase. Each pack
 
 Here's a brief overview of the library included in this repository:
 
-Planner: Contains algorithms for path planning.
-Dynamical System: Implements dynamical systems for controlling robotic motions.
-Controller: Provides controllers for shotcrete, surface finishing, and metal additive tasks.
-ROS Interface: Handles communication with ROS, providing an interface for interacting with the robotic system.
-Safety: Implements safety mechanisms to ensure the safe operation of the robotic system.
-Shared Control: Provides shared control algorithms for collaborative human-robot interaction.
-Perception: Implements perception algorithms for environment sensing and object detection.
+- Planner: Contains algorithms for path planning.
+- Dynamical System: Implements dynamical systems for controlling robotic motions.
+- Controller: Provides controllers for shotcrete, surface finishing, and metal additive tasks.
+- ROS Interface: Handles communication with ROS, providing an interface for interacting with the robotic system.
+- Safety: Implements safety mechanisms to ensure the safe operation of the robotic system.
+- Shared Control: Provides shared control algorithms for collaborative human-robot interaction.
+- Perception: Implements perception algorithms for environment sensing and object detection.
 
 Each package contributes to different aspects of the robotic workflow, enabling comprehensive control and operation of robotic tasks. Refer to the documentation within each package for detailed usage instructions.
 
