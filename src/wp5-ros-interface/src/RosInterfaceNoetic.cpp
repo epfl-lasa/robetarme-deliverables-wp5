@@ -70,7 +70,7 @@ void RosInterfaceNoetic::jointStateCallback(const sensor_msgs::JointState::Const
     jointsSpeed_ = msg->velocity;    // Update the speed vector
     jointsTorque_ = msg->effort;     // Update the torque vector
 
-    if (robotName_ == "Ur5") {
+    if (robotName_ == "ur5_robot") {
       // swap the position to have each joint in the kinematic order, ONLY FOR UR%
       swap(jointsPosition_[0], jointsPosition_[2]);
       swap(jointsSpeed_[0], jointsSpeed_[2]);
@@ -99,7 +99,7 @@ void RosInterfaceNoetic::FTCallback(const geometry_msgs::WrenchStamped::ConstPtr
 
   } else {
     ROS_WARN("Received ftsensor data is empty.");
-    wrenchSensor_ = {0,0,0,0,0,0};
+    wrenchSensor_ = {0, 0, 0, 0, 0, 0};
   }
 }
 

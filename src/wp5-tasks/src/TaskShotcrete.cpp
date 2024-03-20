@@ -30,7 +30,7 @@ bool TaskShotcrete::initialize() {
     } else {
       cout << "Error: roboticArm_ is null." << endl;
     }
-  } else if (roboticArm_->getName() == "Iiwa7") {
+  } else if (roboticArm_->getName() == "iiwa7") {
     roboticArm_ = make_unique<RoboticArmIiwa7>();
     if (roboticArm_) {
       cout << "----------------------Iiwa7 chosen and well initializate----------------------------------" << endl;
@@ -156,6 +156,7 @@ bool TaskShotcrete::goHomingPosition() {
   pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm_->getFK(homeJoint_);
   Quaterniond homeQuat = pairHomeQuatPos.first;
   Vector3d homePos = pairHomeQuatPos.second;
+  cout << homePos<< endl;
   vector<double> desiredQuatPos = {
       homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
 

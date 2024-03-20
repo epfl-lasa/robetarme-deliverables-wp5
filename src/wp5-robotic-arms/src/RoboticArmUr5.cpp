@@ -20,7 +20,7 @@ using namespace std;
 
 RoboticArmUr5::RoboticArmUr5() {
   pathUrdf_ = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/ur5.urdf";
-  robotName_ = "Ur5";
+  robotName_ = "ur5_robot";
   tipLink_ = "tool0";
   tipJoint_ = "wrist_3_joint";
   baseLink_ = "base";

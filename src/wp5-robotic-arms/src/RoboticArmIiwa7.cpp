@@ -22,7 +22,7 @@ using namespace std;
 
 RoboticArmIiwa7::RoboticArmIiwa7() {
   pathUrdf_ = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/iiwa7.urdf";
-  robotName_ = "Iiwa7";
+  robotName_ = "iiwa7";
   tipLink_ = "iiwa_link_ee";
   tipJoint_ = "iiwa_joint_ee";
   baseLink_ = "iiwa_link_0";
@@ -48,7 +48,7 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   string yamlPath = string(WP5_ROBOTIC_ARMS_DIR) + "/config/robot_config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
 
-  YAML::Node robotNode = config["Iiwa7"];
+  YAML::Node robotNode = config["iiwa7"];
 
   double linearPrincipledamping = robotNode["linear_principle_damping"].as<double>();
   double linearOrthogonalDamping = robotNode["linear_orthogonal_damping"].as<double>();
