@@ -46,9 +46,9 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   feedbackState_ = state_representation::CartesianState(robotName_, referenceFrame_);
 
   string yamlPath = string(WP5_ROBOTIC_ARMS_DIR) + "/config/robot_config.yaml";
-  YAML::Node config = YAML::LoadFile(yamlPath);
 
-  YAML::Node robotNode = config["iiwa7"];
+  YAML::Node config = YAML::LoadFile(yamlPath);
+  YAML::Node robotNode = config[robotName_];
 
   double linearPrincipledamping = robotNode["linear_principle_damping"].as<double>();
   double linearOrthogonalDamping = robotNode["linear_orthogonal_damping"].as<double>();

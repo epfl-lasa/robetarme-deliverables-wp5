@@ -23,7 +23,8 @@ using namespace Eigen;
 int main(int argc, char** argv) {
   bool valid = false;
   double rosFreq = 300;
-  // init ros
+
+  // Init ros
   ros::init(argc, argv, "task_shotcrete");
   ros::NodeHandle nh;
   ros::Rate loopRate(rosFreq);

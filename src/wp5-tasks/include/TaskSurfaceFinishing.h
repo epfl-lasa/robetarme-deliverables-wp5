@@ -21,14 +21,9 @@ class TaskSurfaceFinishing : public ITaskBase {
 public:
   TaskSurfaceFinishing(ros::NodeHandle& n, double freq, std::string robotName);
 
-  bool initialize();
-  bool execute();
   bool computePath();
+  bool execute();
 
-  bool goHomingPosition();
-  bool goWorkingPosition();
-
-  void setHomingPosition(std::vector<double> desiredJoint);
   bool TestSF();
   void set_bias();
 

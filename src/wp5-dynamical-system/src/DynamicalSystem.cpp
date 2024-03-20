@@ -16,17 +16,15 @@ void DynamicalSystem::parameterInitialization() {
   YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file
-  CycleRadiusLC_ = config["limitCycleRadius"].as<double>();
-  CycleSpeedLC_ = config["limitCycleSpeed"].as<double>();
+  cycleRadiusLC_ = config["limitCycleRadius"].as<double>();
+  cycleSpeedLC_ = config["limitCycleSpeed"].as<double>();
   linearVelExpected_ = config["linearSpeed"].as<double>();
-  ConvergenceRateLC_ = config["convRate"].as<double>();
+  convergenceRateLC_ = config["convRate"].as<double>();
   toleranceToNextPoint_ = config["toleranceToNextPoint"].as<double>();
 
   toolOffsetFromTarget_ = config["toolOffsetFromTarget"].as<double>();
   velocityLimit_ = config["velocityLimit"].as<double>();
 }
-
-std::vector<double> DynamicalSystem::getFirstQuatPos() { return firstQuatPos_; }
 
 void DynamicalSystem::setPath(vector<vector<double>> pathInput) {
   desiredPath_ = pathInput;
@@ -45,14 +43,7 @@ void DynamicalSystem::setPath(vector<vector<double>> pathInput) {
   desiredOriVelocityFiltered_(3) = firstQuatPos_[3];
 }
 
-void DynamicalSystem::setLimitCycleSpeedConv(double angSpeed, double conv) {
-  ConvergenceRateLC_ = conv;
-  CycleSpeedLC_ = angSpeed;
-}
-void DynamicalSystem::setLimitCycleRadius(double rad) { CycleRadiusLC_ = rad; }
-
 void DynamicalSystem::setCartPose(pair<Quaterniond, Vector3d> pairQuatPos) {
-
   realQuat_ = pairQuatPos.first;
   realPos_ = pairQuatPos.second;
 
@@ -63,12 +54,29 @@ void DynamicalSystem::setCartPose(pair<Quaterniond, Vector3d> pairQuatPos) {
   Matrix3d rotation_matrix = normalizedQuat.toRotationMatrix();
 
   realPosOffset_ = realPos_ + toolOffsetFromTarget_ * rotation_matrix.col(2);
-  if (iFollow_ == 0 && !init) {
+  if (iFollow_ == 0 && !init_) {
     centerLimitCycle_ = realPosOffset_;
-    init = true;
+    init_ = true;
   }
 }
-//----------------define all function-------------------------------------
+
+// void DynamicalSystem::setBiasForce(VectorXd meanWrenchFromSensor) { meanWrenchFromSensor_ = meanWrenchFromSensor; }
+void DynamicalSystem::setLinearSpeed(double speed) { linearVelExpected_ = speed; }
+
+void DynamicalSystem::setLimitCycleSpeedConv(double angSpeed, double conv) {
+  convergenceRateLC_ = conv;
+  cycleSpeedLC_ = angSpeed;
+}
+
+void DynamicalSystem::setLimitCycleRadius(double rad) { cycleRadiusLC_ = rad; }
+
+void DynamicalSystem::setToleranceNextPoint(double tol) { toleranceToNextPoint_ = tol; }
+
+bool DynamicalSystem::isFinished() const { return finish_; }
+
+bool DynamicalSystem::isInitialized() const { return init_; }
+
+bool DynamicalSystem::checkLinearDs() const { return checkLinearDs_; }
 
 // this function take the path comoute from server and create a linear DS
 //when the eef is close the the next point it change the goal until the last point of the path
@@ -77,13 +85,14 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   double norm;
   double scaleVel;
   Vector3d dVel;
-  pathPoint(0) = desiredQuatPos[4];
-  pathPoint(1) = desiredQuatPos[5];
-  pathPoint(2) = desiredQuatPos[6];
 
-  dx = pathPoint(0) - realPosOffset_(0);
-  dy = pathPoint(1) - realPosOffset_(1);
-  dz = pathPoint(2) - realPosOffset_(2);
+  pathPoint_(0) = desiredQuatPos[4];
+  pathPoint_(1) = desiredQuatPos[5];
+  pathPoint_(2) = desiredQuatPos[6];
+
+  dx = pathPoint_(0) - realPosOffset_(0);
+  dy = pathPoint_(1) - realPosOffset_(1);
+  dz = pathPoint_(2) - realPosOffset_(2);
 
   norm = sqrt(dx * dx + dy * dy + dz * dz);
   scaleVel = linearVelExpected_ / norm;
@@ -92,11 +101,11 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   dVel(1) = dy * scaleVel;
   dVel(2) = dz * scaleVel;
 
-  if (sqrt((pathPoint - realPosOffset_).norm()) <= toleranceToNextPoint_) {
+  if (sqrt((pathPoint_ - realPosOffset_).norm()) <= toleranceToNextPoint_) {
     dVel(0) = 0;
     dVel(1) = 0;
     dVel(2) = 0;
-    checkLinearDs = true;
+    checkLinearDs_ = true;
   }
 
   // Fill desiredQuat with the values from desiredOriVelocityFiltered_
@@ -117,13 +126,13 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
 
   if (iFollow_ < desiredPath_.size()) {
     vector<double> desiredQuatPos = desiredPath_[iFollow_];
-    pathPoint(0) = desiredQuatPos[4];
-    pathPoint(1) = desiredQuatPos[5];
-    pathPoint(2) = desiredQuatPos[6];
+    pathPoint_(0) = desiredQuatPos[4];
+    pathPoint_(1) = desiredQuatPos[5];
+    pathPoint_(2) = desiredQuatPos[6];
 
-    dx = pathPoint(0) - realPosOffset_(0);
-    dy = pathPoint(1) - realPosOffset_(1);
-    dz = pathPoint(2) - realPosOffset_(2);
+    dx = pathPoint_(0) - realPosOffset_(0);
+    dy = pathPoint_(1) - realPosOffset_(1);
+    dz = pathPoint_(2) - realPosOffset_(2);
 
     norm = sqrt(dx * dx + dy * dy + dz * dz);
     scaleVel = linearVelExpected_ / norm;
@@ -136,12 +145,12 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
 
     centerLimitCycle_ += dVel * dt;
     // cerr << "target number: " << iFollow_ << endl;
-    // cerr << "error" << (sqrt((pathPoint - centerLimitCycle_).norm())) << endl;
-    if (sqrt((pathPoint - centerLimitCycle_).norm()) <= toleranceToNextPoint_) {
+    // cerr << "error" << (sqrt((pathPoint_ - centerLimitCycle_).norm())) << endl;
+    if (sqrt((pathPoint_ - centerLimitCycle_).norm()) <= toleranceToNextPoint_) {
       iFollow_ += 1;
       cout << "target number: " << iFollow_ << "reached" << endl;
     }
-    updateLimitCycle3DPosVel_with2DLC(realPosOffset_, centerLimitCycle_);
+    updateLimitCycle3DPosVelWith2DLC(realPosOffset_, centerLimitCycle_);
 
   } else {
 
@@ -151,7 +160,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     desiredVel_(0) = 0;
     desiredVel_(1) = 0;
     desiredVel_(2) = 0;
-    finish = true;
+    finish_ = true;
   }
 
   if (desiredVel_.norm() > velocityLimit_) {
@@ -169,7 +178,42 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   // return make_pair(desiredQuat, dVel);
 }
 
-void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d targetPoseCircleDS) {
+std::vector<double> DynamicalSystem::getFirstQuatPos() const { return firstQuatPos_; }
+
+VectorXd DynamicalSystem::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Vector3d> pairQuatPos) {
+  Quaterniond quat2 = pairQuatPos.first;
+  Vector3d speed = pairQuatPos.second;
+
+  //orientation
+  Vector4d q1, q2;
+  q1 << quat1.w(), quat1.x(), quat1.y(), quat1.z(); //qw,qx,qy,qz
+  q2 << quat2.w(), quat2.x(), quat2.y(), quat2.z(); //qw,qx,qy,qz
+
+  Vector4d dqd = slerpQuaternion_(q1, q2, 0.5);
+  Vector4d deltaQ = dqd - q1;
+
+  Vector4d qconj = q1;
+  qconj.segment(1, 3) = -1 * qconj.segment(1, 3);
+  Vector4d tempAngVel = quaternionProduct_(deltaQ, qconj);
+
+  Vector3d tmpAngularVel = tempAngVel.segment(1, 3);
+  double maxDq = 0.2;
+  if (tmpAngularVel.norm() > maxDq)
+    tmpAngularVel = maxDq * tmpAngularVel.normalized();
+
+  double dsGainOri = 0.50;
+  double thetaGq = (-.5 / (4 * maxDq * maxDq)) * tmpAngularVel.transpose() * tmpAngularVel;
+  Vector3d omegaOut = 2 * dsGainOri * (1 + exp(thetaGq)) * tmpAngularVel;
+
+  vector<double> v = {speed(0), speed(1), speed(2), omegaOut[0], omegaOut[1], omegaOut[2]};
+
+  double* pt = &v[0];
+  VectorXd vOut = Map<VectorXd>(pt, 6);
+
+  return vOut;
+}
+
+void DynamicalSystem::updateLimitCycle3DPosVelWith2DLC(Vector3d pos, Vector3d targetPoseCircleDS) {
   float a[2] = {1., 1.};
   float norm_a = sqrt(a[0] * a[0] + a[1] * a[1]);
   for (int i = 0; i < 2; i++) a[i] = a[i] / norm_a;
@@ -196,16 +240,16 @@ void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d t
 
   x_vel = 0;
   y_vel = 0;
-  z_vel = -ConvergenceRateLC_ * posEig(2);
+  z_vel = -convergenceRateLC_ * posEig(2);
 
   R = sqrt(posEig(0) * posEig(0) + posEig(1) * posEig(1));
   T = atan2(posEig(1), posEig(0));
 
-  double Rdot = -ConvergenceRateLC_ * (R - CycleRadiusLC_);
-  double Tdot = CycleSpeedLC_;
+  double Rdot = -convergenceRateLC_ * (R - cycleRadiusLC_);
+  double tDot = cycleSpeedLC_;
 
-  x_vel = Rdot * cos(T) - R * Tdot * sin(T);
-  y_vel = Rdot * sin(T) + R * Tdot * cos(T);
+  x_vel = Rdot * cos(T) - R * tDot * sin(T);
+  y_vel = Rdot * sin(T) + R * tDot * cos(T);
   cricle_plane_error = posEig(2);
 
   velocity(0) = x_vel;
@@ -218,40 +262,13 @@ void DynamicalSystem::updateLimitCycle3DPosVel_with2DLC(Vector3d pos, Vector3d t
     desiredVel_[i] = velocity(i);
   }
 }
+void DynamicalSystem::resetInit() { init_ = false; };
 
-VectorXd DynamicalSystem::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Vector3d> pairQuatPos) {
-  Quaterniond quat2 = pairQuatPos.first;
-  Vector3d speed = pairQuatPos.second;
-  //orientation
-  Vector4d q1, q2;
-  q1 << quat1.w(), quat1.x(), quat1.y(), quat1.z(); //qw,qx,qy,qz
-  q2 << quat2.w(), quat2.x(), quat2.y(), quat2.z(); //qw,qx,qy,qz
+void DynamicalSystem::resetCheckLinearDs() { checkLinearDs_ = false; };
 
-  Vector4d dqd = slerpQuaternion(q1, q2, 0.5);
-  Vector4d deltaQ = dqd - q1;
+void DynamicalSystem::restartPath() { iFollow_ = 0; }
 
-  Vector4d qconj = q1;
-  qconj.segment(1, 3) = -1 * qconj.segment(1, 3);
-  Vector4d temp_angVel = quaternionProduct(deltaQ, qconj);
-
-  Vector3d tmp_angular_vel = temp_angVel.segment(1, 3);
-  double maxDq = 0.2;
-  if (tmp_angular_vel.norm() > maxDq)
-    tmp_angular_vel = maxDq * tmp_angular_vel.normalized();
-
-  double dsGain_ori = 0.50;
-  double theta_gq = (-.5 / (4 * maxDq * maxDq)) * tmp_angular_vel.transpose() * tmp_angular_vel;
-  Vector3d Omega_out = 2 * dsGain_ori * (1 + exp(theta_gq)) * tmp_angular_vel;
-
-  vector<double> V = {speed(0), speed(1), speed(2), Omega_out[0], Omega_out[1], Omega_out[2]};
-
-  double* pt = &V[0];
-  VectorXd VOut = Map<VectorXd>(pt, 6);
-
-  return VOut;
-}
-
-Matrix<double, 4, 1> DynamicalSystem::slerpQuaternion(Matrix<double, 4, 1>& q1, Matrix<double, 4, 1>& q2, double t) {
+Matrix<double, 4, 1> DynamicalSystem::slerpQuaternion_(Matrix<double, 4, 1>& q1, Matrix<double, 4, 1>& q2, double t) {
   Matrix<double, 4, 1> q;
 
   // Change sign of q2 if dot product of the two quaternions is negative => allows interpolating along the shortest path
@@ -277,7 +294,7 @@ Matrix<double, 4, 1> DynamicalSystem::slerpQuaternion(Matrix<double, 4, 1>& q1, 
   return q;
 }
 
-Matrix<double, 4, 1> DynamicalSystem::quaternionProduct(Matrix<double, 4, 1> q1, Matrix<double, 4, 1> q2) {
+Matrix<double, 4, 1> DynamicalSystem::quaternionProduct_(Matrix<double, 4, 1> q1, Matrix<double, 4, 1> q2) {
   Matrix<double, 4, 1> q;
   q(0) = q1(0) * q2(0) - (q1.segment(1, 3)).dot(q2.segment(1, 3));
 
@@ -287,8 +304,3 @@ Matrix<double, 4, 1> DynamicalSystem::quaternionProduct(Matrix<double, 4, 1> q1,
 
   return q;
 }
-
-// void DynamicalSystem::setBiasForce(VectorXd meanWrenchFromSensor) { meanWrenchFromSensor_ = meanWrenchFromSensor; }
-void DynamicalSystem::setLinearSpeed(double speed) { linearVelExpected_ = speed; }
-void DynamicalSystem::setToleranceNextPoint(double tol) { toleranceToNextPoint_ = tol; }
-void DynamicalSystem::restartPath() { iFollow_ = 0; }

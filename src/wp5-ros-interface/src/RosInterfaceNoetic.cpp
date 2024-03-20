@@ -21,9 +21,8 @@
 using namespace std;
 
 RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : nh_(n), robotName_(robotName) {
-  // Load parameters from YAML file
+  // Try to load parameters from YAML file
   try {
-    // Load parameters from YAML file
     string yamlPath = string(WP5_ROS_INTERFACE_DIR) + "/config/config.yaml";
     YAML::Node config = YAML::LoadFile(yamlPath);
 
@@ -57,11 +56,11 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : n
   }
 
   // Wait for the callback to be called at least once
-  while (!initJoint_) {
-    ROS_INFO("Waiting for the callback to be called...");
-    ros::Duration(1.0).sleep(); // Sleep for 1 second before checking again
-    ros::spinOnce();            // Ensure the callback is called
-  }
+  // while (!initJoint_) {
+  //   ROS_INFO("Waiting for the callback to be called...");
+  //   ros::Duration(1.0).sleep(); // Sleep for 1 second before checking again
+  //   ros::spinOnce();            // Ensure the callback is called
+  // }
 }
 
 void RosInterfaceNoetic::jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg) {

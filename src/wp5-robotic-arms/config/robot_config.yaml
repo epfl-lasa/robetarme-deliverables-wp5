@@ -1,4 +1,4 @@
-Ur5:
+ur5_robot:
   robot_name: "ur5_robot"
   controller_joint_names: ["shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"]
   reference_frame: "base"
@@ -11,7 +11,7 @@ Ur5:
   angular_stiffness: 100.0
   angular_damping: 100.0
 
-Iiwa7:
+iiwa7:
   controller_joint_names: ['iiwa_joint_1', 'iiwa_joint_2', 'iiwa_joint_3', 'iiwa_joint_4', 'iiwa_joint_5', 'iiwa_joint_6', 'iiwa_joint_7' ]
   robot_name: "iiwa7"
   reference_frame: "base"

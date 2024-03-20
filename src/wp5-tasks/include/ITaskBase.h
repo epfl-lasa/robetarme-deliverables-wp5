@@ -47,25 +47,34 @@ public:
 
   ITaskBase(ros::NodeHandle& nh, double freq, std::string robotName);
 
-  virtual bool initialize() = 0;
+  bool initialize();
   virtual bool computePath() = 0;
   virtual bool execute() = 0;
 
-  virtual bool goHomingPosition() = 0;
-  virtual bool goWorkingPosition() = 0;
-
-  virtual void setHomingPosition(std::vector<double> desiredJoint) = 0;
+  virtual bool goHomingPosition() const;
+  virtual bool goWorkingPosition() const;
 
 protected:
-  ros::NodeHandle nh_;
-  ros::Rate loopRate_;
+  double getRosFrequency_() const;
+  ros::Rate getRosLoopRate_() const;
+  ros::NodeHandle getRosNodehandle_() const;
+  std::vector<double> getHomeJoint_() const;
 
-  double rosFreq_;
-  std::vector<double> homeJoint_;
+  void setHomeJoint_(std::vector<double> desiredJoint);
+
+  // Create an unique pointer for the instance of DynamicalSystem
+  std::unique_ptr<DynamicalSystem> dynamicalSystem_ = nullptr;
 
   // Create an unique pointer for the instance of IRoboticArmBase
   std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;
 
   // Create an unique pointer for the instance of RosInterfaceNoetic
   std::unique_ptr<RosInterfaceNoetic> rosInterface_ = nullptr;
+
+private:
+  ros::NodeHandle nh_;
+  ros::Rate loopRate_;
+
+  double rosFreq_;
+  std::vector<double> homeJoint_;
 };

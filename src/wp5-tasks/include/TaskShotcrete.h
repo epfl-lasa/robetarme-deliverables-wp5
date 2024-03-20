@@ -21,19 +21,10 @@ class TaskShotcrete : public ITaskBase {
 public:
   TaskShotcrete(ros::NodeHandle& n, double freq, std::string robotName);
 
-  bool initialize();
-  bool execute();
   bool computePath();
-
-  bool goHomingPosition();
-  bool goWorkingPosition();
-
-  void setHomingPosition(std::vector<double> desiredJoint);
+  bool execute();
 
 private:
-  // Create an unique pointer for the instance of DynamicalSystem
-  std::unique_ptr<DynamicalSystem> dynamicalSystem_ = nullptr;
-
   // Create an unique pointer for the instance of TargetExtraction
   std::unique_ptr<TargetExtraction> targetExtraction_ = nullptr;
 

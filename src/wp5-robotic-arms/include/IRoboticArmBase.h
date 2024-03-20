@@ -14,10 +14,8 @@
 // clang-format off
 #include <pinocchio/fwd.hpp>
 // clang-format on
-#include "controllers/ControllerFactory.hpp"
-#include "state_representation/parameters/ParameterInterface.hpp"
-#include "state_representation/space/cartesian/CartesianState.hpp"
-#include "state_representation/space/joint/JointState.hpp"
+#include <yaml-cpp/yaml.h>
+
 #include <cmath>
 #include <dynamical_systems/DynamicalSystemFactory.hpp>
 #include <eigen3/Eigen/Dense>
@@ -27,19 +25,14 @@
 #include <robot_model/Model.hpp>
 #include <sstream>
 #include <string>
-#include <yaml-cpp/yaml.h>
 
 // #include <trac_ik/trac_ik.hpp>
 #include <vector>
 
-enum RobotType : int8_t {
-  ROBOT_UNDEFINED = -1,
-  IIWA7,
-  UR5,
-  CR7,
-  COBOD,
-  NB_ROBOTS // Keep at the end of enum => number of types
-};
+#include "controllers/ControllerFactory.hpp"
+#include "state_representation/parameters/ParameterInterface.hpp"
+#include "state_representation/space/cartesian/CartesianState.hpp"
+#include "state_representation/space/joint/JointState.hpp"
 
 /**
  * @brief Mother class to create all the prototype functions needed in different robotic arms.
@@ -48,9 +41,6 @@ enum RobotType : int8_t {
  */
 class IRoboticArmBase {
 public:
-  inline static const std::map<std::string, RobotType> robotTypes{
-      {"Iiwa7", IIWA7}, {"Ur5", UR5}, {"Cr7", CR7}, {"Cobod", COBOD}};
-
   /**
      * @brief Default constructor for IRoboticArmBase.
      */
@@ -62,8 +52,6 @@ public:
   virtual ~IRoboticArmBase() = default;
 
   std::string getName() { return robotName_; }
-
-  std::vector<double> getHomeJoint();
 
   /**
      * @brief Get forward kinematics of the robotic arm.
@@ -120,19 +108,18 @@ public:
      */
   std::vector<double> getInvertVelocities(std::vector<double> vectJoint, Eigen::VectorXd speedEigen);
 
-
   // /**
   //  * @brief Low-level controller function for the robotic arm.
   //  *
   //  * @param data Tuple containing vectors of joint positions, joint velocities, and joint efforts.
   //  */
-  virtual std::vector<double>
-  lowLevelController(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,
-                     Eigen::VectorXd& twist) = 0;
-  virtual std::vector<double>
-  lowLevelControllerSF(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,
-                       Eigen::VectorXd& twist,
-                       Eigen::VectorXd& deltaTwist) = 0;
+  virtual std::vector<double> lowLevelController(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data, Eigen::VectorXd& twist) = 0;
+
+  virtual std::vector<double> lowLevelControllerSF(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& data,
+      Eigen::VectorXd& twist,
+      Eigen::VectorXd& deltaTwist) = 0;
 
   std::vector<double> originalHomeJoint = {};
 
@@ -169,5 +156,4 @@ protected:
   // void initIK();
 
 private:
-
 };

@@ -20,13 +20,15 @@
 class RoboticArmIiwa7 : public IRoboticArmBase {
 public:
   explicit RoboticArmIiwa7();
-  std::vector<double>
-  lowLevelController(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
-                     Eigen::VectorXd& twist) override;
-  std::vector<double>
-  lowLevelControllerSF(std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
-                       Eigen::VectorXd& desiredTwist,
-                       Eigen::VectorXd& wrenchFromSensor) override;
+
+  std::vector<double> lowLevelController(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
+      Eigen::VectorXd& twist) override;
+
+  std::vector<double> lowLevelControllerSF(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
+      Eigen::VectorXd& desiredTwist,
+      Eigen::VectorXd& wrenchFromSensor) override;
 
 protected:
   state_representation::CartesianState commandState_;

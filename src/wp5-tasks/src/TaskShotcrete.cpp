@@ -4,73 +4,16 @@ using namespace std;
 using namespace Eigen;
 
 TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName) : ITaskBase(nh, freq, robotName) {
-  // Create an unique pointer for the instance of DynamicalSystem
-  dynamicalSystem_ = make_unique<DynamicalSystem>(rosFreq_);
+  ros::NodeHandle nodeHandle = getRosNodehandle_();
 
   // Create an unique pointer for the instance of TargetExtraction
-  targetExtraction_ = make_unique<TargetExtraction>(nh_);
+  targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
 
   // Create an unique pointer for the instance of PathPlanner
-  pathPlanner_ = make_unique<PathPlanner>(nh_);
+  pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
 
   // Create an unique pointer for the instance of PathPlanner
-  boustrophedonServer_ = make_unique<BoustrophedonServer>(nh_);
-}
-
-bool TaskShotcrete::initialize() {
-  cout << "initialization shotcrete ..." << endl;
-
-  // if (roboticArm_->getName() == "Ur5") {
-  if (true) {
-    roboticArm_ = make_unique<RoboticArmUr5>();
-    if (roboticArm_) {
-      cout << "----------------------Ur5 chosen and well initializate----------------------------------" << endl;
-      checkInitialization = true;
-      homeJoint_ = roboticArm_->originalHomeJoint;
-    } else {
-      cout << "Error: roboticArm_ is null." << endl;
-    }
-  } else if (roboticArm_->getName() == "iiwa7") {
-    roboticArm_ = make_unique<RoboticArmIiwa7>();
-    if (roboticArm_) {
-      cout << "----------------------Iiwa7 chosen and well initializate----------------------------------" << endl;
-      checkInitialization = true;
-      homeJoint_ = roboticArm_->originalHomeJoint;
-    } else {
-      cout << "Error: roboticArm_ is null." << endl;
-    }
-  } else {
-    cout << "Please define a valid robot to perform shotcrete" << endl;
-  }
-
-  return checkInitialization;
-}
-
-bool TaskShotcrete::execute() {
-  cout << "preforming shotcrete ..." << endl;
-  dynamicalSystem_->init = false;
-  while (ros::ok() && !checkFinish) {
-    // set and get desired speed
-    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface_->receiveState();
-    vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
-
-    dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
-
-    checkFinish = dynamicalSystem_->finish;
-
-    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-    vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
-
-    rosInterface_->sendState(desiredJointSpeed);
-
-    ros::spinOnce();
-    loopRate_.sleep();
-  }
-
-  return checkFinish;
+  boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
 }
 
 bool TaskShotcrete::computePath() {
@@ -141,26 +84,18 @@ bool TaskShotcrete::computePath() {
       }
     }
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
   cout << "path well compute" << endl;
 
   return checkPath;
 }
 
-bool TaskShotcrete::goHomingPosition() {
-  dynamicalSystem_->init = false;
-  dynamicalSystem_->checkLinearDs = false;
-  cout << "Go Home..." << endl;
-  // get home position
-  pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm_->getFK(homeJoint_);
-  Quaterniond homeQuat = pairHomeQuatPos.first;
-  Vector3d homePos = pairHomeQuatPos.second;
-  cout << homePos<< endl;
-  vector<double> desiredQuatPos = {
-      homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
+bool TaskShotcrete::execute() {
+  cout << "preforming shotcrete ..." << endl;
+  dynamicalSystem_->resetInit();
 
-  while (ros::ok() && !checkHomingPosition) {
+  while (ros::ok() && !dynamicalSystem_->isFinished()) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     stateJoints = rosInterface_->receiveState();
@@ -168,51 +103,16 @@ bool TaskShotcrete::goHomingPosition() {
     pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
     dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(desiredQuatPos);
-
-    checkHomingPosition = dynamicalSystem_->checkLinearDs;
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
 
     VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
     vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
+
     rosInterface_->sendState(desiredJointSpeed);
 
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
 
-  return checkHomingPosition;
+  return dynamicalSystem_->isFinished();
 }
-
-bool TaskShotcrete::goWorkingPosition() {
-  dynamicalSystem_->init = false;
-  dynamicalSystem_->checkLinearDs = false;
-
-  vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
-  cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
-       << endl;
-
-  while (ros::ok() && !checkWorkingPosition) {
-    // set and get desired speed
-    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface_->receiveState();
-    vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
-
-    dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
-    checkWorkingPosition = dynamicalSystem_->checkLinearDs;
-
-    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
-    vector<double> desiredJoint = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
-    rosInterface_->sendState(desiredJoint);
-
-    ros::spinOnce();
-    loopRate_.sleep();
-  }
-
-  return checkWorkingPosition;
-}
-
-void TaskShotcrete::setHomingPosition(vector<double> desiredJoint) { cout << "setHomingPosition()" << endl; }

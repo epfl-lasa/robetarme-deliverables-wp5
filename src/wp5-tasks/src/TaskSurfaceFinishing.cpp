@@ -5,73 +5,16 @@ using namespace Eigen;
 
 TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, string robotName) :
     ITaskBase(nh, freq, robotName) {
-  // Create an unique pointer for the instance of DynamicalSystem
-  dynamicalSystem_ = make_unique<DynamicalSystem>(rosFreq_);
+  ros::NodeHandle nodeHandle = getRosNodehandle_();
 
   // Create an unique pointer for the instance of TargetExtraction
-  targetExtraction_ = make_unique<TargetExtraction>(nh_);
+  targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
 
   // Create an unique pointer for the instance of PathPlanner
-  pathPlanner_ = make_unique<PathPlanner>(nh_);
+  pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
 
   // Create an unique pointer for the instance of PathPlanner
-  boustrophedonServer_ = make_unique<BoustrophedonServer>(nh_);
-}
-
-bool TaskSurfaceFinishing::initialize() {
-  cout << "initialization shotcrete ..." << endl;
-
-  // if (roboticArm_->getName() == "Ur5") {
-  if (true) {
-    roboticArm_ = make_unique<RoboticArmUr5>();
-    if (roboticArm_) {
-      cout << "----------------------Ur5 chosen and well initializate----------------------------------" << endl;
-      checkInitialization = true;
-      homeJoint_ = roboticArm_->originalHomeJoint;
-    } else {
-      cout << "Error: roboticArm_ is null." << endl;
-    }
-  } else if (roboticArm_->getName() == "Iiwa7") {
-    roboticArm_ = make_unique<RoboticArmIiwa7>();
-    if (roboticArm_) {
-      cout << "----------------------Iiwa7 chosen and well initializate----------------------------------" << endl;
-      checkInitialization = true;
-      homeJoint_ = roboticArm_->originalHomeJoint;
-    } else {
-      cout << "Error: roboticArm_ is null." << endl;
-    }
-  } else {
-    cout << "Please define a valid robot to perform shotcrete" << endl;
-  }
-
-  return checkInitialization;
-}
-
-bool TaskSurfaceFinishing::execute() {
-  cout << "preforming shotcrete ..." << endl;
-  dynamicalSystem_->init = false;
-  while (ros::ok() && !checkFinish) {
-    // set and get desired speed
-    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface_->receiveState();
-    vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
-
-    dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
-
-    checkFinish = dynamicalSystem_->finish;
-
-    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-    vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
-
-    rosInterface_->sendState(desiredJointSpeed);
-
-    ros::spinOnce();
-    loopRate_.sleep();
-  }
-
-  return checkFinish;
+  boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
 }
 
 bool TaskSurfaceFinishing::computePath() {
@@ -142,25 +85,18 @@ bool TaskSurfaceFinishing::computePath() {
       }
     }
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
   cout << "path well compute" << endl;
 
   return checkPath;
 }
 
-bool TaskSurfaceFinishing::goHomingPosition() {
-  dynamicalSystem_->init = false;
-  dynamicalSystem_->checkLinearDs = false;
-  cout << "Go Home..." << endl;
-  // get home position
-  pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm_->getFK(homeJoint_);
-  Quaterniond homeQuat = pairHomeQuatPos.first;
-  Vector3d homePos = pairHomeQuatPos.second;
-  vector<double> desiredQuatPos = {
-      homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
+bool TaskSurfaceFinishing::execute() {
+  cout << "preforming shotcrete ..." << endl;
+  dynamicalSystem_->resetInit();
 
-  while (ros::ok() && !checkHomingPosition) {
+  while (ros::ok() && !dynamicalSystem_->isFinished()) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     stateJoints = rosInterface_->receiveState();
@@ -168,58 +104,19 @@ bool TaskSurfaceFinishing::goHomingPosition() {
     pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
     dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(desiredQuatPos);
-
-    checkHomingPosition = dynamicalSystem_->checkLinearDs;
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
 
     VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
     vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
+
     rosInterface_->sendState(desiredJointSpeed);
 
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
 
-  return checkHomingPosition;
+  return dynamicalSystem_->isFinished();
 }
-
-bool TaskSurfaceFinishing::goWorkingPosition() {
-  dynamicalSystem_->init = false;
-  dynamicalSystem_->checkLinearDs = false;
-
-  vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
-  cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
-       << endl;
-
-  while (ros::ok() && !checkWorkingPosition) {
-    // set and get desired speed
-    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface_->receiveState();
-    vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
-
-    dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
-    checkWorkingPosition = dynamicalSystem_->checkLinearDs;
-
-    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
-    vector<double> desiredJoint = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
-    rosInterface_->sendState(desiredJoint);
-
-    ros::spinOnce();
-    loopRate_.sleep();
-  }
-
-  return checkWorkingPosition;
-}
-
-void TaskSurfaceFinishing::setHomingPosition(vector<double> desiredJoint) {
-  cout << "set joints HomingPosition()" << endl;
-}
-
-
 
 void TaskSurfaceFinishing::set_bias() {
   int meanNum = 1000;
@@ -236,7 +133,7 @@ void TaskSurfaceFinishing::set_bias() {
       wrenchActual[i] += receivedWrench[i] / meanNum;
     }
     meanIteration += 1;
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
 
   // Assign the calculated bias to biasWrench_
@@ -279,13 +176,13 @@ Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
 }
 
 bool TaskSurfaceFinishing::TestSF() {
-  dynamicalSystem_->init = false;
+  dynamicalSystem_->resetInit();
   set_bias();
   vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
   cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
        << endl;
 
-  while (ros::ok() && !checkFirstPosition) {
+  while (ros::ok() && !dynamicalSystem_->checkLinearDs()) {
     // set and get desired speed
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     stateJoints = rosInterface_->receiveState();
@@ -294,7 +191,6 @@ bool TaskSurfaceFinishing::TestSF() {
 
     dynamicalSystem_->setCartPose(pairActualQuatPos);
     pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
-    dynamicalSystem_->checkLinearDs;
 
     VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
     //TEST
@@ -306,10 +202,10 @@ bool TaskSurfaceFinishing::TestSF() {
     rosInterface_->sendState(desiredJoint);
 
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
 
     //TODO: delet rviz dependency
     twistMarker(twistDesiredEigen, pairActualQuatPos.second, pubDesiredVelFiltered_);
   }
-  return checkFirstPosition;
+  return dynamicalSystem_->checkLinearDs();
 }
