@@ -29,6 +29,12 @@ public:
   bool goWorkingPosition();
 
   void setHomingPosition(std::vector<double> desiredJoint);
+  bool TestSF();
+  void set_bias();
+
+  std::vector<double> homeJoint_;
+  std::vector<double> biasWrench_;
+  Eigen::VectorXd outputTwist_;
 
 private:
   // Create an unique pointer for the instance of DynamicalSystem
@@ -42,4 +48,6 @@ private:
 
   // Create an unique pointer for the instance of PathPlanner
   std::unique_ptr<BoustrophedonServer> boustrophedonServer_ = nullptr;
+
+  Eigen::VectorXd decoderWrench();
 };

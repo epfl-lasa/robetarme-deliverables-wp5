@@ -218,3 +218,98 @@ bool TaskSurfaceFinishing::goWorkingPosition() {
 void TaskSurfaceFinishing::setHomingPosition(vector<double> desiredJoint) {
   cout << "set joints HomingPosition()" << endl;
 }
+
+
+
+void TaskSurfaceFinishing::set_bias() {
+  int meanNum = 1000;
+  std::cout << "Recording F/T sensor bias. Please do not touch the robot for 3 seconds..." << std::endl;
+
+  // Initialize wrenchActual and receivedWrench vectors
+  std::vector<double> wrenchActual(6, 0.0); // Assuming 6 elements in the wrench
+  std::vector<double> receivedWrench;
+
+  int meanIteration = 0;
+  while (ros::ok() && (meanIteration < meanNum)) {
+    receivedWrench = rosInterface_->receiveWrench();
+    for (size_t i = 0; i < wrenchActual.size(); ++i) {
+      wrenchActual[i] += receivedWrench[i] / meanNum;
+    }
+    meanIteration += 1;
+    loopRate_.sleep();
+  }
+
+  // Assign the calculated bias to biasWrench_
+  biasWrench_ = wrenchActual;
+
+  // Print all elements of the biasWrench_ vector
+  std::cout << "Recording F/T sensor bias done:" << std::endl;
+  for (size_t i = 0; i < biasWrench_.size(); ++i) {
+    std::cout << "biasWrench_[" << i << "] = " << biasWrench_[i] << std::endl;
+  }
+}
+
+Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
+  vector<double> receivedWrench = rosInterface_->receiveWrench();
+  Eigen::VectorXd outTwist(6);
+  double alpha = 0.25;
+  for (size_t i = 0; i < receivedWrench.size(); ++i) {
+    receivedWrench[i] -= biasWrench_[i];
+    if (receivedWrench[i] > 5) {
+      outTwist(i) = receivedWrench[i] * 0.01;
+
+    } else if (receivedWrench[i] < -5) {
+      outTwist(i) = receivedWrench[i] * 0.01;
+
+    } else {
+      outTwist(i) = 0;
+    }
+  }
+  outputTwist_ = alpha * outputTwist_ + (1 - alpha) * outTwist;
+
+  for (size_t i = 0; i < outputTwist_.size(); ++i) {
+    if (outputTwist_(i) < -0.15) {
+      outputTwist_(i) = -0.15;
+    }
+    if (outputTwist_(i) > 0.15) {
+      outputTwist_(i) = 0.15;
+    }
+  }
+  return outputTwist_;
+}
+
+bool TaskSurfaceFinishing::TestSF() {
+  dynamicalSystem_->init = false;
+  set_bias();
+  vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
+  cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
+       << endl;
+
+  while (ros::ok() && !checkFirstPosition) {
+    // set and get desired speed
+    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
+    stateJoints = rosInterface_->receiveState();
+    vector<double> actualJoint = get<0>(stateJoints);
+    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
+
+    dynamicalSystem_->setCartPose(pairActualQuatPos);
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
+    dynamicalSystem_->checkLinearDs;
+
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    //TEST
+    Eigen::VectorXd deltaTwist;
+    deltaTwist = decoderWrench();
+    vector<double> desiredJoint = roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, deltaTwist);
+    //--------
+
+    rosInterface_->sendState(desiredJoint);
+
+    ros::spinOnce();
+    loopRate_.sleep();
+
+    //TODO: delet rviz dependency
+    twistMarker(twistDesiredEigen, pairActualQuatPos.second, pubDesiredVelFiltered_);
+  }
+  return checkFirstPosition;
+}
