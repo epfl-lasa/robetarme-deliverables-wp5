@@ -25,6 +25,7 @@ public:
 
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> receiveState();
   void sendState(std::vector<double>& data);
+  std::vector<double> receiveWrench();
 
 private:
   void jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg);
@@ -32,8 +33,7 @@ private:
   std::vector<double> jointsPosition_;
   std::vector<double> jointsSpeed_;
   std::vector<double> jointsTorque_;
-  std::vector<double> torqueSensor_;    // Update the torque ve
-  std::vector<double> forceSensor_;
+  std::vector<double> wrenchSensor_;
   std::string robotName_;
 
   bool initJoint_;

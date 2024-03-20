@@ -25,6 +25,7 @@ public:
   void setToleranceNextPoint(double tol);
   void restartPath();
   std::vector<double> getFirstQuatPos();
+  // void setBiasForce(Eigen::VectorXd meanWrenchFromSensor);
 
 private:
   double ConvergenceRateLC_ = 10;
@@ -49,6 +50,8 @@ private:
 
   Eigen::Vector3d centerLimitCycle_;
   Eigen::Vector4d desiredOriVelocityFiltered_;
+
+  // Eigen::VectorXd meanWrenchFromSensor_;
 
   double toolOffsetFromTarget_, velocityLimit_;
   bool targetReceived__ = false;

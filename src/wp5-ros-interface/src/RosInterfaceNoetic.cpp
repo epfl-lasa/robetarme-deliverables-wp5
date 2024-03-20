@@ -84,12 +84,22 @@ void RosInterfaceNoetic::jointStateCallback(const sensor_msgs::JointState::Const
 
 void RosInterfaceNoetic::FTCallback(const geometry_msgs::WrenchStamped::ConstPtr& msg) {
   if (msg->wrench.force.x != 0.0 || msg->wrench.force.y != 0.0 || msg->wrench.force.z != 0.0) {
-    forceSensor_ = {msg->wrench.force.x, msg->wrench.force.y, msg->wrench.force.z};     // Update the force vector
-    torqueSensor_ = {msg->wrench.torque.x, msg->wrench.torque.y, msg->wrench.torque.z}; // Update the torque vector
+    // Extract force and torque components from the sensor message
+    double force_x = msg->wrench.force.x;
+    double force_y = msg->wrench.force.y;
+    double force_z = msg->wrench.force.z;
+
+    double torque_x = msg->wrench.torque.x;
+    double torque_y = msg->wrench.torque.y;
+    double torque_z = msg->wrench.torque.z;
+
+    // Combine force and torque components into a single vector
+    wrenchSensor_ = {force_x, force_y, force_z, torque_x, torque_y, torque_z};
     initFTsensor_ = true;
 
   } else {
     ROS_WARN("Received ftsensor data is empty.");
+    wrenchSensor_ = {0,0,0,0,0,0};
   }
 }
 
@@ -101,6 +111,11 @@ tuple<vector<double>, vector<double>, vector<double>> RosInterfaceNoetic::receiv
       make_tuple(jointsPosition_, jointsSpeed_, jointsTorque_);
 
   return stateJoints;
+}
+
+vector<double> RosInterfaceNoetic::receiveWrench() {
+  ros::spinOnce();
+  return wrenchSensor_;
 }
 
 void RosInterfaceNoetic::sendState(vector<double>& data) {

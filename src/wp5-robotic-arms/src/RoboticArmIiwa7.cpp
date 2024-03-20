@@ -41,7 +41,6 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   double tolerance = 1e-3;
   unsigned int maxNumberOfIterations = 1000;
   paramsIK_ = {damp, alpha, gamma, margin, tolerance, maxNumberOfIterations};
-  Eigen::ArrayXd torques(nJoint_);
 
   commandState_ = state_representation::CartesianState(robotName_, referenceFrame_);
   feedbackState_ = state_representation::CartesianState(robotName_, referenceFrame_);
@@ -88,6 +87,43 @@ vector<double> RoboticArmIiwa7::lowLevelController(tuple<vector<double>, vector<
   // compute the command output
   auto commandOutput = twistCtrl_->compute_command(commandState_, feedbackState_);
   Eigen::VectorXd wrench = commandOutput.get_wrench();
+
+  Eigen::VectorXd EigentorqueCommand = jacobianObject.transpose() * wrench;
+
+  vector<double> torqueCommand(EigentorqueCommand.data(), EigentorqueCommand.data() + EigentorqueCommand.size());
+  return torqueCommand;
+}
+
+vector<double> RoboticArmIiwa7::lowLevelControllerSF(tuple<vector<double>, vector<double>, vector<double>>& stateJoints,
+                                                     Eigen::VectorXd& desiredTwist,
+                                                     Eigen::VectorXd& delaTwist) {
+
+  //set_up the feeedback_State
+  vector<double>& retrievedPosition = get<0>(stateJoints);
+  vector<double>& retrievedSpeed = get<1>(stateJoints);
+  vector<double>& retrievedTorque = get<2>(stateJoints);
+
+  Eigen::VectorXd positions = Eigen::Map<Eigen::VectorXd>(retrievedPosition.data(), retrievedPosition.size());
+  Eigen::VectorXd velocities = Eigen::Map<Eigen::VectorXd>(retrievedSpeed.data(), retrievedSpeed.size());
+  Eigen::VectorXd torques = Eigen::Map<Eigen::VectorXd>(retrievedTorque.data(), retrievedTorque.size());
+
+  Eigen::VectorXd actualTwist = getTwistFromJointState(retrievedPosition, retrievedSpeed);
+  feedbackState_.set_twist(actualTwist);
+  commandState_.set_twist(desiredTwist);
+
+  state_representation::JointPositions JointPositions;
+
+  JointPositions = state_representation::JointPositions(robotName_, jointNames_, positions);
+
+  state_representation::Jacobian jacobianObject = model_->compute_jacobian(JointPositions);
+
+  // compute the command output
+  auto commandOutput = twistCtrl_->compute_command(commandState_, feedbackState_);
+  Eigen::VectorXd wrench = commandOutput.get_wrench();
+
+  //TODO: change with good equyation for force
+  wrench(1) = wrench(1) + delaTwist(1);
+
   Eigen::VectorXd EigentorqueCommand = jacobianObject.transpose() * wrench;
 
   vector<double> torqueCommand(EigentorqueCommand.data(), EigentorqueCommand.data() + EigentorqueCommand.size());

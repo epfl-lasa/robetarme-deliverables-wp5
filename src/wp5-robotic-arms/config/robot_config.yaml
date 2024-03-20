@@ -6,6 +6,10 @@ Ur5:
   tipJoint: "wrist_3_joint"
   numberJoint: 6
   path_urdf: "/home/ros/ros_ws/src/controller_ur5/urdf/ur5.urdf"
+  linear_principle_damping: 500.0
+  linear_orthogonal_damping: 100.0
+  angular_stiffness: 100.0
+  angular_damping: 100.0
 
 Iiwa7:
   controller_joint_names: ['iiwa_joint_1', 'iiwa_joint_2', 'iiwa_joint_3', 'iiwa_joint_4', 'iiwa_joint_5', 'iiwa_joint_6', 'iiwa_joint_7' ]

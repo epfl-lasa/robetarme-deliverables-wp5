@@ -7,8 +7,11 @@
 # Tristan Bonato : 2024-03-15
 
 shotcrete:
-  robot_name: "Ur5" # options: Ur5 or Iiwa7
+  robot_name: "Ur5"
+  # robot_name: "Iiwa7"
 surface_finishing:
-  robot_name: "Ur5" # options: Ur5 or Iiwa7
+  # robot_name: "Iiwa7"
+  robot_name: "Ur5"
+
 metal_additive:
   robot_name: "Cr7" # options: Cr7
