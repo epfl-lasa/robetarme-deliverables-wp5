@@ -74,7 +74,6 @@ bool TaskShotcrete::computePath() {
         vector<vector<double>> vectorPathTransformed = pathPlanner_->convertPathPlanToVectorVector(pathTransformed);
 
         vector<double> firstQuatPos = vectorPathTransformed[0];
-
         dynamicalSystem_->setPath(vectorPathTransformed);
 
         boustrophedonServer_->pathPub.publish(pathTransformed);

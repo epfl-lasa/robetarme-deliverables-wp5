@@ -72,6 +72,8 @@ protected:
   // Create an unique pointer for the instance of RosInterfaceNoetic
   std::unique_ptr<RosInterfaceNoetic> rosInterface_ = nullptr;
 
+  bool GoToPoint(std::vector<double> firstQuatPosOffset) const;
+
 private:
   ros::NodeHandle nh_;
 

@@ -32,6 +32,7 @@ public:
   void resetInit();
   void resetCheckLinearDs();
   void restartPath();
+  std::vector<double> addOffset(std::vector<double> desiredQuatPos);
 
 private:
   bool finish_ = false;
@@ -55,9 +56,6 @@ private:
 
   Eigen::Vector3d realPos_;
   Eigen::Quaterniond realQuat_;
-
-  Eigen::Vector3d realPosOffset_;
-  Eigen::Quaterniond realQuatOffset_;
 
   Eigen::Vector3d centerLimitCycle_;
   Eigen::Vector4d desiredOriVelocityFiltered_;

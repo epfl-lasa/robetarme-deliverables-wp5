@@ -27,7 +27,12 @@ void DynamicalSystem::parameterInitialization() {
 }
 
 void DynamicalSystem::setPath(vector<vector<double>> pathInput) {
-  desiredPath_ = pathInput;
+
+  desiredPath_.resize(pathInput.size());
+  // adding offset for the endefector distance with the target to the entire path
+  for (size_t i = 0; i < pathInput.size(); ++i) {
+    desiredPath_[i] = addOffset(pathInput[i]);
+  }
 
   firstQuatPos_ = desiredPath_.front();
   lastQuatPos_ = desiredPath_.back();
@@ -47,17 +52,28 @@ void DynamicalSystem::setCartPose(pair<Quaterniond, Vector3d> pairQuatPos) {
   realQuat_ = pairQuatPos.first;
   realPos_ = pairQuatPos.second;
 
-  //---- Update end effector pose (position+orientation)
-  realQuatOffset_ = realQuat_;
-
-  Quaterniond normalizedQuat = realQuat_.normalized();
-  Matrix3d rotation_matrix = normalizedQuat.toRotationMatrix();
-
-  realPosOffset_ = realPos_ + toolOffsetFromTarget_ * rotation_matrix.col(2);
   if (iFollow_ == 0 && !init_) {
-    centerLimitCycle_ = realPosOffset_;
+    centerLimitCycle_ = realPos_;
     init_ = true;
   }
+}
+
+vector<double> DynamicalSystem::addOffset(vector<double> desiredQuatPos) {
+  Vector3d PosNoOffset;
+  PosNoOffset << desiredQuatPos[4], desiredQuatPos[5], desiredQuatPos[6];
+  Eigen::Quaterniond QuatNoOffset(desiredQuatPos[3], desiredQuatPos[0], desiredQuatPos[1], desiredQuatPos[2]);
+  Quaterniond normalizedQuat = QuatNoOffset.normalized();
+  Matrix3d rotation_matrix = normalizedQuat.toRotationMatrix();
+
+  Vector3d PosOffset = PosNoOffset - toolOffsetFromTarget_ * rotation_matrix.col(2);
+  vector<double> desiredQuatPosOffset = {desiredQuatPos[0],
+                                         desiredQuatPos[1],
+                                         desiredQuatPos[2],
+                                         desiredQuatPos[3],
+                                         PosOffset(0),
+                                         PosOffset(1),
+                                         PosOffset(2)};
+  return desiredQuatPosOffset;
 }
 
 // void DynamicalSystem::setBiasForce(VectorXd meanWrenchFromSensor) { meanWrenchFromSensor_ = meanWrenchFromSensor; }
@@ -90,9 +106,9 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   pathPoint_(1) = desiredQuatPos[5];
   pathPoint_(2) = desiredQuatPos[6];
 
-  dx = pathPoint_(0) - realPosOffset_(0);
-  dy = pathPoint_(1) - realPosOffset_(1);
-  dz = pathPoint_(2) - realPosOffset_(2);
+  dx = pathPoint_(0) - realPos_(0);
+  dy = pathPoint_(1) - realPos_(1);
+  dz = pathPoint_(2) - realPos_(2);
 
   norm = sqrt(dx * dx + dy * dy + dz * dz);
   scaleVel = linearVelExpected_ / norm;
@@ -101,7 +117,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   dVel(1) = dy * scaleVel;
   dVel(2) = dz * scaleVel;
 
-  if (sqrt((pathPoint_ - realPosOffset_).norm()) <= toleranceToNextPoint_) {
+  if (sqrt((pathPoint_ - realPos_).norm()) <= toleranceToNextPoint_) {
     dVel(0) = 0;
     dVel(1) = 0;
     dVel(2) = 0;
@@ -130,9 +146,9 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     pathPoint_(1) = desiredQuatPos[5];
     pathPoint_(2) = desiredQuatPos[6];
 
-    dx = pathPoint_(0) - realPosOffset_(0);
-    dy = pathPoint_(1) - realPosOffset_(1);
-    dz = pathPoint_(2) - realPosOffset_(2);
+    dx = pathPoint_(0) - realPos_(0);
+    dy = pathPoint_(1) - realPos_(1);
+    dz = pathPoint_(2) - realPos_(2);
 
     norm = sqrt(dx * dx + dy * dy + dz * dz);
     scaleVel = linearVelExpected_ / norm;
@@ -150,7 +166,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
       iFollow_ += 1;
       cout << "target number: " << iFollow_ << "reached" << endl;
     }
-    updateLimitCycle3DPosVelWith2DLC(realPosOffset_, centerLimitCycle_);
+    updateLimitCycle3DPosVelWith2DLC(realPos_, centerLimitCycle_);
 
   } else {
 

@@ -55,19 +55,7 @@ bool ITaskBase::goHomingPosition() const {
       homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
 
   while (ros::ok() && !dynamicalSystem_->checkLinearDs()) {
-    // set and get desired speed
-    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface_->receiveState();
-    vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
-
-    dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(desiredQuatPos);
-
-    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
-    vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
-    rosInterface_->sendState(desiredJointSpeed);
+    ITaskBase::GoToPoint(desiredQuatPos);
 
     ros::spinOnce();
     getRosLoopRate_().sleep();
@@ -84,24 +72,34 @@ bool ITaskBase::goWorkingPosition() const {
   cout << "Go to first position, pointing on the target point:" << firstQuatPos[4] << firstQuatPos[5] << firstQuatPos[6]
        << endl;
 
+  // // add the offsetof the distance between the endeffector and the target
+  // vector<double> firstQuatPosOffset = dynamicalSystem_->addOffset(firstQuatPos);
+
   while (ros::ok() && !dynamicalSystem_->checkLinearDs()) {
-    // set and get desired speed
-    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-    stateJoints = rosInterface_->receiveState();
-    vector<double> actualJoint = get<0>(stateJoints);
-    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
-    dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
-
-    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-
-    vector<double> desiredJoint = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
-    rosInterface_->sendState(desiredJoint);
+    ITaskBase::GoToPoint(firstQuatPos);
 
     ros::spinOnce();
     getRosLoopRate_().sleep();
   }
+
+  return dynamicalSystem_->checkLinearDs();
+}
+
+bool ITaskBase::GoToPoint(vector<double> firstQuatPosOffset) const {
+  // set and get desired speed
+  tuple<vector<double>, vector<double>, vector<double>> stateJoints;
+  stateJoints = rosInterface_->receiveState();
+  vector<double> actualJoint = get<0>(stateJoints);
+  pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
+
+  dynamicalSystem_->setCartPose(pairActualQuatPos);
+  pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPosOffset);
+
+  VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+
+  vector<double> desiredJoint = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
+  rosInterface_->sendState(desiredJoint);
 
   return dynamicalSystem_->checkLinearDs();
 }
