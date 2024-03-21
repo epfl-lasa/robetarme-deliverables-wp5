@@ -85,7 +85,7 @@ bool TaskSurfaceFinishing::computePath() {
       }
     }
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    loopRate_.sleep();
   }
   cout << "path well compute" << endl;
 
@@ -112,7 +112,7 @@ bool TaskSurfaceFinishing::execute() {
     rosInterface_->sendState(desiredJointSpeed);
 
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    loopRate_.sleep();
   }
 
   return dynamicalSystem_->isFinished();
@@ -133,7 +133,7 @@ void TaskSurfaceFinishing::set_bias() {
       wrenchActual[i] += receivedWrench[i] / meanNum;
     }
     meanIteration += 1;
-    getRosLoopRate_().sleep();
+    loopRate_.sleep();
   }
 
   // Assign the calculated bias to biasWrench_
@@ -202,7 +202,7 @@ bool TaskSurfaceFinishing::TestSF() {
     rosInterface_->sendState(desiredJoint);
 
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    loopRate_.sleep();
 
     //TODO: delet rviz dependency
     // twistMarker(twistDesiredEigen, pairActualQuatPos.second, pubDesiredVelFiltered_);

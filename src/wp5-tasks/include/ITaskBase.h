@@ -53,6 +53,7 @@ public:
 
   virtual bool goHomingPosition() const;
   virtual bool goWorkingPosition() const;
+  ros::Rate loopRate_;
 
 protected:
   double getRosFrequency_() const;
@@ -73,7 +74,6 @@ protected:
 
 private:
   ros::NodeHandle nh_;
-  ros::Rate loopRate_;
 
   double rosFreq_;
   std::vector<double> homeJoint_;

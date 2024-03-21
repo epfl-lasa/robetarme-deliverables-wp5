@@ -14,6 +14,7 @@ using namespace Eigen;
 //TargetExrtaction functon
 TargetExtraction::TargetExtraction(ros::NodeHandle& nh) :
     poseTargetSub_(
+        // nh.subscribe("/vrpn_client_node/targetRobetarmeSF/pose_transform", 10, &TargetExtraction::CCVrpnTarget, this)) {
         nh.subscribe("/vrpn_client_node/TargetRobetarme/pose_transform", 10, &TargetExtraction::CCVrpnTarget, this)) {
 
   originalPolygonPub_ = nh.advertise<geometry_msgs::PolygonStamped>("/original_polygon", 1, true);

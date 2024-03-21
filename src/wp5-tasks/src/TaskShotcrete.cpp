@@ -84,7 +84,7 @@ bool TaskShotcrete::computePath() {
       }
     }
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    loopRate_.sleep();
   }
   cout << "path well compute" << endl;
 
@@ -111,7 +111,7 @@ bool TaskShotcrete::execute() {
     rosInterface_->sendState(desiredJointSpeed);
 
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    loopRate_.sleep();
   }
 
   return dynamicalSystem_->isFinished();
