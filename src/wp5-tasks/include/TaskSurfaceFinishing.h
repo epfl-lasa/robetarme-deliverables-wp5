@@ -32,9 +32,6 @@ public:
   Eigen::VectorXd outputTwist_;
 
 private:
-  // Create an unique pointer for the instance of DynamicalSystem
-  std::unique_ptr<DynamicalSystem> dynamicalSystem_ = nullptr;
-
   // Create an unique pointer for the instance of TargetExtraction
   std::unique_ptr<TargetExtraction> targetExtraction_ = nullptr;
 

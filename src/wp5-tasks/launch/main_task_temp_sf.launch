@@ -1,0 +1,5 @@
+<launch>
+    <node pkg="wp5_tasks" type="wp5_main_temp_surface_finishing_node"
+        name="wp5_main_temp_surface_finishing_node"
+        output="screen" />
+</launch>

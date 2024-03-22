@@ -6,7 +6,9 @@ convRate: 10
 
 linearSpeed: 0.05
 
-toolOffsetFromTarget: 0.7
+# toolOffsetFromTarget: 0.7
+toolOffsetFromTarget: 0.1
+
 
 toleranceToNextPoint: 0.1
 velocityLimit: 1.5

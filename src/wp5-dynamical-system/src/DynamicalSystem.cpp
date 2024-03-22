@@ -23,17 +23,20 @@ void DynamicalSystem::parameterInitialization() {
   toleranceToNextPoint_ = config["toleranceToNextPoint"].as<double>();
 
   toolOffsetFromTarget_ = config["toolOffsetFromTarget"].as<double>();
+  cout << "toolOffsetFromTarget_:" << toolOffsetFromTarget_ << endl;
+
   velocityLimit_ = config["velocityLimit"].as<double>();
 }
 
 void DynamicalSystem::setPath(vector<vector<double>> pathInput) {
 
-  desiredPath_.resize(pathInput.size());
+  vector<vector<double>> pathOff(pathInput.size());
   // adding offset for the endefector distance with the target to the entire path
   for (size_t i = 0; i < pathInput.size(); ++i) {
-    desiredPath_[i] = addOffset(pathInput[i]);
+    pathOff[i] = addOffset(pathInput[i]);
   }
 
+  desiredPath_ = pathOff;
   firstQuatPos_ = desiredPath_.front();
   lastQuatPos_ = desiredPath_.back();
 
@@ -59,6 +62,7 @@ void DynamicalSystem::setCartPose(pair<Quaterniond, Vector3d> pairQuatPos) {
 }
 
 vector<double> DynamicalSystem::addOffset(vector<double> desiredQuatPos) {
+
   Vector3d PosNoOffset;
   PosNoOffset << desiredQuatPos[4], desiredQuatPos[5], desiredQuatPos[6];
   Eigen::Quaterniond QuatNoOffset(desiredQuatPos[3], desiredQuatPos[0], desiredQuatPos[1], desiredQuatPos[2]);
@@ -229,7 +233,7 @@ VectorXd DynamicalSystem::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Ve
   return vOut;
 }
 
-void DynamicalSystem::updateLimitCycle3DPosVelWith2DLC(Vector3d pos, Vector3d targetPoseCircleDS) {
+Vector3d DynamicalSystem::updateLimitCycle3DPosVelWith2DLC(Vector3d pos, Vector3d targetPoseCircleDS) {
   float a[2] = {1., 1.};
   float norm_a = sqrt(a[0] * a[0] + a[1] * a[1]);
   for (int i = 0; i < 2; i++) a[i] = a[i] / norm_a;
@@ -277,6 +281,7 @@ void DynamicalSystem::updateLimitCycle3DPosVelWith2DLC(Vector3d pos, Vector3d ta
   for (int i = 0; i < 3; i++) {
     desiredVel_[i] = velocity(i);
   }
+  return velocity;
 }
 void DynamicalSystem::resetInit() { init_ = false; };
 

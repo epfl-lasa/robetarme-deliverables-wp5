@@ -12,10 +12,7 @@ using namespace std;
 using namespace Eigen;
 
 //TargetExrtaction functon
-TargetExtraction::TargetExtraction(ros::NodeHandle& nh) :
-    poseTargetSub_(
-        // nh.subscribe("/vrpn_client_node/targetRobetarmeSF/pose_transform", 10, &TargetExtraction::CCVrpnTarget, this)) {
-        nh.subscribe("/vrpn_client_node/TargetRobetarme/pose_transform", 10, &TargetExtraction::CCVrpnTarget, this)) {
+TargetExtraction::TargetExtraction(ros::NodeHandle& nh) {
 
   originalPolygonPub_ = nh.advertise<geometry_msgs::PolygonStamped>("/original_polygon", 1, true);
 
@@ -26,6 +23,9 @@ TargetExtraction::TargetExtraction(ros::NodeHandle& nh) :
   // Access parameters from the YAML file
   heightTarget_ = config["heightTarget"].as<double>();
   widthTarget_ = config["widthTarget"].as<double>();
+  string nameTarget = config["nameTarget"].as<string>();
+
+  poseTargetSub_ = nh.subscribe(nameTarget, 10, &TargetExtraction::CCVrpnTarget, this);
 
   cout << "Waiting for target Pose" << endl;
 

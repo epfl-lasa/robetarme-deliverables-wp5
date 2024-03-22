@@ -26,6 +26,8 @@ def publish_pose():
     pose_msg.pose.orientation.y = -0.010362802471094404
     pose_msg.pose.orientation.z = 0.01012737717438275
     pose_msg.pose.orientation.w = 0.7032861345486314
+    
+
 
     # Start publishing
     while not rospy.is_shutdown():

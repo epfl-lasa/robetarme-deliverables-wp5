@@ -28,7 +28,7 @@ public:
   std::vector<double> getFirstQuatPos() const;
   Eigen::VectorXd getTwistFromDS(Eigen::Quaterniond quat1, std::pair<Eigen::Quaterniond, Eigen::Vector3d> pairQuatPos);
 
-  void updateLimitCycle3DPosVelWith2DLC(Eigen::Vector3d pose, Eigen::Vector3d poseTarget);
+  Eigen::Vector3d updateLimitCycle3DPosVelWith2DLC(Eigen::Vector3d pose, Eigen::Vector3d poseTarget);
   void resetInit();
   void resetCheckLinearDs();
   void restartPath();
@@ -63,7 +63,6 @@ private:
   // Eigen::VectorXd meanWrenchFromSensor_;
 
   double toolOffsetFromTarget_, velocityLimit_;
-  bool targetReceived__ = false;
 
   Eigen::Matrix<double, 4, 1> slerpQuaternion_(Eigen::Matrix<double, 4, 1>& q1,
                                                Eigen::Matrix<double, 4, 1>& q2,

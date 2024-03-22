@@ -1,7 +1,9 @@
 // clang-format off
 #include <pinocchio/fwd.hpp>
 // clang-format on
+
 #include <ros/ros.h>
+#include <yaml-cpp/yaml.h>
 
 #include <tuple>
 
@@ -12,39 +14,39 @@
 #include "RoboticArmUr5.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
+#include "TaskFSM.h"
+#include "TaskFactory.h"
+#include "TaskShotcrete.h"
 #include "TaskSurfaceFinishing.h"
 
 using namespace std;
 using namespace Eigen;
 
 int main(int argc, char** argv) {
+  bool valid = false;
   double rosFreq = 300;
 
   // Init ros
-  ros::init(argc, argv, "task_surface");
+  ros::init(argc, argv, "task_surface_finishing");
   ros::NodeHandle nh;
+  ros::Rate loopRate(rosFreq);
 
-  ros::Rate loop_rate(300);
+  // Get task configuration
+  string yamlPath = string(WP5_TASKS_DIR) + "/config/config.yaml";
+  YAML::Node config = YAML::LoadFile(yamlPath);
 
-  // Init class for Tasks --------------------------------
-  unique_ptr<Tasks> tasks = nullptr;
-  tasks = make_unique<Tasks>(nh, rosFreq);
+  string taskType = "surface_finishing";
+  string robotName = config[taskType]["robot_name"].as<string>();
 
-  // comput path -----------------------------------------
-  tasks->computePathShotcrete();
+  // Create an unique pointer for the instance of TaskFSM
+  TaskFactory taskFactory;
+  std::shared_ptr<ITaskBase> task = taskFactory.createTask(taskType, nh, rosFreq, robotName);
 
-  // Init surface finishing
-  bool valid = tasks->initTask("surface_finishing");
-  // tasks->goHome();
+  taskFsm_ internalFSM_(task);
 
-  if (valid) {
-    cout << "Iniitalization surface_finishing  ok" << endl;
-  } else {
-    cout << "Iniitalization surface_finishing  failed" << endl;
-    return 0;
-  }
-
-  tasks->TestSF();
+  // Initialize and test the FSM
+  internalFSM_.start();
+  internalFSM_.process_event(Start());
 
   return 0;
 }

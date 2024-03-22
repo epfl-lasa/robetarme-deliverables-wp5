@@ -55,7 +55,7 @@ bool ITaskBase::goHomingPosition() const {
       homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
 
   while (ros::ok() && !dynamicalSystem_->checkLinearDs()) {
-    ITaskBase::GoToPoint(desiredQuatPos);
+    GoToPoint(desiredQuatPos);
 
     ros::spinOnce();
     getRosLoopRate_().sleep();
@@ -77,7 +77,7 @@ bool ITaskBase::goWorkingPosition() const {
 
   while (ros::ok() && !dynamicalSystem_->checkLinearDs()) {
 
-    ITaskBase::GoToPoint(firstQuatPos);
+    GoToPoint(firstQuatPos);
 
     ros::spinOnce();
     getRosLoopRate_().sleep();

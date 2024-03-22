@@ -40,20 +40,31 @@ include_directories(
 )
 
 # Add the main_temp node
-add_executable(wp5_main_temp_node
+add_executable(wp5_main_temp_shotcrete_node
   src/main_task_shotcrete.cpp
   src/ITaskBase.cpp
   src/TaskShotcrete.cpp
   src/TaskSurfaceFinishing.cpp
 )
+target_link_libraries(wp5_main_temp_shotcrete_node PRIVATE
+  ${catkin_LIBRARIES}
+  ${control_libraries_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
+)
 
-# add_executable(wp5_main_temp_node
-#   src/main_task_surface_finishing.cpp
-#   src/ITaskBase.cpp
-#   src/TaskShotcrete.cpp
-# )
+# Test, to b
+# Add the main_temp node
+add_executable(wp5_main_temp_surface_finishing_node
+src/main_task_surface_finishing.cpp
+src/ITaskBase.cpp
+src/TaskShotcrete.cpp
+src/TaskSurfaceFinishing.cpp
+)
 
-target_link_libraries(wp5_main_temp_node PRIVATE
+
+
+target_link_libraries(wp5_main_temp_surface_finishing_node PRIVATE
   ${catkin_LIBRARIES}
   ${control_libraries_LIBRARIES}
   ${Boost_LIBRARIES}

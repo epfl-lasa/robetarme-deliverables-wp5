@@ -10,11 +10,12 @@ TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, str
   // Create an unique pointer for the instance of TargetExtraction
   targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
 
-  // Create an unique pointer for the instance of PathPlanner
-  pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
+  // // Create an unique pointer for the instance of PathPlanner
+  // pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
 
-  // Create an unique pointer for the instance of PathPlanner
-  boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
+  // // Create an unique pointer for the instance of PathPlanner
+  // boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
+  outputTwist_ = Eigen::VectorXd::Zero(6);
 }
 
 bool TaskSurfaceFinishing::computePath() {
@@ -27,95 +28,60 @@ bool TaskSurfaceFinishing::computePath() {
   Vector3d posTarget = targetExtraction_->getPosTarget();
   targetExtraction_->seeTarget();
 
-  // initialization
-  pathPlanner_->setTarget(quatTarget, posTarget, polygonsPositions);
-  double optimumRadius = pathPlanner_->getOptimumRadius();
+  vector<double> targetQuatPos = {
+      quatTarget.x(), quatTarget.y(), quatTarget.z(), quatTarget.w(), posTarget(0), posTarget(1), posTarget(2)};
 
-  boustrophedonServer_->setOptimumRad(optimumRadius);
-  // wait for the action server to startnew_rad
-
-  cout << "Waiting for action server to start." << endl;
-  boustrophedonServer_->initRosLaunch();
-
-  cout << "Action server started" << endl;
-
-  boustrophedon_msgs::PlanMowingPathGoal goal;
-  goal = pathPlanner_->ComputeGoal();
-  boustrophedonServer_->polygonPub.publish(goal.property);
-
-  cout << "Waiting for goal" << endl;
-
-  nav_msgs::Path path;
-  nav_msgs::Path pathTransformed;
-
-  while (ros::ok() && !checkPath) {
-    ros::Time start_time = ros::Time::now();
-    pathPlanner_->publishInitialPose();
-    goal.robot_position = pathPlanner_->getInitialPose();
-    boustrophedonServer_->startPub.publish(goal.robot_position);
-    boustrophedonServer_->client.sendGoal(goal);
-    ROS_INFO_STREAM("Sending goal");
-
-    // wait for the action to return
-    bool finishedBeforeTimeout = boustrophedonServer_->client.waitForResult(ros::Duration(30.0));
-    actionlib::SimpleClientGoalState state = boustrophedonServer_->client.getState();
-    boustrophedon_msgs::PlanMowingPathResultConstPtr result = boustrophedonServer_->client.getResult();
-    if (result->plan.points.size() < 1) {
-      ROS_INFO("Action did not finish before the time out.");
-    } else {
-      ROS_INFO("Action finished: %s", state.toString().c_str());
-
-      cout << "Result with : " << result->plan.points.size() << endl;
-
-      if (result->plan.points.size() > 2) {
-        pathPlanner_->convertStripingPlanToPath(result->plan, path);
-
-        pathTransformed = pathPlanner_->getTransformedPath(path);
-
-        vector<vector<double>> vectorPathTransformed = pathPlanner_->convertPathPlanToVectorVector(pathTransformed);
-
-        vector<double> firstQuatPos = vectorPathTransformed[0];
-
-        dynamicalSystem_->setPath(vectorPathTransformed);
-
-        boustrophedonServer_->pathPub.publish(pathTransformed);
-
-        boustrophedonServer_->closeRosLaunch();
-        checkPath = true;
-      }
-    }
-    ros::spinOnce();
-    loopRate_.sleep();
+  std::vector<std::vector<double>> result;
+  for (int i = 0; i < 10; ++i) {
+    result.push_back(targetQuatPos);
   }
-  cout << "path well compute" << endl;
+
+  dynamicalSystem_->setPath(result);
+
+  checkPath = true;
 
   return checkPath;
 }
 
 bool TaskSurfaceFinishing::execute() {
-  cout << "preforming shotcrete ..." << endl;
-  dynamicalSystem_->resetInit();
+  set_bias();
+  cout << "preforming limitcycle ..." << endl;
 
-  while (ros::ok() && !dynamicalSystem_->isFinished()) {
-    // set and get desired speed
+  dynamicalSystem_->resetInit();
+  dynamicalSystem_->resetCheckLinearDs();
+
+  vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
+
+  while (ros::ok()) {
+
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     stateJoints = rosInterface_->receiveState();
     vector<double> actualJoint = get<0>(stateJoints);
     pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
     dynamicalSystem_->setCartPose(pairActualQuatPos);
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
+
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
 
     VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-    vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
+    Eigen::Vector3d centerLimitCycle;
+    centerLimitCycle << firstQuatPos[4], firstQuatPos[5], firstQuatPos[6];
+    Eigen::Vector3d limitCycleLinSpeed =
+        dynamicalSystem_->updateLimitCycle3DPosVelWith2DLC(pairActualQuatPos.second, centerLimitCycle);
 
-    rosInterface_->sendState(desiredJointSpeed);
+    // twistDesiredEigen(0) = limitCycleLinSpeed(0);
+    // twistDesiredEigen(1) = limitCycleLinSpeed(1);
+    // twistDesiredEigen(2) = limitCycleLinSpeed(2);
+    Eigen::VectorXd deltaTwist;
+    deltaTwist = decoderWrench();
+    cout << deltaTwist << endl;
 
+    vector<double> desiredJoint = roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, deltaTwist);
+    rosInterface_->sendState(desiredJoint);
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
-
-  return dynamicalSystem_->isFinished();
+  return dynamicalSystem_->checkLinearDs();
 }
 
 void TaskSurfaceFinishing::set_bias() {
@@ -150,6 +116,7 @@ Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
   vector<double> receivedWrench = rosInterface_->receiveWrench();
   Eigen::VectorXd outTwist(6);
   double alpha = 0.25;
+
   for (size_t i = 0; i < receivedWrench.size(); ++i) {
     receivedWrench[i] -= biasWrench_[i];
     if (receivedWrench[i] > 5) {
@@ -162,6 +129,7 @@ Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
       outTwist(i) = 0;
     }
   }
+
   outputTwist_ = alpha * outputTwist_ + (1 - alpha) * outTwist;
 
   for (size_t i = 0; i < outputTwist_.size(); ++i) {
