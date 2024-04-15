@@ -24,7 +24,6 @@ public:
   bool computePath();
   bool execute();
 
-  bool TestSF();
   void set_bias();
 
   std::vector<double> homeJoint_;
@@ -42,4 +41,5 @@ private:
   std::unique_ptr<BoustrophedonServer> boustrophedonServer_ = nullptr;
 
   Eigen::VectorXd decoderWrench();
+  Eigen::VectorXd contactUpdateDS();
 };

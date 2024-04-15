@@ -45,6 +45,13 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : n
     subFTsensor_ = nh_.subscribe(FTTopic, 10, &RosInterfaceNoetic::FTCallback, this);
     subState_ = nh_.subscribe(actualStateTopic, 10, &RosInterfaceNoetic::jointStateCallback, this);
     pubState_ = nh_.advertise<std_msgs::Float64MultiArray>(commandStateTopic, 1000);
+
+
+    pubStateDS_ = nh_.advertise<std_msgs::Float64MultiArray>("desiredDsTwist", 1000);
+    pubStateCartesianTwistEEF_ = nh_.advertise<std_msgs::Float64MultiArray>("actualCartesianTwistEEF", 1000);
+
+
+
   } catch (const YAML::Exception& e) {
     ROS_ERROR_STREAM("Error loading YAML file: " << e.what());
   }
@@ -123,3 +130,19 @@ void RosInterfaceNoetic::sendState(vector<double>& data) {
   nextJointMsg.data = data;
   pubState_.publish(nextJointMsg);
 }
+
+// These functions aff for purpose to plot the speed easily
+void RosInterfaceNoetic::setDesiredDsTwist(vector<double>& data) {
+
+  std_msgs::Float64MultiArray nextJointMsg;
+  nextJointMsg.data = data;
+  pubStateDS_.publish(nextJointMsg);
+}
+
+void RosInterfaceNoetic::setCartesianTwist(vector<double>& data) {
+
+  std_msgs::Float64MultiArray nextJointMsg;
+  nextJointMsg.data = data;
+  pubStateCartesianTwistEEF_.publish(nextJointMsg);
+}
+

@@ -12,13 +12,18 @@ To install the dependencies, you have two options:
 
     We utilize Docker Compose for managing the Docker container. Follow these steps to set up the environment at the roots of the folder:
 
-    bash
+    #you need to defin a rosuser
+    export ROS_USER=COMPUTERNAME
+    
+    # initialize the submodules
+    git submodule update --init --recursive
+    git submodule update --recursive --remote
 
     # Build the Docker containers
-    docker-compose build
+    docker compose build
 
     # Start the Docker containers in detached mode
-    docker-compose up -d
+    docker compose up -d
 
     # Access the Docker container's shell
     docker exec -it robetarme-deliverables-wp5-ros-1 bash

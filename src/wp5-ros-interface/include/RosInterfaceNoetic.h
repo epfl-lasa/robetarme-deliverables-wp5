@@ -25,6 +25,9 @@ public:
 
   std::tuple<std::vector<double>, std::vector<double>, std::vector<double>> receiveState();
   void sendState(std::vector<double>& data);
+  void setCartesianTwist(std::vector<double>& data);
+  void setDesiredDsTwist(std::vector<double>& data);
+  
   std::vector<double> receiveWrench();
 
 private:
@@ -43,4 +46,6 @@ private:
   ros::Subscriber subFTsensor_;
   ros::Subscriber subState_;
   ros::Publisher pubState_;
+  ros::Publisher pubStateDS_;
+  ros::Publisher pubStateCartesianTwistEEF_;
 };

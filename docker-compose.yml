@@ -16,13 +16,13 @@ services:
         USER: ${ROS_USER}
       secrets:
         - ssh_key
-    # deploy:
-    #   resources:
-    #     reservations:
-    #       devices:
-    #         - driver: nvidia
-    #           count: 1
-    #           capabilities: [ gpu ]
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [ gpu ]
     volumes:
       - /tmp/.X11-unix:/tmp/.X11-unix
       - ./src:/home/${ROS_USER}/catkin_ws/src

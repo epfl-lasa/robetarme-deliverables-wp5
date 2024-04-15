@@ -99,6 +99,8 @@ bool TaskShotcrete::execute() {
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     stateJoints = rosInterface_->receiveState();
     vector<double> actualJoint = get<0>(stateJoints);
+    vector<double> actualJointSpeed = get<1>(stateJoints);
+
     pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
 
     dynamicalSystem_->setCartPose(pairActualQuatPos);
@@ -108,6 +110,20 @@ bool TaskShotcrete::execute() {
     vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
 
     rosInterface_->sendState(desiredJointSpeed);
+
+
+    //publish to ros to ploting purpose
+    VectorXd actualTwistEigen = roboticArm_->getTwistFromJointState(actualJoint,actualJointSpeed);
+    vector<double> actualTwist(6,0.0) ;
+    for (int i = 0; i < actualTwistEigen.size(); ++i) {
+      actualTwist[i] = actualTwistEigen[i];
+    }    
+    vector<double> desiredTwist(6,0.0) ;
+    for (int i = 0; i < twistDesiredEigen.size(); ++i) {
+      desiredTwist[i] = twistDesiredEigen[i];
+    }
+    rosInterface_->setCartesianTwist(actualTwist);
+    rosInterface_->setDesiredDsTwist(desiredTwist );
 
     ros::spinOnce();
     loopRate_.sleep();

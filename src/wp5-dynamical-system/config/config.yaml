@@ -1,8 +1,8 @@
 
 flowRadius: 0.03
 limitCycleRadius: 0.03
-limitCycleSpeed: 9
-convRate: 10
+limitCycleSpeed: 3 #9
+convRate: 2 #10
 
 linearSpeed: 0.05
 
