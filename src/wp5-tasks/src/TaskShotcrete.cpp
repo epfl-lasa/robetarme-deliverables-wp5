@@ -117,7 +117,6 @@ bool TaskShotcrete::execute() {
     vector<double> actualTwist(6,0.0) ;
     for (int i = 0; i < actualTwistEigen.size(); ++i) {
       actualTwist[i] = actualTwistEigen[i];
-    }    
     vector<double> desiredTwist(6,0.0) ;
     for (int i = 0; i < twistDesiredEigen.size(); ++i) {
       desiredTwist[i] = twistDesiredEigen[i];
