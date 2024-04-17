@@ -1,7 +1,8 @@
 # Handle ros distro
 ARG ROS_DISTRO=noetic
+ARG ROS_IMAGE=${ROS_DISTRO}-desktop-full
 
-FROM ros:${ROS_DISTRO} as ros-ws
+FROM osrf/ros:${ROS_IMAGE} as ros-ws
 
 ARG ROS_DISTRO
 ARG USER=root
@@ -75,9 +76,12 @@ RUN unlink /root/.ssh/id_ed25519
 RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y \
     python3-vcstool \
-    ros-noetic-rqt-joint-trajectory-controller \
-    ros-noetic-moveit-commander \
-    ros-noetic-teleop-twist-keyboard
+    ros-${ROS_DISTRO}-rqt-joint-trajectory-controller \
+    ros-${ROS_DISTRO}-moveit-commander \
+    ros-${ROS_DISTRO}-pcl-ros \
+    ros-${ROS_DISTRO}-teleop-twist-keyboard \
+    ros-${ROS_DISTRO}-joint-state-publisher \
+    ros-${ROS_DISTRO}-robot-state-publisher
 
 # Install trac ik
 RUN apt update --fix-missing && apt upgrade -y && apt clean
@@ -101,6 +105,7 @@ FROM cmake-options as simulation-tools
 # Install gazebo
 RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y \
+    gazebo11 \
     ros-${ROS_DISTRO}-gazebo-ros-pkgs \
     ros-${ROS_DISTRO}-gazebo-ros-control
 

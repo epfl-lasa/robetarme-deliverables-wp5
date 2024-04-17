@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   ros:
     user: ${ROS_USER}
@@ -24,8 +22,8 @@ services:
               count: 1
               capabilities: [ gpu ]
     volumes:
-      - /tmp/.X11-unix:/tmp/.X11-unix
       - ./src:/home/${ROS_USER}/catkin_ws/src
+      - /tmp/.X11-unix:/tmp/.X11-unix
     stdin_open: true
     tty: true
 
