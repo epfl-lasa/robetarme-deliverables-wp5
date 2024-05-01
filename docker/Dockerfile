@@ -94,7 +94,7 @@ RUN if [ "${USE_SIMD}" = "ON" ] ; \
 
 # Add cmake option to bash rc if needed
 RUN if [ "${USE_SIMD}" = "ON" ] ; \
-    then echo "export ENABLE_SIMD=ON" >> /home/${USER}/.bashrc ; fi
+    then echo "export ENABLE_SIMD=ON" >> ${HOME}/.bashrc ; fi
 
 FROM cmake-options as simulation-tools
 
@@ -107,14 +107,8 @@ RUN apt install -y \
 FROM simulation-tools as finalisation
 
 # Give bashrc back to user
-WORKDIR /home/${USER}
-
-RUN echo export ROS_MASTER_URI=http://localhost:11311 >> ~/.bashrc
-RUN echo export ROS_IP=127.0.0.1 >> ~/.bashrc
-# RUN echo export ROS_MASTER_URI=http://10.42.0.187:11311 >> ~/.bashrc
-# RUN echo export ROS_IP=128.178.145.217 >> ~/.bashrc
+WORKDIR ${HOME}
 RUN chown -R ${USER}:${HOST_GID} .bashrc
-
 
 # Create catkin workspace
 RUN mkdir -p ${HOME}/catkin_ws/src
@@ -125,4 +119,4 @@ RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${HOME}/catkin_ws &&
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 RUN echo "source ${HOME}/catkin_ws/devel/setup.bash" >> ~/.bashrc
 
-WORKDIR /home/${USER}/catkin_ws
+WORKDIR ${HOME}/catkin_ws

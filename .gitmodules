@@ -5,3 +5,6 @@
 	path = src/iiwa_ros
 	url = https://github.com/epfl-lasa/iiwa_ros.git
 	branch = feature/dockerise
+[submodule "src/ros-modbus-device-driver"]
+	path = src/ros-modbus-device-driver
+	url = https://github.com/bitmeal/ros-modbus-device-driver.git
