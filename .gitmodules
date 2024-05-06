@@ -1,7 +1,0 @@
-[submodule "src/net-ft-ros"]
-	path = src/net-ft-ros
-	url = https://github.com/epfl-lasa/net-ft-ros.git
-[submodule "src/iiwa_ros"]
-	path = src/iiwa_ros
-	url = https://github.com/epfl-lasa/iiwa_ros.git
-	branch = feature/dockerise
