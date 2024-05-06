@@ -1,8 +1,0 @@
-<map id="iiwa_ros::Iiwa" name="iiwa_ros::Iiwa">
-<area shape="rect" id="node1" title=" " alt="" coords="208,185,319,212"/>
-<area shape="rect" id="node2" title=" " alt="" coords="5,81,153,123"/>
-<area shape="rect" id="node3" href="$classkuka_1_1fri_1_1_dummy_state.html" title=" " alt="" coords="178,89,349,115"/>
-<area shape="rect" id="node4" title=" " alt="" coords="223,5,304,32"/>
-<area shape="rect" id="node5" href="$classkuka_1_1fri_1_1_dummy_command.html" title=" " alt="" coords="373,89,575,115"/>
-<area shape="rect" id="node6" title=" " alt="" coords="417,5,531,32"/>
-</map>
