@@ -52,13 +52,13 @@ Here's a brief overview of the library included in this repository:
 
 Each package contributes to different aspects of the robotic workflow, enabling comprehensive control and operation of robotic tasks. Refer to the documentation within each package for detailed usage instructions.
 
-##Contributing
+## Contributing
 
 We welcome contributions to this repository. If you find any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request.
 ## License
 
 This project is licensed under the MIT License.
-##Contact
+## Contact
 
 If you have any questions or need further assistance, please contact tristan_bonato@hotmail.com.
 
