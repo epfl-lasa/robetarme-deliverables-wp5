@@ -1,8 +1,8 @@
 /**
  * @file PathPlanner.h
  * @brief Declaration of the PathPlanner class
- * @author [Author Name]
- * @date [Date]
+ * @author [Tristan Bonato]
+ * @date 2024-03-07
  */
 
 #pragma once
