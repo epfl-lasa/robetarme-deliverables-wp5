@@ -1,0 +1,7 @@
+<map id="IRoboticArmBase" name="IRoboticArmBase">
+<area shape="rect" id="node1" title="Mother class to create all the prototype functions needed in different robotic arms." alt="" coords="235,5,370,32"/>
+<area shape="rect" id="node2" href="$class_robotic_arm_cobod.html" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="5,80,144,107"/>
+<area shape="rect" id="node3" href="$class_robotic_arm_cr7.html" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="168,80,288,107"/>
+<area shape="rect" id="node4" href="$class_robotic_arm_iiwa7.html" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="312,80,445,107"/>
+<area shape="rect" id="node5" href="$class_robotic_arm_ur5.html" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="470,80,591,107"/>
+</map>

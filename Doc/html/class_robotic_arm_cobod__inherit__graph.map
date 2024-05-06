@@ -1,0 +1,4 @@
+<map id="RoboticArmCobod" name="RoboticArmCobod">
+<area shape="rect" id="node1" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="5,80,144,107"/>
+<area shape="rect" id="node2" href="$class_i_robotic_arm_base.html" title="Mother class to create all the prototype functions needed in different robotic arms." alt="" coords="7,5,142,32"/>
+</map>
