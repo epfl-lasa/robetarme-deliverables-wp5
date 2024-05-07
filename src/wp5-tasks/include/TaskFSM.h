@@ -117,6 +117,7 @@ protected:
 public:
   TaskFSM(std::shared_ptr<ITaskBase> task) : currentTask_(task) { std::cout << "Inside TaskFSM : " << std::endl; };
 
+  bool getExit() { return exit_; }
   bool getHomed() { return homed_; }
   bool getReady() { return ready_; }
   std::string getError() { return error_; }

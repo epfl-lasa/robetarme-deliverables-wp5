@@ -78,7 +78,7 @@ bool TaskSurfaceFinishing::execute() {
     vector<double> desiredJoint = roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, deltaTwist);
     rosInterface_->sendState(desiredJoint);
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    getRosLoopRate_()->sleep();
   }
   return dynamicalSystem_->checkLinearDs();
 }
@@ -94,11 +94,13 @@ void TaskSurfaceFinishing::set_bias() {
   int meanIteration = 0;
   while (ros::ok() && (meanIteration < meanNum)) {
     receivedWrench = rosInterface_->receiveWrench();
+
     for (size_t i = 0; i < wrenchActual.size(); ++i) {
       wrenchActual[i] += receivedWrench[i] / meanNum;
     }
     meanIteration += 1;
-    getRosLoopRate_().sleep();
+
+    loopRate_.sleep();
   }
 
   // Assign the calculated bias to biasWrench_
@@ -169,7 +171,7 @@ bool TaskSurfaceFinishing::TestSF() {
     rosInterface_->sendState(desiredJoint);
 
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    getRosLoopRate_()->sleep();
 
     //TODO: delet rviz dependency
     // twistMarker(twistDesiredEigen, pairActualQuatPos.second, pubDesiredVelFiltered_);

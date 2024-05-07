@@ -83,7 +83,7 @@ bool TaskShotcrete::computePath() {
       }
     }
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    getRosLoopRate_()->sleep();
   }
   cout << "path well compute" << endl;
 
@@ -128,7 +128,7 @@ bool TaskShotcrete::execute() {
     rosInterface_->setDesiredDsTwist(desiredTwist);
 
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    getRosLoopRate_()->sleep();
   }
 
   return dynamicalSystem_->isFinished();
