@@ -38,6 +38,16 @@ public:
     }
   }
 
+  std::vector<std::string> getTaskTypes() {
+    std::vector<std::string> keys;
+
+    for (const auto& pair : factoryFunctionRegistry) {
+      keys.push_back(pair.first);
+    }
+
+    return keys;
+  }
+
 private:
   std::map<std::string, FactoryFunction> factoryFunctionRegistry;
 };

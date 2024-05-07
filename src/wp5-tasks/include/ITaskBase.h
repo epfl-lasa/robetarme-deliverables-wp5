@@ -30,11 +30,11 @@
  */
 enum TaskType : int8_t {
   TASK_UNDEFINED = -1, /**< Undefined task type. */
-  SHOTCRETE,          /**< Shotcrete task type. */
-  SURFACE_FINISHING,  /**< Surface finishing task type. */
-  SAND_BLASTING,      /**< Sand blasting task type. */
-  MAM_REBARS,         /**< MAM rebar task type. */
-  NB_TASKS            /**< Number of task types. Keep at the end of enum. */
+  SHOTCRETE,           /**< Shotcrete task type. */
+  SURFACE_FINISHING,   /**< Surface finishing task type. */
+  SAND_BLASTING,       /**< Sand blasting task type. */
+  MAM_REBARS,          /**< MAM rebar task type. */
+  NB_TASKS             /**< Number of task types. Keep at the end of enum. */
 };
 
 /**
@@ -164,7 +164,7 @@ protected:
    * @param firstQuatPosOffset Vector representing the position offset.
    * @return True if successful, false otherwise.
    */
-  bool GoToPoint(std::vector<double> firstQuatPosOffset) const;
+  bool goToPoint(std::vector<double> firstQuatPosOffset) const;
 
 private:
   /**

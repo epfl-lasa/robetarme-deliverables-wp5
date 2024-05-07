@@ -83,7 +83,7 @@ bool TaskShotcrete::computePath() {
       }
     }
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
   cout << "path well compute" << endl;
 
@@ -111,22 +111,24 @@ bool TaskShotcrete::execute() {
 
     rosInterface_->sendState(desiredJointSpeed);
 
-
     //publish to ros to ploting purpose
-    VectorXd actualTwistEigen = roboticArm_->getTwistFromJointState(actualJoint,actualJointSpeed);
-    vector<double> actualTwist(6,0.0) ;
+    VectorXd actualTwistEigen = roboticArm_->getTwistFromJointState(actualJoint, actualJointSpeed);
+    vector<double> actualTwist(6, 0.0);
+
     for (int i = 0; i < actualTwistEigen.size(); ++i) {
       actualTwist[i] = actualTwistEigen[i];
-    }    
-    vector<double> desiredTwist(6,0.0) ;
+    }
+
+    vector<double> desiredTwist(6, 0.0);
     for (int i = 0; i < twistDesiredEigen.size(); ++i) {
       desiredTwist[i] = twistDesiredEigen[i];
     }
+
     rosInterface_->setCartesianTwist(actualTwist);
-    rosInterface_->setDesiredDsTwist(desiredTwist );
+    rosInterface_->setDesiredDsTwist(desiredTwist);
 
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
 
   return dynamicalSystem_->isFinished();

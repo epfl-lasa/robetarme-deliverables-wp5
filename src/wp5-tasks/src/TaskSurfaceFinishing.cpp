@@ -71,10 +71,10 @@ bool TaskSurfaceFinishing::execute() {
     centerLimitCycle << firstQuatPos[4], firstQuatPos[5], firstQuatPos[6];
     Eigen::Vector3d limitCycleLinSpeed =
         dynamicalSystem_->updateLimitCycle3DPosVelWith2DLC(pairActualQuatPos.second, centerLimitCycle);
-    pairQuatLinerSpeed.second =limitCycleLinSpeed;
+    pairQuatLinerSpeed.second = limitCycleLinSpeed;
 
     VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
-  
+
     Eigen::VectorXd deltaTwist;
     deltaTwist = contactUpdateDS();
 
@@ -82,17 +82,17 @@ bool TaskSurfaceFinishing::execute() {
     rosInterface_->sendState(desiredJoint);
 
     //publish to ros to ploting purpose
-    VectorXd actualTwistEigen = roboticArm_->getTwistFromJointState(actualJoint,actualJointSpeed);
-    vector<double> actualTwist(6,0.0) ;
+    VectorXd actualTwistEigen = roboticArm_->getTwistFromJointState(actualJoint, actualJointSpeed);
+    vector<double> actualTwist(6, 0.0);
     for (int i = 0; i < actualTwistEigen.size(); ++i) {
       actualTwist[i] = actualTwistEigen[i];
-    }    
-    vector<double> desiredTwist(6,0.0) ;
+    }
+    vector<double> desiredTwist(6, 0.0);
     for (int i = 0; i < twistDesiredEigen.size(); ++i) {
       desiredTwist[i] = twistDesiredEigen[i];
     }
     rosInterface_->setCartesianTwist(actualTwist);
-    rosInterface_->setDesiredDsTwist(desiredTwist );
+    rosInterface_->setDesiredDsTwist(desiredTwist);
 
     // rosLoop
     ros::spinOnce();
@@ -112,11 +112,13 @@ void TaskSurfaceFinishing::set_bias() {
   int meanIteration = 0;
   while (ros::ok() && (meanIteration < meanNum)) {
     receivedWrench = rosInterface_->receiveWrench();
+
     for (size_t i = 0; i < wrenchActual.size(); ++i) {
       wrenchActual[i] += receivedWrench[i] / meanNum;
     }
+
     meanIteration += 1;
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
 
   // Assign the calculated bias to biasWrench_
@@ -127,7 +129,6 @@ void TaskSurfaceFinishing::set_bias() {
   for (size_t i = 0; i < biasWrench_.size(); ++i) {
     std::cout << "biasWrench_[" << i << "] = " << biasWrench_[i] << std::endl;
   }
-
 }
 
 Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
@@ -162,7 +163,7 @@ Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
   return outputTwist_;
 }
 Eigen::VectorXd TaskSurfaceFinishing::contactUpdateDS() {
-   vector<double> receivedWrench = rosInterface_->receiveWrench();
+  vector<double> receivedWrench = rosInterface_->receiveWrench();
   Eigen::VectorXd outTwist(6);
   double alpha = 0.25;
   double margin = 1;
@@ -175,18 +176,17 @@ Eigen::VectorXd TaskSurfaceFinishing::contactUpdateDS() {
   }
 
   if (receivedWrench[2] > margin) {
-      outTwist(2) = receivedWrench[2] * 0.05;
+    outTwist(2) = receivedWrench[2] * 0.05;
 
-    } else if (receivedWrench[2] < -margin) {
-      outTwist(2) = receivedWrench[2] * 0.05;
+  } else if (receivedWrench[2] < -margin) {
+    outTwist(2) = receivedWrench[2] * 0.05;
 
-    } else {
-      outTwist(2) = 0;
-    }
-
+  } else {
+    outTwist(2) = 0;
+  }
 
   for (size_t i = 0; i < outTwist.size(); ++i) {
-    if(i !=2){
+    if (i != 2) {
       outTwist(i) = 0;
     }
   }
@@ -194,14 +194,11 @@ Eigen::VectorXd TaskSurfaceFinishing::contactUpdateDS() {
   outputTwist_ = alpha * outputTwist_ + (1 - alpha) * outTwist;
 
   if (outputTwist_(2) < -0.15) {
-      outputTwist_(2) = -0.15;
-    }
-    if (outputTwist_(2) > 0.15) {
-      outputTwist_(2) = 0.15;
-    }
+    outputTwist_(2) = -0.15;
+  }
+  if (outputTwist_(2) > 0.15) {
+    outputTwist_(2) = 0.15;
+  }
 
   return outputTwist_;
-
 }
-
-

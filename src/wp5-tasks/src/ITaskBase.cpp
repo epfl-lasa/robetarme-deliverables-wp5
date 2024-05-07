@@ -55,7 +55,7 @@ bool ITaskBase::goHomingPosition() const {
       homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
 
   while (ros::ok() && !dynamicalSystem_->checkLinearDs()) {
-    GoToPoint(desiredQuatPos);
+    goToPoint(desiredQuatPos);
 
     ros::spinOnce();
     getRosLoopRate_().sleep();
@@ -77,7 +77,7 @@ bool ITaskBase::goWorkingPosition() const {
 
   while (ros::ok() && !dynamicalSystem_->checkLinearDs()) {
 
-    GoToPoint(firstQuatPos);
+    goToPoint(firstQuatPos);
 
     ros::spinOnce();
     getRosLoopRate_().sleep();
@@ -86,7 +86,7 @@ bool ITaskBase::goWorkingPosition() const {
   return dynamicalSystem_->checkLinearDs();
 }
 
-bool ITaskBase::GoToPoint(vector<double> firstQuatPosOffset) const {
+bool ITaskBase::goToPoint(vector<double> firstQuatPosOffset) const {
   // set and get desired speed
   tuple<vector<double>, vector<double>, vector<double>> stateJoints;
   stateJoints = rosInterface_->receiveState();
