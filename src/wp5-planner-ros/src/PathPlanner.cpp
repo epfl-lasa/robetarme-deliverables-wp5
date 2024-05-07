@@ -20,7 +20,7 @@ PathPlanner::PathPlanner(ros::NodeHandle& n) :
   transformedPolygonPub_ = nh_.advertise<geometry_msgs::PolygonStamped>("/flat_polygon", 1, true);
 
   // Load parameters from YAML file
-  string yamlPath = string(WP5_PLANNER_ROS_DIR) + "/config/config.yaml";
+  string yamlPath = string(WP5_PLANNER_ROS_DIR) + "/config/target_config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file

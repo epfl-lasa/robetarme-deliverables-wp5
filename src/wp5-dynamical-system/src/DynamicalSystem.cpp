@@ -12,7 +12,7 @@ DynamicalSystem::DynamicalSystem(double freq) {
 
 void DynamicalSystem::parameterInitialization() {
   // Load parameters from YAML file
-  string yamlPath = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/config.yaml";
+  string yamlPath = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/control_config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file

@@ -17,7 +17,7 @@ TargetExtraction::TargetExtraction(ros::NodeHandle& nh) {
   originalPolygonPub_ = nh.advertise<geometry_msgs::PolygonStamped>("/original_polygon", 1, true);
 
   // Load parameters from YAML file
-  string yamlPath = string(WP5_PLANNER_ROS_DIR) + "/config/config.yaml";
+  string yamlPath = string(WP5_PLANNER_ROS_DIR) + "/config/target_config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file
