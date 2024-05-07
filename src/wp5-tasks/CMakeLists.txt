@@ -39,45 +39,18 @@ include_directories(
   ${YAML_CPP_INCLUDE_DIR}
 )
 
-# Add the main_temp node
-add_executable(wp5_main_temp_shotcrete_node
-  src/main_task_shotcrete.cpp
+# Add the main node
+set(node_name wp5_main_task_node)
+add_executable(${node_name}
+  src/main_task.cpp
   src/ITaskBase.cpp
   src/TaskShotcrete.cpp
   src/TaskSurfaceFinishing.cpp
 )
-target_link_libraries(wp5_main_temp_shotcrete_node PRIVATE
+
+target_link_libraries(${node_name} PRIVATE
   ${catkin_LIBRARIES}
   ${control_libraries_LIBRARIES}
   ${Boost_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
 )
-
-# Test, to b
-# Add the main_temp node
-add_executable(wp5_main_temp_surface_finishing_node
-src/main_task_surface_finishing.cpp
-src/ITaskBase.cpp
-src/TaskShotcrete.cpp
-src/TaskSurfaceFinishing.cpp
-)
-
-
-
-target_link_libraries(wp5_main_temp_surface_finishing_node PRIVATE
-  ${catkin_LIBRARIES}
-  ${control_libraries_LIBRARIES}
-  ${Boost_LIBRARIES}
-  ${YAML_CPP_LIBRARIES}
-)
-
-# Test, to be removed
-add_executable(test_node
-  src/test.cpp
-)
-
-target_link_libraries(test_node PRIVATE
-  ${catkin_LIBRARIES}
-  ${Boost_LIBRARIES}
-)
-

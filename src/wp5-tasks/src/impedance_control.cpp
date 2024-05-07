@@ -98,7 +98,7 @@ void TaskSurfaceFinishing::set_bias() {
       wrenchActual[i] += receivedWrench[i] / meanNum;
     }
     meanIteration += 1;
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
   }
 
   // Assign the calculated bias to biasWrench_
@@ -169,7 +169,7 @@ bool TaskSurfaceFinishing::TestSF() {
     rosInterface_->sendState(desiredJoint);
 
     ros::spinOnce();
-    loopRate_.sleep();
+    getRosLoopRate_().sleep();
 
     //TODO: delet rviz dependency
     // twistMarker(twistDesiredEigen, pairActualQuatPos.second, pubDesiredVelFiltered_);
