@@ -1,0 +1,26 @@
+digraph "/home/lmunier/Documents/robetarme/robetarme-deliverables-wp5/src/boustrophedon_planner/boustrophedon_server/include/boustrophedon_server/striping_planner.h"
+{
+ // LATEX_PDF_SIZE
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="/home/lmunier/Documents\l/robetarme/robetarme-deliverables\l-wp5/src/boustrophedon_planner\l/boustrophedon_server/include/boustrophedon\l_server/striping_planner.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black",tooltip=" "];
+  Node1 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="boustrophedon_server\l/cgal_types.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$cgal__types_8h.html",tooltip=" "];
+  Node2 -> Node3 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="CGAL/Polygon_2.h",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node2 -> Node4 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node4 [label="CGAL/Cartesian.h",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node2 -> Node5 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node5 [label="CGAL/Arr_linear_traits_2.h",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node2 -> Node6 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node6 [label="CGAL/Orthogonal_k_neighbor\l_search.h",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node2 -> Node7 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node7 [label="CGAL/Search_traits_2.h",height=0.2,width=0.4,color="grey75", fillcolor="white", style="filled",tooltip=" "];
+  Node1 -> Node8 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 [label="boustrophedon_server\l/cgal_utils.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$cgal__utils_8h.html",tooltip=" "];
+  Node8 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node8 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node9 [label="boustrophedon_server\l/boustrophedon_types.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$boustrophedon__types_8h.html",tooltip=" "];
+  Node9 -> Node2 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node1 -> Node9 [color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+}

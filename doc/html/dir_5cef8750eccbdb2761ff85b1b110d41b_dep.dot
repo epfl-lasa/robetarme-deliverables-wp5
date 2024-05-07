@@ -1,0 +1,14 @@
+digraph "/home/lmunier/Documents/robetarme/robetarme-deliverables-wp5/src/boustrophedon_planner/boustrophedon_server/include/boustrophedon_server" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_35b477de848b1d8bee1b2af260600461 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="include" fontname="Helvetica", fontsize="10", URL="dir_35b477de848b1d8bee1b2af260600461.html"]
+  subgraph clusterdir_5cef8750eccbdb2761ff85b1b110d41b {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_5cef8750eccbdb2761ff85b1b110d41b.html"];
+    dir_5cef8750eccbdb2761ff85b1b110d41b [shape=plaintext label="boustrophedon_server"];
+    dir_a302aef3a694d760053355238e2df3a8 [shape=box label="cellular_decomposition" color="black" fillcolor="white" style="filled" URL="dir_a302aef3a694d760053355238e2df3a8.html"];
+  }
+  }
+  dir_5cef8750eccbdb2761ff85b1b110d41b->dir_a302aef3a694d760053355238e2df3a8 [headlabel="1", labeldistance=1.5 headhref="dir_000004_000005.html"];
+}

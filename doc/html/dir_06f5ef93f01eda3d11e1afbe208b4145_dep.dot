@@ -1,0 +1,17 @@
+digraph "/home/lmunier/Documents/robetarme/robetarme-deliverables-wp5/src/iiwa_ros/iiwa_control" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_69e928a0ea828c5e87a9d7882b30aa73 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="iiwa_ros" fontname="Helvetica", fontsize="10", URL="dir_69e928a0ea828c5e87a9d7882b30aa73.html"]
+  subgraph clusterdir_06f5ef93f01eda3d11e1afbe208b4145 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_06f5ef93f01eda3d11e1afbe208b4145.html"];
+    dir_06f5ef93f01eda3d11e1afbe208b4145 [shape=plaintext label="iiwa_control"];
+    dir_67ffad700891a9b54ce3cc6478e168b6 [shape=box label="include" color="red" fillcolor="white" style="filled" URL="dir_67ffad700891a9b54ce3cc6478e168b6.html"];
+    dir_9269b3340bb98655d3341df21dd7b9d2 [shape=box label="src" color="black" fillcolor="white" style="filled" URL="dir_9269b3340bb98655d3341df21dd7b9d2.html"];
+  }
+  }
+  dir_e789eb4300345b263128670793af9cac [shape=box label="iiwa_tools" fillcolor="white" style="filled" color="red" URL="dir_e789eb4300345b263128670793af9cac.html"];
+  dir_9269b3340bb98655d3341df21dd7b9d2->dir_67ffad700891a9b54ce3cc6478e168b6 [headlabel="1", labeldistance=1.5 headhref="dir_000023_000021.html"];
+  dir_67ffad700891a9b54ce3cc6478e168b6->dir_e789eb4300345b263128670793af9cac [headlabel="1", labeldistance=1.5 headhref="dir_000021_000033.html"];
+}

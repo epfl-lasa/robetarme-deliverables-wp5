@@ -1,0 +1,28 @@
+digraph "/home/lmunier/Documents/robetarme/robetarme-deliverables-wp5/src/wp5-tasks" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_68267d1309a1af8e8297ef4c3efbcdba {
+    graph [ bgcolor="#ddddee", pencolor="black", label="src" fontname="Helvetica", fontsize="10", URL="dir_68267d1309a1af8e8297ef4c3efbcdba.html"]
+  subgraph clusterdir_335b0a685d7ba665093824a7d5bff625 {
+    graph [ bgcolor="#eeeeff", pencolor="black", label="" URL="dir_335b0a685d7ba665093824a7d5bff625.html"];
+    dir_335b0a685d7ba665093824a7d5bff625 [shape=plaintext label="wp5-tasks"];
+    dir_22b48096fab27517eff40960bb676e99 [shape=box label="include" color="black" fillcolor="white" style="filled" URL="dir_22b48096fab27517eff40960bb676e99.html"];
+    dir_f9b50a15d2bb17fbe688f4fa2c900e1f [shape=box label="scripts" color="black" fillcolor="white" style="filled" URL="dir_f9b50a15d2bb17fbe688f4fa2c900e1f.html"];
+    dir_0046d1ba7c5df50dc55a49892a50d3e4 [shape=box label="src" color="black" fillcolor="white" style="filled" URL="dir_0046d1ba7c5df50dc55a49892a50d3e4.html"];
+  }
+  }
+  dir_ab6553eef1a09de7ccfd4e7a06da7626 [shape=box label="wp5-planner-ros" fillcolor="white" style="filled" color="red" URL="dir_ab6553eef1a09de7ccfd4e7a06da7626.html"];
+  dir_24cc78587ca3d82c7ece8c5a0652aecd [shape=box label="wp5-ros-interface" fillcolor="white" style="filled" color="red" URL="dir_24cc78587ca3d82c7ece8c5a0652aecd.html"];
+  dir_e0ea8c05b5401c2a19bd76f9656679c5 [shape=box label="wp5-dynamical-system" fillcolor="white" style="filled" color="red" URL="dir_e0ea8c05b5401c2a19bd76f9656679c5.html"];
+  dir_d358a46036a0d13e363a89125c2b2ea0 [shape=box label="wp5-robotic-arms" fillcolor="white" style="filled" color="red" URL="dir_d358a46036a0d13e363a89125c2b2ea0.html"];
+  dir_22b48096fab27517eff40960bb676e99->dir_ab6553eef1a09de7ccfd4e7a06da7626 [headlabel="9", labeldistance=1.5 headhref="dir_000049_000016.html"];
+  dir_22b48096fab27517eff40960bb676e99->dir_24cc78587ca3d82c7ece8c5a0652aecd [headlabel="3", labeldistance=1.5 headhref="dir_000049_000018.html"];
+  dir_22b48096fab27517eff40960bb676e99->dir_e0ea8c05b5401c2a19bd76f9656679c5 [headlabel="3", labeldistance=1.5 headhref="dir_000049_000015.html"];
+  dir_22b48096fab27517eff40960bb676e99->dir_d358a46036a0d13e363a89125c2b2ea0 [headlabel="5", labeldistance=1.5 headhref="dir_000049_000017.html"];
+  dir_0046d1ba7c5df50dc55a49892a50d3e4->dir_ab6553eef1a09de7ccfd4e7a06da7626 [headlabel="3", labeldistance=1.5 headhref="dir_000051_000016.html"];
+  dir_0046d1ba7c5df50dc55a49892a50d3e4->dir_22b48096fab27517eff40960bb676e99 [headlabel="8", labeldistance=1.5 headhref="dir_000051_000049.html"];
+  dir_0046d1ba7c5df50dc55a49892a50d3e4->dir_24cc78587ca3d82c7ece8c5a0652aecd [headlabel="1", labeldistance=1.5 headhref="dir_000051_000018.html"];
+  dir_0046d1ba7c5df50dc55a49892a50d3e4->dir_e0ea8c05b5401c2a19bd76f9656679c5 [headlabel="1", labeldistance=1.5 headhref="dir_000051_000015.html"];
+  dir_0046d1ba7c5df50dc55a49892a50d3e4->dir_d358a46036a0d13e363a89125c2b2ea0 [headlabel="3", labeldistance=1.5 headhref="dir_000051_000017.html"];
+}

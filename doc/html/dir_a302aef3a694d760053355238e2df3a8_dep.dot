@@ -1,0 +1,9 @@
+digraph "/home/lmunier/Documents/robetarme/robetarme-deliverables-wp5/src/boustrophedon_planner/boustrophedon_server/include/boustrophedon_server/cellular_decomposition" {
+  compound=true
+  node [ fontsize="10", fontname="Helvetica"];
+  edge [ labelfontsize="10", labelfontname="Helvetica"];
+  subgraph clusterdir_5cef8750eccbdb2761ff85b1b110d41b {
+    graph [ bgcolor="#ddddee", pencolor="black", label="boustrophedon_server" fontname="Helvetica", fontsize="10", URL="dir_5cef8750eccbdb2761ff85b1b110d41b.html"]
+  dir_a302aef3a694d760053355238e2df3a8 [shape=box, label="cellular_decomposition", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_a302aef3a694d760053355238e2df3a8.html"];
+  }
+}
