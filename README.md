@@ -38,6 +38,14 @@ To install the dependencies, you have two options:
 
 Choose the method that best fits your needs and environment to get started with the Robetarme WP5 Deliverable repository.
 
+## Documentation
+
+The documentation has to be generated using the script inside doc folder. Please be sure to have the doxygen packet installed. On linux do :
+
+    sudo apt install doxygen
+
+The documentation is readable opening the index.html file into your preferred browser.
+
 ## Usage
 
 Once the dependencies are installed, you can start using the codebase. Each package contains its own set of functionalities. Refer to the documentation within each package for detailed usage instructions.

@@ -1,7 +1,0 @@
-<map id="Graphical Class Hierarchy" name="Graphical Class Hierarchy">
-<area shape="rect" id="node1" href="$class_i_robotic_arm_base.html" title="Mother class to create all the prototype functions needed in different robotic arms." alt="" coords="5,81,140,108"/>
-<area shape="rect" id="node2" href="$class_robotic_arm_cobod.html" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="188,5,327,32"/>
-<area shape="rect" id="node3" href="$class_robotic_arm_cr7.html" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="197,56,317,83"/>
-<area shape="rect" id="node4" href="$class_robotic_arm_iiwa7.html" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="191,107,324,133"/>
-<area shape="rect" id="node5" href="$class_robotic_arm_ur5.html" title="Child class to create all the prototype fonctions needed in the different robotic arms." alt="" coords="197,157,318,184"/>
-</map>
