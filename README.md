@@ -8,16 +8,24 @@ The repository comprises multiple packages written in C++. Currently, it is desi
 
 ## Installation
 
-To install the dependencies, you have two options:
+We do work on Ubuntu system using docker and its docker compose plugin, which is the environment we recommend. But if you want, you can have a look at our Dockerfile and the scripts in the root folder to have all the needed dependencies if you would like using an other way to install them.
 
-    Using Docker Compose:
+### Dependencies
 
-    We utilize Docker Compose for managing the Docker container. Follow these steps to set up the environment at the roots of the folder:
+Assuming working on a Ubuntu Linux distribution, follow these instructions to have a working environment using docker and docker compose plugin V2.
 
-    #you need to defin a rosuser
+- **docker** <https://docs.docker.com/engine/install/ubuntu/>
+
+- **docker compose** <https://docs.docker.com/compose/install/linux/#install-using-the-repository>
+
+#### Docker setup
+
+We utilize Docker Compose for managing the Docker container. Follow these steps to set up the environment at the roots of the folder:
+
+    # You need to defin a rosuser
     export ROS_USER=COMPUTERNAME
 
-    # initialize the submodules
+    # Initialize the submodules
     git submodule update --init --recursive
     git submodule update --recursive --remote
 
@@ -34,12 +42,6 @@ To install the dependencies, you have two options:
     # Build code and source it
     catkin build
     source devel/setup.bash
-
-    Manual Installation:
-
-    If you prefer to install the dependencies directly onto your machine, you can use the provided scripts. Navigate to the scripts directory and run the appropriate script for your operating system.
-
-Choose the method that best fits your needs and environment to get started with the Robetarme WP5 Deliverable repository.
 
 ## Documentation
 
