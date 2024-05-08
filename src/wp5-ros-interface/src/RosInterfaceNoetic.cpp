@@ -1,96 +1,148 @@
 /**
  * @file RosInterfaceNoetic.cpp
  * @author Louis Munier (lmunier@protonmail.com)
- * @brief
+ * @author Tristan Bonato (tristan_bonato@hotmail.com)
+ * @brief Create a ROS interface with respect to the ROS version to communicate with the robotic arm
  * @version 0.1
- * @date 2024-02-27
+ * @date 2024-03-07
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  *
  */
 
-#include "../include/RosInterfaceNoetic.h"
+#include "RosInterfaceNoetic.h"
+
+#include <geometry_msgs/Pose.h>
+#include <geometry_msgs/PoseStamped.h>
+#include <geometry_msgs/Twist.h>
+#include <std_msgs/Float64MultiArray.h>
+#include <yaml-cpp/yaml.h>
 
 using namespace std;
 
-RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& nh): nh_(nh) {
-   try {
+RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : nh_(n), robotName_(robotName) {
+  // Try to load parameters from YAML file
+  try {
+    string yamlPath = string(WP5_ROS_INTERFACE_DIR) + "/config/config.yaml";
+    YAML::Node config = YAML::LoadFile(yamlPath);
 
-    std::string package_path = ros::package::getPath("wp5-ros-interface"); 
+    // Print information about robotName_ field
+    YAML::Node robotNode = config[robotName_];
 
-    // Load parameters from YAML file
-    std::string yaml_path = package_path + "/config/config.yaml";
-    YAML::Node config = YAML::LoadFile(yaml_path);  
-    // Print information about "UR5" field
-    YAML::Node ur5Node = config["UR5"];
+    // Attempt to access the "njoint" field within the robot
+    nJoint_ = robotNode["number_joint"].as<int>();
+    string FTTopic = robotNode["ft_topic"].as<string>();
+    string actualStateTopic = robotNode["joint_topic"].as<string>();
+    string commandStateTopic = robotNode["joint_command"].as<string>();
 
-    // Attempt to access the "njoint" field within "UR5"
-    int nJoint;
-    nJoint = ur5Node["njoint"].as<int>();
+    // Initialization
+    jointsPosition_.assign(nJoint_, 0.0);
+    jointsSpeed_.assign(nJoint_, 0.0);
+    jointsTorque_.assign(nJoint_, 0.0);
+    initJoint_ = false;
+
+    // ROS init
+    subFTsensor_ = nh_.subscribe(FTTopic, 10, &RosInterfaceNoetic::FTCallback, this);
+    subState_ = nh_.subscribe(actualStateTopic, 10, &RosInterfaceNoetic::jointStateCallback, this);
+    pubState_ = nh_.advertise<std_msgs::Float64MultiArray>(commandStateTopic, 1000);
 
 
-    string actualStateTopic = ur5Node["joint_topic"].as<string>();
-    string commandStateTopic = ur5Node["joint_command"].as<string>();
+    pubStateDS_ = nh_.advertise<std_msgs::Float64MultiArray>("desiredDsTwist", 1000);
+    pubStateCartesianTwistEEF_ = nh_.advertise<std_msgs::Float64MultiArray>("actualCartesianTwistEEF", 1000);
 
-    // initialization
-    jointsPosition.assign(nJoint, 0.0);
-    jointsSpeed.assign(nJoint, 0.0);
-    jointsTorque.assign(nJoint, 0.0);
-    init_joint = true;
 
-    //ros init
-    sub_state_ = nh_.subscribe(actualStateTopic, 10, &RosInterfaceNoetic::jointStateCallback, this);
-    pub_state_ = nh_.advertise<std_msgs::Float64MultiArray>(commandStateTopic, 1000);
 
-    } catch (const YAML::Exception& e) {
-      ROS_ERROR_STREAM("Error loading YAML file: " << e.what());
-      // Handle the error as appropriate
-    }
+  } catch (const YAML::Exception& e) {
+    ROS_ERROR_STREAM("Error loading YAML file: " << e.what());
+  }
 
-    // Wait for ROS master to be connected
-    while (!ros::master::check()) {
-        ROS_INFO("Waiting for ROS master to be connected...");
-        ros::Duration(1.0).sleep();  // Sleep for 1 second before checking again
-    }
-    // Wait for the callback to be called at least once
-    while (init_joint) {
-        ROS_INFO("Waiting for the callback to be called...");
-        ros::Duration(1.0).sleep();  // Sleep for 1 second before checking again
-        ros::spinOnce();  // Ensure the callback is called
-    }
+  // Wait for ROS master to be connected
+  while (!ros::master::check()) {
+    ROS_INFO("Waiting for ROS master to be connected...");
+    ros::Duration(1.0).sleep(); // Sleep for 1 second before checking again
+  }
+
+  // Wait for the callback to be called at least once
+  // while (!initJoint_) {
+  //   ROS_INFO("Waiting for the callback to be called...");
+  //   ros::Duration(1.0).sleep(); // Sleep for 1 second before checking again
+  //   ros::spinOnce();            // Ensure the callback is called
+  // }
 }
 
 void RosInterfaceNoetic::jointStateCallback(const sensor_msgs::JointState::ConstPtr& msg) {
   if (!msg->position.empty()) {
-    jointsPosition = msg->position; // Update the position vector
-    jointsSpeed = msg->velocity; // Update the speed vector 
-    jointsTorque = msg->effort; // Update the torque vector 
+    jointsPosition_ = msg->position; // Update the position vector
+    jointsSpeed_ = msg->velocity;    // Update the speed vector
+    jointsTorque_ = msg->effort;     // Update the torque vector
 
-    // swap the position to have each joint in the kinematic order
-    swap(jointsPosition[0], jointsPosition[2]);
-    swap(jointsSpeed[0], jointsSpeed[2]);
-    init_joint = false;
-          
+    if (robotName_ == "ur5_robot") {
+      // swap the position to have each joint in the kinematic order, ONLY FOR UR%
+      swap(jointsPosition_[0], jointsPosition_[2]);
+      swap(jointsSpeed_[0], jointsSpeed_[2]);
+    }
+    initJoint_ = true;
+
   } else {
-      ROS_WARN("Received joint positions are empty.");
+    ROS_WARN("Received joint positions are empty.");
   }
 }
 
-  tuple<vector<double>, vector<double>, vector<double>> RosInterfaceNoetic::receive_state()  {
-    ros::spinOnce();
-    // Create a tuple and fill it with existing vectors
-    tuple<vector<double>, vector<double>, vector<double>> stateJoints =
-    make_tuple(jointsPosition, jointsSpeed, jointsTorque);
-    return stateJoints;
-  } 
+void RosInterfaceNoetic::FTCallback(const geometry_msgs::WrenchStamped::ConstPtr& msg) {
+  if (msg->wrench.force.x != 0.0 || msg->wrench.force.y != 0.0 || msg->wrench.force.z != 0.0) {
+    // Extract force and torque components from the sensor message
+    double force_x = msg->wrench.force.x;
+    double force_y = msg->wrench.force.y;
+    double force_z = msg->wrench.force.z;
 
-  void RosInterfaceNoetic::send_state( tuple<vector<double>, vector<double>, vector<double>>& data)  {
-    // Access the vectors in the tuple if needed
-    vector<double>& retrievedPosition = get<0>(data);
-    vector<double>& retrievedSpeed    = get<1>(data);
-    vector<double>& retrievedTorque   = get<2>(data);
+    double torque_x = msg->wrench.torque.x;
+    double torque_y = msg->wrench.torque.y;
+    double torque_z = msg->wrench.torque.z;
 
-    std_msgs::Float64MultiArray nextSpeedJointMsg;
-    nextSpeedJointMsg.data = retrievedSpeed;
-    pub_state_.publish(nextSpeedJointMsg);
+    // Combine force and torque components into a single vector
+    wrenchSensor_ = {force_x, force_y, force_z, torque_x, torque_y, torque_z};
+    initFTsensor_ = true;
+
+  } else {
+    ROS_WARN("Received ftsensor data is empty.");
+    wrenchSensor_ = {0, 0, 0, 0, 0, 0};
   }
+}
+
+tuple<vector<double>, vector<double>, vector<double>> RosInterfaceNoetic::receiveState() {
+  ros::spinOnce();
+
+  // Create a tuple and fill it with existing vectors
+  tuple<vector<double>, vector<double>, vector<double>> stateJoints =
+      make_tuple(jointsPosition_, jointsSpeed_, jointsTorque_);
+
+  return stateJoints;
+}
+
+vector<double> RosInterfaceNoetic::receiveWrench() {
+  ros::spinOnce();
+  return wrenchSensor_;
+}
+
+void RosInterfaceNoetic::sendState(vector<double>& data) {
+
+  std_msgs::Float64MultiArray nextJointMsg;
+  nextJointMsg.data = data;
+  pubState_.publish(nextJointMsg);
+}
+
+// These functions aff for purpose to plot the speed easily
+void RosInterfaceNoetic::setDesiredDsTwist(vector<double>& data) {
+
+  std_msgs::Float64MultiArray nextJointMsg;
+  nextJointMsg.data = data;
+  pubStateDS_.publish(nextJointMsg);
+}
+
+void RosInterfaceNoetic::setCartesianTwist(vector<double>& data) {
+
+  std_msgs::Float64MultiArray nextJointMsg;
+  nextJointMsg.data = data;
+  pubStateCartesianTwistEEF_.publish(nextJointMsg);
+}
+

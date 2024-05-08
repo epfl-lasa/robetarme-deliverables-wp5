@@ -5,7 +5,7 @@
  * @version 0.1
  * @date 2024-02-27
  *
- * @copyright Copyright (c) 2024
+ * @copyright Copyright (c) 2024 - EPFL
  *
  */
 #pragma once
@@ -19,12 +19,20 @@
  */
 class RoboticArmIiwa7 : public IRoboticArmBase {
 public:
-  // TODO: implement all the public members, accessible from everyone owning a class object
   explicit RoboticArmIiwa7();
 
-protected:
-  // TODO: implement all the protected members, accessible from its own and herited classes
+  std::vector<double> lowLevelController(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
+      Eigen::VectorXd& twist) override;
 
-private:
-  // TODO: implement all the private members, only accessible from its own class
+  std::vector<double> lowLevelControllerSF(
+      std::tuple<std::vector<double>, std::vector<double>, std::vector<double>>& stateJoints,
+      Eigen::VectorXd& desiredTwist,
+      Eigen::VectorXd& wrenchFromSensor) override;
+
+protected:
+  state_representation::CartesianState commandState_;
+  state_representation::CartesianState feedbackState_;
+  std::shared_ptr<controllers::IController<state_representation::CartesianState>> twistCtrl_;
+  std::list<std::shared_ptr<state_representation::ParameterInterface>> parameters_;
 };

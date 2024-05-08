@@ -1,0 +1,11 @@
+widthTarget: 0.4
+heightTarget: 0.35
+
+flowRadius: 0.03
+limitCycleRadius: 0.05
+
+nameTarget: /vrpn_client_node/targetRobetarme/pose_transform
+# nameTarget: /vrpn_client_node/targetRobetarmeSF/pose_transform
+
+
+
