@@ -1,6 +1,7 @@
 #include "DynamicalSystem.h"
 
 #include <yaml-cpp/yaml.h>
+#include <fstream>
 
 using namespace std;
 using namespace Eigen;
@@ -11,8 +12,21 @@ DynamicalSystem::DynamicalSystem(double freq) {
 }
 
 void DynamicalSystem::parameterInitialization() {
+
+
+  string alternativeYamlPath = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/control_config.yaml";
+  string yamlPath = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/../../config/control_config.yaml";
+
+  // Check if the alternative YAML file exists
+  ifstream originalFile(yamlPath);
+  if (originalFile.good()) {
+    cout << "Using general YAML file: " << yamlPath << endl;
+  } else {
+    yamlPath = alternativeYamlPath;
+    cout << "Using local YAML file: " << yamlPath << endl;
+  }
+
   // Load parameters from YAML file
-  string yamlPath = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/control_config.yaml";
   YAML::Node config = YAML::LoadFile(yamlPath);
 
   // Access parameters from the YAML file

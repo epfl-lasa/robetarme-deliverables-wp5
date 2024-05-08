@@ -17,13 +17,28 @@
 #include <geometry_msgs/Twist.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <yaml-cpp/yaml.h>
+#include <fstream>
 
 using namespace std;
 
 RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : nh_(n), robotName_(robotName) {
   // Try to load parameters from YAML file
   try {
-    string yamlPath = string(WP5_ROS_INTERFACE_DIR) + "/config/config.yaml";
+
+      // Load parameters from YAML file
+    string alternativeYamlPath = string(WP5_ROS_INTERFACE_DIR) + "/config/ros_interface_config.yaml";
+    string yamlPath = string(WP5_ROS_INTERFACE_DIR) + "/../../config/ros_interface_config.yaml";
+
+    // Check if the alternative YAML file exists
+    ifstream originalFile(yamlPath);
+    if (originalFile.good()) {
+      cout << "Using general YAML file: " << yamlPath << endl;
+    } else {
+      yamlPath = alternativeYamlPath;
+      cout << "Using local YAML file: " << yamlPath << endl;
+    }
+
+    // Load parameters from YAML file
     YAML::Node config = YAML::LoadFile(yamlPath);
 
     // Print information about robotName_ field

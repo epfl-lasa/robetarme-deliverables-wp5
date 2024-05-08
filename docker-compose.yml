@@ -23,6 +23,7 @@ services:
               capabilities: [ gpu ]
     volumes:
       - ./src:/home/${ROS_USER}/catkin_ws/src
+      - ./config:/home/${ROS_USER}/catkin_ws/config
       - /tmp/.X11-unix:/tmp/.X11-unix
     stdin_open: true
     tty: true

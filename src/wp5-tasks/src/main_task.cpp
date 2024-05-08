@@ -20,6 +20,8 @@
 #include "TaskFactory.h"
 #include "TaskShotcrete.h"
 #include "TaskSurfaceFinishing.h"
+#include <fstream>
+
 
 using namespace std;
 using namespace Eigen;
@@ -51,8 +53,21 @@ int main(int argc, char** argv) {
     return 1;
   }
 
-  // Get task configuration
-  string yamlPath = string(WP5_TASKS_DIR) + "/config/config.yaml";
+
+  // Load parameters from YAML file
+  string alternativeYamlPath = string(WP5_TASKS_DIR) + "/config/robot_task_config.yaml";
+  string yamlPath = string(WP5_TASKS_DIR) + "/../../config/robot_task_config.yaml";
+
+  // Check if the alternative YAML file exists
+  ifstream originalFile(yamlPath);
+  if (originalFile.good()) {
+    cout << "Using general YAML file: " << yamlPath << endl;
+  } else {
+    yamlPath = alternativeYamlPath;
+    cout << "Using local YAML file: " << yamlPath << endl;
+  }
+
+  // Load parameters from YAML file
   YAML::Node config = YAML::LoadFile(yamlPath);
 
   string robotName = config[taskType]["robot_name"].as<string>();
