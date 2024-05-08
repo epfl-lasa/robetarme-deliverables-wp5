@@ -1,5 +1,6 @@
 .vscode
 build/
+.DS_Store
 
 # Add directory to ignore except files allowing to generate the documentation
 doc/*

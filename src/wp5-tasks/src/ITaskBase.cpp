@@ -34,7 +34,7 @@ bool ITaskBase::initialize() {
 
 double ITaskBase::getRosFrequency_() const { return rosFreq_; }
 
-ros::Rate ITaskBase::getRosLoopRate_() const { return loopRate_; }
+ros::Rate* ITaskBase::getRosLoopRate_() { return &loopRate_; }
 
 ros::NodeHandle ITaskBase::getRosNodehandle_() const { return nh_; }
 
@@ -42,7 +42,7 @@ vector<double> ITaskBase::getHomeJoint_() const { return homeJoint_; }
 
 void ITaskBase::setHomeJoint_(vector<double> desiredJoint) { homeJoint_ = desiredJoint; }
 
-bool ITaskBase::goHomingPosition() const {
+bool ITaskBase::goHomingPosition() {
   dynamicalSystem_->resetInit();
   dynamicalSystem_->resetCheckLinearDs();
 
@@ -58,13 +58,13 @@ bool ITaskBase::goHomingPosition() const {
     goToPoint(desiredQuatPos);
 
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    getRosLoopRate_()->sleep();
   }
 
   return dynamicalSystem_->checkLinearDs();
 }
 
-bool ITaskBase::goWorkingPosition() const {
+bool ITaskBase::goWorkingPosition() {
   dynamicalSystem_->resetInit();
   dynamicalSystem_->resetCheckLinearDs();
 
@@ -80,7 +80,7 @@ bool ITaskBase::goWorkingPosition() const {
     goToPoint(firstQuatPos);
 
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    getRosLoopRate_()->sleep();
   }
 
   return dynamicalSystem_->checkLinearDs();

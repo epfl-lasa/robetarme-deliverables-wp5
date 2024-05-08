@@ -28,9 +28,12 @@ To install the dependencies, you have two options:
     docker compose up -d
 
     # Access the Docker container's shell
+    # This will set up the necessary environment within Docker for running the codebase.
     docker exec -it robetarme-deliverables-wp5-ros-1 bash
 
-    This will set up the necessary environment within Docker for running the codebase.
+    # Build code and source it
+    catkin build
+    source devel/setup.bash
 
     Manual Installation:
 
@@ -49,6 +52,11 @@ The documentation is readable opening the index.html file into your preferred br
 ## Usage
 
 Once the dependencies are installed, you can start using the codebase. Each package contains its own set of functionalities. Refer to the documentation within each package for detailed usage instructions.
+
+To run a new task, use the launch file with the corresponding task, depending on the one to be done. If no task is specified, an error message will shows up and display the name of the taskType to be used. Here are some examples:
+
+    roslaunch wp5_tasks main_task.launch taskType:=shotcrete
+    roslaunch wp5_tasks main_task.launch taskType:=surface_finishing
 
 ## Packages
 

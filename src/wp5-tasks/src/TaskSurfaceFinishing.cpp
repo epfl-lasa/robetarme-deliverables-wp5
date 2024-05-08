@@ -96,7 +96,7 @@ bool TaskSurfaceFinishing::execute() {
 
     // rosLoop
     ros::spinOnce();
-    getRosLoopRate_().sleep();
+    getRosLoopRate_()->sleep();
   }
   return dynamicalSystem_->checkLinearDs();
 }
@@ -118,7 +118,7 @@ void TaskSurfaceFinishing::set_bias() {
     }
 
     meanIteration += 1;
-    getRosLoopRate_().sleep();
+    getRosLoopRate_()->sleep();
   }
 
   // Assign the calculated bias to biasWrench_

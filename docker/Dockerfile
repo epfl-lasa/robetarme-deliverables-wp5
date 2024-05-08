@@ -21,9 +21,30 @@ RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y sudo
 RUN useradd -m ${USER} && echo "${USER}:${USER}passwd" | chpasswd && adduser ${USER} sudo
 
-### Add a few essential tools
+### Add a few essential tools and catkin tools
 RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y git openssh-client python3 net-tools build-essential cmake git
+RUN apt install -y \
+    git \
+    openssh-client \
+    python3 \
+    net-tools \
+    build-essential \
+    cmake \
+    wget
+
+RUN sh -c \
+    'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" \
+    > /etc/apt/sources.list.d/ros-latest.list'
+
+RUN wget http://packages.ros.org/ros.key -O - | apt-key add -
+RUN apt update --fix-missing && apt upgrade -y && apt clean
+RUN apt install -y python3-catkin-tools
+
+# Create catkin workspace
+RUN mkdir -p ${HOME}/catkin_ws/src
+RUN chown -R ${USER}:${USER} ${HOME}/catkin_ws
+
+RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y \
     bash-completion \
     silversearcher-ag \
@@ -37,21 +58,10 @@ RUN apt install -y \
     ros-${ROS_DISTRO}-rosparam-shortcuts \
     libcgal-dev
 
-# Install catkin tools
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y wget
-RUN sh -c \
-    'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" \
-    > /etc/apt/sources.list.d/ros-latest.list'
-
-RUN wget http://packages.ros.org/ros.key -O - | apt-key add -
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y python3-catkin-tools
-
-# Add GitHub's host key
-RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y python3-pip
 RUN pip install matplotlib
+
+# Add GitHub's host key
 RUN ln -s /usr/bin/python3 /usr/bin/python
 RUN mkdir -p /root/.ssh
 RUN --mount=type=secret,id=ssh_key ln -s /run/secrets/ssh_key /root/.ssh/id_ed25519
@@ -61,10 +71,6 @@ FROM ros-ws as libraries
 
 # Setup the project using automatic script
 # Use a secret for the SSH key
-COPY ./scripts/setupIiwaRosEnv.sh /run/setupIiwaRosEnv.sh
-RUN chmod +x /run/setupIiwaRosEnv.sh
-RUN --mount=type=secret,id=ssh_key /run/setupIiwaRosEnv.sh
-
 COPY ./scripts/setupControlLasaEnv.sh /run/setupControlLasaEnv.sh
 RUN chmod +x /run/setupControlLasaEnv.sh
 RUN --mount=type=secret,id=ssh_key /run/setupControlLasaEnv.sh
@@ -113,17 +119,7 @@ FROM simulation-tools as finalisation
 
 # Give bashrc back to user
 WORKDIR /home/${USER}
-
-RUN echo export ROS_MASTER_URI=http://localhost:11311 >> ~/.bashrc
-RUN echo export ROS_IP=127.0.0.1 >> ~/.bashrc
-# RUN echo export ROS_MASTER_URI=http://10.42.0.187:11311 >> ~/.bashrc
-# RUN echo export ROS_IP=128.178.145.217 >> ~/.bashrc
 RUN chown -R ${USER}:${HOST_GID} .bashrc
-
-
-# Create catkin workspace
-RUN mkdir -p ${HOME}/catkin_ws/src
-RUN chown -R ${USER}:${USER} ${HOME}/catkin_ws
 
 USER ${USER}
 RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${HOME}/catkin_ws && catkin build"
@@ -131,3 +127,5 @@ RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 RUN echo "source ${HOME}/catkin_ws/devel/setup.bash" >> ~/.bashrc
 
 WORKDIR /home/${USER}/catkin_ws
+
+CMD [ "bash" ]

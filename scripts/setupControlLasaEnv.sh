@@ -11,7 +11,7 @@ checkError () {
 mkdir temp
 cd temp
 
-# Install control Lasa
+# Install control Aica
 echo "* CLONING CONTROL LIBRAIRIES AICA..."
 git clone https://github.com/aica-technology/control-libraries.git --branch v7.3.0  --single-branch
 cd control-libraries/source

@@ -105,19 +105,19 @@ public:
    * @brief Moves to the homing position.
    * @return True if successful, false otherwise.
    */
-  virtual bool goHomingPosition() const;
+  virtual bool goHomingPosition();
 
   /**
    * @brief Moves to the working position.
    * @return True if successful, false otherwise.
    */
-  virtual bool goWorkingPosition() const;
+  virtual bool goWorkingPosition();
 
   /**
-   * @brief Gets the ROS loop rate.
+   * @brief Gets the ROS loop rate by reference.
    * @return ROS loop rate.
    */
-  ros::Rate getRosLoopRate_() const;
+  ros::Rate* getRosLoopRate_();
 
 protected:
   /**
