@@ -93,6 +93,7 @@ bool TaskSurfaceFinishing::execute() {
     }
     rosInterface_->setCartesianTwist(actualTwist);
     rosInterface_->setDesiredDsTwist(desiredTwist);
+    rosInterface_->setDesiredDsTwist(desiredTwist);
 
     // rosLoop
     ros::spinOnce();

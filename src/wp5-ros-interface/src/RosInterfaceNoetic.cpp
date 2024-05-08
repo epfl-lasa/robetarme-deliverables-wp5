@@ -64,8 +64,7 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : n
 
     pubStateDS_ = nh_.advertise<std_msgs::Float64MultiArray>("desiredDsTwist", 1000);
     pubStateCartesianTwistEEF_ = nh_.advertise<std_msgs::Float64MultiArray>("actualCartesianTwistEEF", 1000);
-
-
+    pubStateCartesianPoseEEF_ = nh_.advertise<geometry_msgs::PoseStamped>("actualCartesianPoseEEF", 1000);
 
   } catch (const YAML::Exception& e) {
     ROS_ERROR_STREAM("Error loading YAML file: " << e.what());
@@ -147,17 +146,39 @@ void RosInterfaceNoetic::sendState(vector<double>& data) {
 }
 
 // These functions aff for purpose to plot the speed easily
-void RosInterfaceNoetic::setDesiredDsTwist(vector<double>& data) {
 
-  std_msgs::Float64MultiArray nextJointMsg;
-  nextJointMsg.data = data;
-  pubStateDS_.publish(nextJointMsg);
+void RosInterfaceNoetic::setDesiredDsTwist(vector<double>& data) {
+  std_msgs::Float64MultiArray nextTwistMsg;
+  nextTwistMsg.data = data;
+  pubStateDS_.publish(nextTwistMsg);
 }
 
 void RosInterfaceNoetic::setCartesianTwist(vector<double>& data) {
-
-  std_msgs::Float64MultiArray nextJointMsg;
-  nextJointMsg.data = data;
-  pubStateCartesianTwistEEF_.publish(nextJointMsg);
+  std_msgs::Float64MultiArray actualTwistMsg;
+  actualTwistMsg.data = data;
+  pubStateCartesianTwistEEF_.publish(actualTwistMsg);
 }
+
+void RosInterfaceNoetic::setCartesianPose(pair<Eigen::Quaterniond, Eigen::Vector3d> pairActualQuatPos) {
+  geometry_msgs::PoseStamped actualPoseMsg;
+  // Populate the quaternion part
+  actualPoseMsg.pose.orientation.x = pairActualQuatPos.first.x();
+  actualPoseMsg.pose.orientation.y = pairActualQuatPos.first.y();
+  actualPoseMsg.pose.orientation.z = pairActualQuatPos.first.z();
+  actualPoseMsg.pose.orientation.w = pairActualQuatPos.first.w();
+  
+  // Populate the position part
+  actualPoseMsg.pose.position.x = pairActualQuatPos.second.x();
+  actualPoseMsg.pose.position.y = pairActualQuatPos.second.y();
+  actualPoseMsg.pose.position.z = pairActualQuatPos.second.z();
+
+  // Set the header information (optional)
+  actualPoseMsg.header.stamp = ros::Time::now(); // Set the current time as the timestamp
+  actualPoseMsg.header.frame_id = "base_link"; // Set the frame ID as needed
+
+  // Publish the message
+  pubStateCartesianPoseEEF_.publish(actualPoseMsg);
+}
+
+
 
