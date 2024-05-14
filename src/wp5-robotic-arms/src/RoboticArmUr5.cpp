@@ -11,6 +11,8 @@
  */
 
 #include "RoboticArmUr5.h"
+#include <yaml-cpp/yaml.h>
+#include <fstream>
 
 #include "controllers/ControllerFactory.hpp"
 
@@ -21,15 +23,31 @@ using namespace std;
 RoboticArmUr5::RoboticArmUr5() {
   pathUrdf_ = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/ur5.urdf";
   robotName_ = "ur5_robot";
-  tipLink_ = "tool0";
-  tipJoint_ = "wrist_3_joint";
-  baseLink_ = "base";
-  jointNames_ = {
-      "shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"};
-  referenceFrame_ = "base";
-  nJoint_ = 6;
+  string alternativeYamlPath = string(WP5_ROBOTIC_ARMS_DIR) + "/config/arm_robot_config.yaml";
+  string yamlPath = string(WP5_ROBOTIC_ARMS_DIR) + "/../../config/arm_robot_config.yaml";
+
+  // Check if the alternative YAML file exists
+  ifstream originalFile(yamlPath);
+  if (originalFile.good()) {
+    cout << "Using general YAML file: " << yamlPath << endl;
+  } else {
+    yamlPath = alternativeYamlPath;
+    cout << "Using local YAML file: " << yamlPath << endl;
+  }
+
+  // Load parameters from YAML file
+  YAML::Node config = YAML::LoadFile(yamlPath);
+  YAML::Node robotNode = config[robotName_];
+
+  tipLink_ = robotNode["tipLink"].as<string>();
+  tipJoint_ = robotNode["tipJoint"].as<string>();
+  baseLink_ = robotNode["reference_frame"].as<string>();
+  jointNames_ =  robotNode["controller_joint_names"].as<std::vector<std::string>>();
+  referenceFrame_ = robotNode["reference_frame"].as<string>();
+  nJoint_ = robotNode["numberJoint"].as<int>();
   originalHomeJoint = {0.0, -1.57, 0.0, -1.57, 0.0, 0.0};
   model_ = make_unique<robot_model::Model>(robotName_, pathUrdf_);
+
   double damp = 1e-6;
   double alpha = 0.5;
   double gamma = 0.8;

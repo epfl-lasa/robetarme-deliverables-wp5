@@ -105,13 +105,12 @@ int main(int argc, char** argv) {
     vector<double> desiredJoint = roboticArm->lowLevelController(stateJoints, twistDesiredEigen);
     rosInterface->sendState(desiredJoint);
 
-    if (dynamicalSystem->checkLinearDs_ == true) {
+    if (dynamicalSystem->isFinished() == true) {
       vector<double> stopjoint(6);
       rosInterface->sendState(stopjoint);
       cout << "point:" << i << endl;
       ros::Duration(1.5).sleep();
 
-      dynamicalSystem->checkLinearDs_ = false;
       std_msgs::Bool boolMsg;
       boolMsg.data = true;
       record_pub.publish(boolMsg);
