@@ -19,8 +19,8 @@ iiwa7:
   path_urdf: "/home/ros/ros_ws/src/controller_iiwa/urdf/iiwa.urdf"
   linear_principle_damping: 150.0
   linear_orthogonal_damping: 150.0
-  angular_stiffness: 4.0
-  angular_damping: 5.0
+  angular_stiffness: 3.0
+  angular_damping: 3.0
 
 covod:
   controller_joint_names: []

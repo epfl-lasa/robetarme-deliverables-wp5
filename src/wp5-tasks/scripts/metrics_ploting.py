@@ -1,6 +1,6 @@
 import rospy
 import matplotlib
-matplotlib.use('Agg')  # Use Agg backend for non-interactive plotting
+# matplotlib.use('Agg')  # Use Agg backend for non-interactive plotting
 import matplotlib.pyplot as plt
 from geometry_msgs.msg import WrenchStamped
 from geometry_msgs.msg import PoseStamped
@@ -89,8 +89,9 @@ class DataSubscriber:
         plt.title('Force Data')
         plt.legend()
         plt.tight_layout()
-        plt.savefig("../plots/" + str(start_time) + "_force.png")
-        plt.close()
+        # plt.savefig("../plots/" + str(start_time) + "_force.png")
+        # plt.close()
+        plt.show()
 
 
         # Split the Desired vs. Actual Linear Speed plot into three subplots
@@ -124,8 +125,9 @@ class DataSubscriber:
         plt.legend(loc='upper right')
 
         plt.tight_layout()
-        plt.savefig("../plots/" + str(start_time) + "_desired_vs_actual_linear_speed.png")
-        plt.close()
+        # plt.savefig("../plots/" + str(start_time) + "_desired_vs_actual_linear_speed.png")
+        # plt.close()
+        plt.show()
 
         # Plot Trajectory
         fig = plt.figure(figsize=(15, 9))
@@ -144,8 +146,10 @@ class DataSubscriber:
         ax.set_ylim(mid_y - max_range * 0.5, mid_y + max_range * 0.5)
         ax.set_zlim(mid_z - max_range * 0.5, mid_z + max_range * 0.5)
         plt.tight_layout()
-        plt.savefig("../plots/" + str(start_time) + "_actualPath.png")
-        plt.close()
+        # plt.savefig("../plots/" + str(start_time) + "_actualPath.png")
+        # plt.close()
+        plt.show()
+
 
         # Plot RMSE
         plt.figure(figsize=(15, 9))
@@ -156,8 +160,9 @@ class DataSubscriber:
         plt.title('Root Mean Squared Error between Actual and Desired Linear Speed')
         plt.legend()
         plt.tight_layout()
-        plt.savefig("../plots/" + str(start_time) + "_rmse.png")
-        plt.close()
+        # plt.savefig("../plots/" + str(start_time) + "_rmse.png")
+        # plt.close()
+        plt.show()
 
 if __name__ == '__main__':
     data_subscriber = DataSubscriber()

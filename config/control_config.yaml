@@ -2,11 +2,11 @@
 
 flowRadius: 0.03
 limitCycleRadius: 0.03
-limitCycleSpeed: 9
+limitCycleSpeed: 6
 convRate: 10
-linearSpeed: 0.05
+linearSpeed: 0.1
 toolOffsetFromTarget: 0.7
-toleranceToNextPoint: 0.1
+toleranceToNextPoint: 0.02
 velocityLimit: 1.5
 
 # surface_finishing: 

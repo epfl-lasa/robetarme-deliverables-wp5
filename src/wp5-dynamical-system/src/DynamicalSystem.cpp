@@ -157,19 +157,28 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   double norm;
   double scaleVel;
   Vector3d dVel;
-
+  dVel.setZero();
+  Vector3d pathPointNext;
+  pathPointNext.setZero();
+  
   if (iFollow_ < desiredPath_.size()) {
-    vector<double> desiredQuatPos = desiredPath_[iFollow_];
-    vector<double> desiredQuatPosNext = desiredPath_[iFollow_ + 1];
 
-    pathPoint_(0) = desiredQuatPos[4];
-    pathPoint_(1) = desiredQuatPos[5];
-    pathPoint_(2) = desiredQuatPos[6];
+    if(iFollow_== 0){
+      pathPointNext(0) = desiredPath_[iFollow_ ][4];
+      pathPointNext(1) = desiredPath_[iFollow_ ][5];
+      pathPointNext(2) = desiredPath_[iFollow_ ][6];
+    }
+    else {
+      pathPointNext(0) = desiredPath_[iFollow_ + 1][4];
+      pathPointNext(1) = desiredPath_[iFollow_ + 1][5];
+      pathPointNext(2) = desiredPath_[iFollow_ + 1][6];
+    }
+
 
     //use the point betweeen path as a linear DS
-    dx = pathPoint_(0) - desiredQuatPosNext[4];
-    dy = pathPoint_(1) - desiredQuatPosNext[5];
-    dz = pathPoint_(2) - desiredQuatPosNext[6];
+    dx = pathPointNext(0) - centerLimitCycle_(0);
+    dy = pathPointNext(1) - centerLimitCycle_(1);
+    dz = pathPointNext(2) - centerLimitCycle_(2);
 
     norm = sqrt(dx * dx + dy * dy + dz * dz);
     scaleVel = linearVelExpected_ / norm;
@@ -179,22 +188,28 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     dVel(2) = dz * scaleVel;
 
     double dt = 1 / fs_;
-    double dxcheck, dycheck, dzcheck, normcheck;
+    double dxcheck= 0, dycheck, dzcheck;
+    double normcheck = 0;
+    
+    //check if the eef is folowing the limit cy0cle
+    // dxcheck = centerLimitCycle_(0) - realPos_[0];
+    // dycheck = centerLimitCycle_(1) - realPos_[1];
+    // dzcheck = centerLimitCycle_(2) - realPos_[2];
+    // normcheck = sqrt(dxcheck * dxcheck + dycheck * dycheck + dzcheck * dzcheck);
 
-    //check if the eef is folowing the limit cycle
-    dxcheck = pathPoint_(0) - realPos_[4];
-    dycheck = pathPoint_(1) - realPos_[5];
-    dzcheck = pathPoint_(2) - realPos_[6];
-    normcheck = sqrt(dxcheck * dxcheck + dycheck * dycheck + dzcheck * dzcheck);
+    // if(normcheck < 1.2 * cycleRadiusLC_){
+    //   centerLimitCycle_ += dVel * dt;
+    //   cout <<"inside"<<endl;
+    // }
+    centerLimitCycle_ += dVel * dt;
 
-    if(normcheck < 1.2 * cycleRadiusLC_){
-      centerLimitCycle_ += dVel * dt;
-    }
+    // cout <<"normcheck"<<normcheck<<endl;
+
     // cerr << "target number: " << iFollow_ << endl;
     // cerr << "error" << (sqrt((pathPoint_ - centerLimitCycle_).norm())) << endl;
-    if (sqrt((pathPoint_ - centerLimitCycle_).norm()) <= toleranceToNextPoint_) {
+    if (sqrt((pathPointNext - centerLimitCycle_).norm()) <= toleranceToNextPoint_) {
       iFollow_ += 1;
-      cout << "target number: " << iFollow_ << "reached" << endl;
+      cout << "-----------------------------------target number: " << iFollow_ << "reached" << endl;
     }
     updateLimitCycle3DPosVelWith2DLC(realPos_, centerLimitCycle_);
 

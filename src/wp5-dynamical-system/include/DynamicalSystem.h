@@ -136,6 +136,7 @@ public:
 private:
   bool finish_ = false;
   bool init_ = false;
+
   bool checkLinearDs_ = false;
   Eigen::Vector3d pathPoint_;
 
