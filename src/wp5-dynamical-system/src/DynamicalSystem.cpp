@@ -160,13 +160,16 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
 
   if (iFollow_ < desiredPath_.size()) {
     vector<double> desiredQuatPos = desiredPath_[iFollow_];
+    vector<double> desiredQuatPosNext = desiredPath_[iFollow_ + 1];
+
     pathPoint_(0) = desiredQuatPos[4];
     pathPoint_(1) = desiredQuatPos[5];
     pathPoint_(2) = desiredQuatPos[6];
 
-    dx = pathPoint_(0) - realPos_(0);
-    dy = pathPoint_(1) - realPos_(1);
-    dz = pathPoint_(2) - realPos_(2);
+    //use the point betweeen path as a linear DS
+    dx = pathPoint_(0) - desiredQuatPosNext[4];
+    dy = pathPoint_(1) - desiredQuatPosNext[5];
+    dz = pathPoint_(2) - desiredQuatPosNext[6];
 
     norm = sqrt(dx * dx + dy * dy + dz * dz);
     scaleVel = linearVelExpected_ / norm;
@@ -176,8 +179,17 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     dVel(2) = dz * scaleVel;
 
     double dt = 1 / fs_;
+    double dxcheck, dycheck, dzcheck, normcheck;
 
-    centerLimitCycle_ += dVel * dt;
+    //check if the eef is folowing the limit cycle
+    dxcheck = pathPoint_(0) - realPos_[4];
+    dycheck = pathPoint_(1) - realPos_[5];
+    dzcheck = pathPoint_(2) - realPos_[6];
+    normcheck = sqrt(dxcheck * dxcheck + dycheck * dycheck + dzcheck * dzcheck);
+
+    if(normcheck < 1.2 * cycleRadiusLC_){
+      centerLimitCycle_ += dVel * dt;
+    }
     // cerr << "target number: " << iFollow_ << endl;
     // cerr << "error" << (sqrt((pathPoint_ - centerLimitCycle_).norm())) << endl;
     if (sqrt((pathPoint_ - centerLimitCycle_).norm()) <= toleranceToNextPoint_) {
