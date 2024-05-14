@@ -92,18 +92,37 @@ class DataSubscriber:
         plt.savefig("../plots/" + str(start_time) + "_force.png")
         plt.close()
 
-        # Plot Desired vs. Actual Linear Speed
+
+        # Split the Desired vs. Actual Linear Speed plot into three subplots
         plt.figure(figsize=(15, 9))
-        plt.plot(eef_time[:eef_size], twist_linear_x_desired[:eef_size], label=r'$\dot{x}_{d1}$', linestyle='--')
-        plt.plot(eef_time[:eef_size], twist_linear_y_desired[:eef_size], label=r'$\dot{x}_{d2}$', linestyle='--')
-        plt.plot(eef_time[:eef_size], twist_linear_z_desired[:eef_size], label=r'$\dot{x}_{d3}$', linestyle='--')
-        plt.plot(eef_time[:eef_size], twist_linear_x_actual[:eef_size], label=r'$\dot{x}_{a1}$')
-        plt.plot(eef_time[:eef_size], twist_linear_y_actual[:eef_size], label=r'$\dot{x}_{a2}$')
-        plt.plot(eef_time[:eef_size], twist_linear_z_actual[:eef_size], label=r'$\dot{x}_{a3$')
+
+        # Subplot 1: X Linear Speed
+        plt.subplot(3, 1, 1)
+        plt.plot(eef_time[:eef_size], twist_linear_x_desired[:eef_size], label=r'$\dot{x}_{d1}$', linestyle='--',color='r')
+        plt.plot(eef_time[:eef_size], twist_linear_x_actual[:eef_size], label=r'$\dot{x}_{a1}$',color='r')
         plt.xlabel('Time (s)')
-        plt.ylabel('Linear Speed (m/s)')
-        plt.title('Desired vs. Actual Linear Speed')
-        plt.legend()
+        plt.ylabel('Linear Speed X (m/s)')
+        plt.title('Desired vs. Actual Linear Speed X')
+        plt.legend(loc='upper right')
+
+        # Subplot 2: Y Linear Speed
+        plt.subplot(3, 1, 2)
+        plt.plot(eef_time[:eef_size], twist_linear_y_desired[:eef_size], label=r'$\dot{x}_{d2}$', linestyle='--',color='g')
+        plt.plot(eef_time[:eef_size], twist_linear_y_actual[:eef_size], label=r'$\dot{x}_{a2}$',color='g')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Linear Speed Y (m/s)')
+        plt.title('Desired vs. Actual Linear Speed Y')
+        plt.legend(loc='upper right')
+
+        # Subplot 3: Z Linear Speed
+        plt.subplot(3, 1, 3)
+        plt.plot(eef_time[:eef_size], twist_linear_z_desired[:eef_size], label=r'$\dot{x}_{d3}$', linestyle='--',color='b')
+        plt.plot(eef_time[:eef_size], twist_linear_z_actual[:eef_size], label=r'$\dot{x}_{a3}$',color='b')
+        plt.xlabel('Time (s)')
+        plt.ylabel('Linear Speed Z (m/s)')
+        plt.title('Desired vs. Actual Linear Speed Z')
+        plt.legend(loc='upper right')
+
         plt.tight_layout()
         plt.savefig("../plots/" + str(start_time) + "_desired_vs_actual_linear_speed.png")
         plt.close()
