@@ -1,131 +1,96 @@
-# Handle ros distro
-ARG ROS_DISTRO=noetic
-ARG ROS_IMAGE=${ROS_DISTRO}-desktop-full
+################################################################################
+# There are three places where your actions are needed in this Dockerfile.
+# These are marked with the label `ACTIONS_NEEDED`.
+# After you are done with those:
+#
+# Pull the robetarme noetic base image with
+# `docker login registry.gitlab.com`
+# `docker pull registry.gitlab.com/certh-iti-robotics-lab/robetarme/robetarme/ros-noetic:base`
+#
+# Then build with
+# `docker compose build`,
+#
+# and run with
+# `docker compose up -d`.
+#
+# Then gain access to the container with
+# `docker attach ros_noetic_xy_development_container`,
+# ** where the string after "attach" is the one specified in the `docker-compose.yml` file under
+# services/ros_noetic_xy_development/container_name.
+#
+# Then simply launch your ROS noetic packages.
+################################################################################
 
-FROM osrf/ros:${ROS_IMAGE} as ros-ws
+FROM registry.gitlab.com/certh-iti-robotics-lab/robetarme/robetarme/ros-noetic:base
+ARG USER=robetarme_user
 
-ARG ROS_DISTRO
-ARG USER=root
-ARG HOME=/home/${USER}
 
-ENV DEBIAN_FRONTEND noninteractive
-ENV NVIDIA_VISIBLE_DEVICES all
-ENV NVIDIA_DRIVER_CAPABILITIES video,compute,utility
-ENV LD_LIBRARY_PATH="/usr/local/lib:${LD_LIBRARY_PATH}"
+# ACTIONS_NEEDED
+#-------------------------------------------------------------------------------
+# Install your dependencies here
+#-------------------------------------------------------------------------------
+#RUN apt-get -y update                                                       && \
+    #DEBIAN_FRONTEND=noninteractive                                          && \
+    #apt install -y --no-install-recommends PACKAGE_1 PACKAGE_2 ...          && \
+    #rm -rf /var/lib/apt/lists/*
+#-------------------------------------------------------------------------------
 
-# Tell docker we want to use bash instead of sh in general
-SHELL ["/bin/bash", "-c"]
 
-# create and configure a new user
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y sudo
-RUN useradd -m ${USER} && echo "${USER}:${USER}passwd" | chpasswd && adduser ${USER} sudo
+# ------------------------------------------------------------------------------
+# Place ROS packages into /home/${USER}/ros1_ws workspace and catkin build
+# ------------------------------------------------------------------------------
+# ACTIONS_NEEDED
+# COPY your ROS packages from the host into the container's
+# /home/${USER}/ros1_ws/src/. THIS INCLUDES CUSTOM INTERFACES.
+# These packages must reside on the host alongside this Dockerfile,
+# e.g. if this Dockerfile is at /path/Dockerfile then you should
+# `cd /path/`
+# `git clone https://github.com/ros/ros_tutorials.git`
+# where you should replace the `ros_tutorials` repository with yours.
+# This applies to any other directory you want access to in the container.
+# The following two lines are indicative and should be replaced by you.
+# CAUTION: leave trailing slashes as-is
+COPY ros1_talker/ /home/${USER}/catkin_ws/src/ros1_talker/
+COPY custom_interfaces_ros1_pkg/ /home/${USER}/catkin_ws/src/custom_interfaces_ros1_pkg/
+#-------------------------------------------------------------------------------
 
-### Add a few essential tools and catkin tools
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y \
-    git \
-    openssh-client \
-    python3 \
-    net-tools \
-    build-essential \
-    cmake \
-    wget
+# ------------------------------------------------------------------------------
+# catkin build ROS noetic packages
+RUN cd /home/${USER}/catkin_ws                                              && \
+    source /opt/ros/noetic/setup.bash                                       && \
+    catkin build                                                            && \
+    source /home/${USER}/catkin_ws/devel/setup.bash
+# ------------------------------------------------------------------------------
 
-RUN sh -c \
-    'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" \
-    > /etc/apt/sources.list.d/ros-latest.list'
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+# Do not modify below this line
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-RUN wget http://packages.ros.org/ros.key -O - | apt-key add -
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y python3-catkin-tools
+# ------------------------------------------------------------------------------
+# Bind mount/shared directory between container and host
+# https://docs.docker.com/storage/bind-mounts/
+RUN mkdir /home/${USER}/shared
+# ------------------------------------------------------------------------------
 
-# Create catkin workspace
-RUN mkdir -p ${HOME}/catkin_ws/src
-RUN chown -R ${USER}:${USER} ${HOME}/catkin_ws
+# ------------------------------------------------------------------------------
+# Make ${USER} a homeowner
+RUN chown -R robetarme_user /home/${USER}
+# ------------------------------------------------------------------------------
 
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y \
-    bash-completion \
-    silversearcher-ag \
-    apt-transport-https \
-    less \
-    alsa-utils \
-    ros-${ROS_DISTRO}-vrpn-client-ros \
-    ros-${ROS_DISTRO}-ros-control \
-    ros-${ROS_DISTRO}-ros-controllers \
-    ros-${ROS_DISTRO}-moveit \
-    ros-${ROS_DISTRO}-rosparam-shortcuts \
-    libcgal-dev
+#-------------------------------------------------------------------------------
+# ACTIONS_NEEDED
+# Your attention is required at file
+# docker-compose.yml (:services/volumes).
+#-------------------------------------------------------------------------------
+# `fix-perms.sh` fixes permissions for volumes when the host user uid does not
+# coincide with the container user uid
+#-------------------------------------------------------------------------------
+COPY fix-perms.sh /fix-perms.sh
+COPY entrypointd.sh /entrypoint.sh
+RUN chmod +x /fix-perms.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
+#-------------------------------------------------------------------------------
 
-RUN apt install -y python3-pip
-RUN pip install matplotlib
-
-# Add GitHub's host key
-RUN ln -s /usr/bin/python3 /usr/bin/python
-RUN mkdir -p /root/.ssh
-RUN --mount=type=secret,id=ssh_key ln -s /run/secrets/ssh_key /root/.ssh/id_ed25519
-RUN ssh-keyscan -H github.com >> /root/.ssh/known_hosts
-
-FROM ros-ws as libraries
-
-# Setup the project using automatic script
-# Use a secret for the SSH key
-COPY ./scripts/setupControlLasaEnv.sh /run/setupControlLasaEnv.sh
-RUN chmod +x /run/setupControlLasaEnv.sh
-RUN --mount=type=secret,id=ssh_key /run/setupControlLasaEnv.sh
-
-# Remove soft link to SSH key
-RUN unlink /root/.ssh/id_ed25519
-
-# Install moveit tools
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y \
-    python3-vcstool \
-    ros-${ROS_DISTRO}-rqt-joint-trajectory-controller \
-    ros-${ROS_DISTRO}-moveit-commander \
-    ros-${ROS_DISTRO}-pcl-ros \
-    ros-${ROS_DISTRO}-teleop-twist-keyboard \
-    ros-${ROS_DISTRO}-joint-state-publisher \
-    ros-${ROS_DISTRO}-robot-state-publisher
-
-# Install trac ik
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y \
-    ros-${ROS_DISTRO}-trac-ik \
-    ros-${ROS_DISTRO}-trac-ik-kinematics-plugin \
-    ros-${ROS_DISTRO}-diagnostic-updater
-
-FROM libraries as cmake-options
-
-# Handle SIMD option
-RUN if [ "${USE_SIMD}" = "ON" ] ; \
-    then export CMAKE_CXX_FLAGS="-march=native -faligned-new" ; fi
-
-# Add cmake option to bash rc if needed
-RUN if [ "${USE_SIMD}" = "ON" ] ; \
-    then echo "export ENABLE_SIMD=ON" >> /home/${USER}/.bashrc ; fi
-
-FROM cmake-options as simulation-tools
-
-# Install gazebo
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y \
-    gazebo11 \
-    ros-${ROS_DISTRO}-gazebo-ros-pkgs \
-    ros-${ROS_DISTRO}-gazebo-ros-control
-
-FROM simulation-tools as finalisation
-
-# Give bashrc back to user
 WORKDIR /home/${USER}
-RUN chown -R ${USER}:${HOST_GID} .bashrc
-
-USER ${USER}
-RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${HOME}/catkin_ws && catkin build"
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
-RUN echo "source ${HOME}/catkin_ws/devel/setup.bash" >> ~/.bashrc
-
-WORKDIR /home/${USER}/catkin_ws
-
-CMD [ "bash" ]
+CMD ["/bin/bash"]
