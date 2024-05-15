@@ -1,5 +1,4 @@
 ur5_robot:
-  robot_name: "ur5_robot"
   controller_joint_names: ["shoulder_pan_joint", "shoulder_lift_joint", "elbow_joint", "wrist_1_joint", "wrist_2_joint", "wrist_3_joint"]
   reference_frame: "base"
   tipLink: "tool0"
@@ -13,14 +12,24 @@ ur5_robot:
 
 iiwa7:
   controller_joint_names: ['iiwa_joint_1', 'iiwa_joint_2', 'iiwa_joint_3', 'iiwa_joint_4', 'iiwa_joint_5', 'iiwa_joint_6', 'iiwa_joint_7' ]
-  robot_name: "iiwa7"
-  reference_frame: "base"
-  tipLink: "-"
-  tipJoint: "-"
+  reference_frame: "iiwa_link_0"
+  tipLink: "iiwa_link_ee"
+  tipJoint: "iiwa_joint_ee"
   numberJoint: 7
   path_urdf: "/home/ros/ros_ws/src/controller_iiwa/urdf/iiwa.urdf"
-  linear_principle_damping: 500.0
-  linear_orthogonal_damping: 100.0
-  angular_stiffness: 100.0
-  angular_damping: 100.0
+  linear_principle_damping: 150.0
+  linear_orthogonal_damping: 150.0
+  angular_stiffness: 3.0
+  angular_damping: 3.0
 
+covod:
+  controller_joint_names: []
+  reference_frame: ""
+  tipLink: ""
+  tipJoint: ""
+  numberJoint: 6
+  path_urdf: ""
+  linear_principle_damping: 0.0
+  linear_orthogonal_damping: 0.0
+  angular_stiffness: 0.0
+  angular_damping: 0.0

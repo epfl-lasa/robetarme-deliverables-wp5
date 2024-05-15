@@ -12,6 +12,7 @@
 #include "RoboticArmIiwa7.h"
 
 #include <yaml-cpp/yaml.h>
+#include <fstream>
 
 #include "state_representation/space/cartesian/CartesianState.hpp"
 #include "state_representation/space/joint/JointState.hpp"
@@ -21,15 +22,33 @@ using namespace state_representation;
 using namespace std;
 
 RoboticArmIiwa7::RoboticArmIiwa7() {
-  pathUrdf_ = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/iiwa7.urdf";
   robotName_ = "iiwa7";
-  tipLink_ = "iiwa_link_ee";
-  tipJoint_ = "iiwa_joint_ee";
-  baseLink_ = "iiwa_link_0";
-  jointNames_ = {
-      "iiwa_joint_1", "iiwa_joint_2", "iiwa_joint_3", "iiwa_joint_4", "iiwa_joint_5", "iiwa_joint_6", "iiwa_joint_7"};
-  referenceFrame_ = "iiwa_link_0";
-  nJoint_ = 7;
+
+  pathUrdf_ = string(WP5_ROBOTIC_ARMS_DIR) + "/urdf/iiwa7.urdf";
+
+  string alternativeYamlPath = string(WP5_ROBOTIC_ARMS_DIR) + "/config/arm_robot_config.yaml";
+  string yamlPath = string(WP5_ROBOTIC_ARMS_DIR) + "/../../config/arm_robot_config.yaml";
+
+  // Check if the alternative YAML file exists
+  ifstream originalFile(yamlPath);
+  if (originalFile.good()) {
+    cout << "Using general YAML file: " << yamlPath << endl;
+  } else {
+    yamlPath = alternativeYamlPath;
+    cout << "Using local YAML file: " << yamlPath << endl;
+  }
+
+  // Load parameters from YAML file
+  YAML::Node config = YAML::LoadFile(yamlPath);
+  YAML::Node robotNode = config[robotName_];
+
+
+  tipLink_ = robotNode["tipLink"].as<string>();
+  tipJoint_ = robotNode["tipJoint"].as<string>();
+  baseLink_ = robotNode["reference_frame"].as<string>();
+  jointNames_ =  robotNode["controller_joint_names"].as<std::vector<std::string>>();
+  referenceFrame_ = robotNode["reference_frame"].as<string>();
+  nJoint_ = robotNode["numberJoint"].as<int>();
   originalHomeJoint = vector<double>(nJoint_, 0.0);
   model_ = make_unique<robot_model::Model>(robotName_, pathUrdf_);
   auto robot = robot_model::Model(robotName_, pathUrdf_);
@@ -45,10 +64,6 @@ RoboticArmIiwa7::RoboticArmIiwa7() {
   commandState_ = state_representation::CartesianState(robotName_, referenceFrame_);
   feedbackState_ = state_representation::CartesianState(robotName_, referenceFrame_);
 
-  string yamlPath = string(WP5_ROBOTIC_ARMS_DIR) + "/config/robot_config.yaml";
-
-  YAML::Node config = YAML::LoadFile(yamlPath);
-  YAML::Node robotNode = config[robotName_];
 
   double linearPrincipledamping = robotNode["linear_principle_damping"].as<double>();
   double linearOrthogonalDamping = robotNode["linear_orthogonal_damping"].as<double>();

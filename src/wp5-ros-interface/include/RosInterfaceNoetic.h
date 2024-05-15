@@ -17,6 +17,8 @@
 #include <sensor_msgs/JointState.h>
 #include <tuple>
 #include <vector>
+#include <eigen3/Eigen/Dense>
+
 
 /**
  * @brief Class for ROS interface compatible with ROS Noetic
@@ -55,6 +57,12 @@ public:
   void setDesiredDsTwist(std::vector<double>& data);
 
   /**
+   * @brief Sets the actual Pose of the end-effector.
+   * @param data Vector containing the quaternion (x,y,z,w) and position (x,y,z) data.
+   */
+  void setCartesianPose(std::pair<Eigen::Quaterniond, Eigen::Vector3d> pairActualQuatPos) ;
+
+  /**
    * @brief Receives wrench data from force/torque sensor.
    * @return Vector containing wrench data.
    */
@@ -88,4 +96,4 @@ private:
   ros::Publisher pubState_;     /**< Publisher for robot state. */
   ros::Publisher pubStateDS_;   /**< Publisher for dynamical system state. */
   ros::Publisher pubStateCartesianTwistEEF_; /**< Publisher for Cartesian twist of end-effector. */
-};
+  ros::Publisher pubStateCartesianPoseEEF_; /**< Publisher for Cartesian pose of end-effector. */};

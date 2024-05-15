@@ -124,6 +124,7 @@ bool TaskShotcrete::execute() {
       desiredTwist[i] = twistDesiredEigen[i];
     }
 
+    rosInterface_->setCartesianPose(pairActualQuatPos);
     rosInterface_->setCartesianTwist(actualTwist);
     rosInterface_->setDesiredDsTwist(desiredTwist);
 

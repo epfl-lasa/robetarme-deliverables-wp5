@@ -1,5 +1,4 @@
 
-target:
-  nameTarget: /vrpn_client_node/targetRobetarme/pose_transform
-  widthTarget: 0.4
-  heightTarget: 0.35
+nameTarget: /vrpn_client_node/targetRobetarme/pose_from_iiwa_7_base
+widthTarget: 0.4
+heightTarget: 0.4

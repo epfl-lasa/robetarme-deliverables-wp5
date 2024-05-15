@@ -1,9 +1,0 @@
-ROBOTS:
-  nameRobot: ur5_robot
-  # nameRobot: Cobod
-  # nameRobot: iiwa7
-
-IK:
-  error: 0.01
-  timeoutInSecs : 0.5
-  solve_type: Distance
