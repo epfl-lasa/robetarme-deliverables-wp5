@@ -94,6 +94,19 @@ Provides shared control algorithms for collaborative human-robot interaction.
 
 Implements perception algorithms for environment sensing and object detection.
 
+### Tasks
+
+Finit state machine to use all the previous package to perform shotcrete or surface finishing.
+
+## How tu use it
+
+As explain on top the best is to use Docker. Then, you just need to check the config file to be sure that everthing is set as you want (choose of the robot for the task, desired speed for dynamical system ...), for more detail please look in the folder config.
+Then you just need to build and run the docker.
+When inside the docker you can perform shotcrete with this one line: 
+roslaunch wp5_tasks main_task.launch taskType:=shotcrete
+
+You can perform surface finishing with taskType:=surface_finishing
+
 ## Contributing
 
 We welcome contributions to this repository. If you find any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request.
