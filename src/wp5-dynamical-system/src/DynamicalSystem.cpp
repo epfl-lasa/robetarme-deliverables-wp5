@@ -161,7 +161,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   Vector3d pathPointNext;
   pathPointNext.setZero();
   
-  if (iFollow_ < desiredPath_.size()) {
+  if (iFollow_ < desiredPath_.size()-1) {
 
     if(iFollow_== 0){
       pathPointNext(0) = desiredPath_[iFollow_ ][4];
@@ -214,6 +214,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     updateLimitCycle3DPosVelWith2DLC(realPos_, centerLimitCycle_);
 
   } else {
+    cout << "FINISH--------------------- =" << endl;
 
     dVel(0) = 0;
     dVel(1) = 0;

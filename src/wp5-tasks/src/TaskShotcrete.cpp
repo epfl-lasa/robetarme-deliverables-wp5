@@ -111,7 +111,7 @@ bool TaskShotcrete::execute() {
 
     rosInterface_->sendState(desiredJointSpeed);
 
-    //publish to ros to ploting purpose
+    //publish to ros to ploting purpose -----------------------------
     VectorXd actualTwistEigen = roboticArm_->getTwistFromJointState(actualJoint, actualJointSpeed);
     vector<double> actualTwist(6, 0.0);
 
@@ -127,10 +127,12 @@ bool TaskShotcrete::execute() {
     rosInterface_->setCartesianPose(pairActualQuatPos);
     rosInterface_->setCartesianTwist(actualTwist);
     rosInterface_->setDesiredDsTwist(desiredTwist);
+    // -----------------------------------------------------------------
 
     ros::spinOnce();
     getRosLoopRate_()->sleep();
   }
-
+  // cout << "gohome----"<< endl;
+  // goHomingPosition();
   return dynamicalSystem_->isFinished();
 }

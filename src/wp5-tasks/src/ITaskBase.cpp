@@ -50,7 +50,6 @@ bool ITaskBase::goHomingPosition() {
   pair<Quaterniond, Vector3d> pairHomeQuatPos = roboticArm_->getFK(getHomeJoint_());
   Quaterniond homeQuat = pairHomeQuatPos.first;
   Vector3d homePos = pairHomeQuatPos.second;
-  cout << homePos << endl;
   vector<double> desiredQuatPos = {
       homeQuat.x(), homeQuat.y(), homeQuat.z(), homeQuat.w(), homePos(0), homePos(1), homePos(2)};
 
@@ -60,6 +59,7 @@ bool ITaskBase::goHomingPosition() {
     ros::spinOnce();
     getRosLoopRate_()->sleep();
   }
+  cout << "Homing achieved"       << endl;
 
   return dynamicalSystem_->checkLinearDs();
 }

@@ -25,14 +25,76 @@ FROM registry.gitlab.com/certh-iti-robotics-lab/robetarme/robetarme/ros-noetic:b
 ARG USER=robetarme_user
 
 
+
 # ACTIONS_NEEDED
 #-------------------------------------------------------------------------------
 # Install your dependencies here
 #-------------------------------------------------------------------------------
-#RUN apt-get -y update                                                       && \
-    #DEBIAN_FRONTEND=noninteractive                                          && \
-    #apt install -y --no-install-recommends PACKAGE_1 PACKAGE_2 ...          && \
-    #rm -rf /var/lib/apt/lists/*
+
+### Add a few essential tools and catkin tools
+RUN apt update --fix-missing && apt upgrade -y && apt clean
+RUN apt install -y \
+    git \
+    python3 \
+    openssh-client \
+    net-tools \
+    build-essential \
+    cmake \
+    wget \
+    bash-completion \
+    silversearcher-ag \
+    apt-transport-https \
+    less \
+    alsa-utils \
+    libcgal-dev \
+    python3-pip \
+    python-is-python3
+
+RUN pip install matplotlib
+
+### Add ros library
+RUN apt update --fix-missing && apt upgrade -y && apt clean
+RUN apt install -y \
+    ros-${ROS_DISTRO}-ros-core \
+    ros-${ROS_DISTRO}-ros-base \
+    ros-${ROS_DISTRO}-vrpn-client-ros \
+    ros-${ROS_DISTRO}-ros-control \
+    ros-${ROS_DISTRO}-ros-controllers \
+    ros-${ROS_DISTRO}-moveit \
+    ros-${ROS_DISTRO}-rosparam-shortcuts 
+
+# Install moveit tools
+RUN apt update --fix-missing && apt upgrade -y && apt clean
+RUN apt install -y \
+    python3-vcstool \
+    ros-${ROS_DISTRO}-rqt-joint-trajectory-controller \
+    ros-${ROS_DISTRO}-moveit-commander \
+    ros-${ROS_DISTRO}-pcl-ros \
+    ros-${ROS_DISTRO}-teleop-twist-keyboard \
+    ros-${ROS_DISTRO}-joint-state-publisher \
+    ros-${ROS_DISTRO}-robot-state-publisher
+
+# Install trac ik
+RUN apt install -y \
+    ros-${ROS_DISTRO}-trac-ik \
+    ros-${ROS_DISTRO}-trac-ik-kinematics-plugin \
+    ros-${ROS_DISTRO}-diagnostic-updater
+
+# Install gazebo
+RUN apt update --fix-missing && apt upgrade -y && apt clean
+RUN apt install -y \
+    gazebo11 \
+    ros-${ROS_DISTRO}-gazebo-ros-pkgs \
+    ros-${ROS_DISTRO}-gazebo-ros-control
+
+# Setup the project using automatic script
+# Use a secret for the SSH key
+COPY ./scripts/setupControlLasaEnv.sh /run/setupControlLasaEnv.sh
+RUN chmod +x /run/setupControlLasaEnv.sh
+RUN ./run/setupControlLasaEnv.sh
+
+
+
 #-------------------------------------------------------------------------------
 
 
@@ -50,8 +112,7 @@ ARG USER=robetarme_user
 # This applies to any other directory you want access to in the container.
 # The following two lines are indicative and should be replaced by you.
 # CAUTION: leave trailing slashes as-is
-COPY ros1_talker/ /home/${USER}/catkin_ws/src/ros1_talker/
-COPY custom_interfaces_ros1_pkg/ /home/${USER}/catkin_ws/src/custom_interfaces_ros1_pkg/
+COPY src/ /home/${USER}/catkin_ws/src/
 #-------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -61,6 +122,11 @@ RUN cd /home/${USER}/catkin_ws                                              && \
     catkin build                                                            && \
     source /home/${USER}/catkin_ws/devel/setup.bash
 # ------------------------------------------------------------------------------
+
+USER ${USER}
+RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${HOME}/catkin_ws && catkin build"
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source ${HOME}/catkin_ws/devel/setup.bash" >> ~/.bashrc
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Do not modify below this line

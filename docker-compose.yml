@@ -20,13 +20,13 @@ services:
     # images of the same ROS version at:
     # https://gitlab.com/certh-iti-robotics-lab/robetarme/RoBetArme/container_registry.
     # Then modify line #2 of this file accordingly.
-    image: registry.gitlab.com/certh-iti-robotics-lab/robetarme/robetarme/ros-noetic-92:development
+    image: registry.gitlab.com/certh-iti-robotics-lab/robetarme/robetarme/ros-noetic-a9:development
 
     # ACTIONS_NEEDED
     # The same naming convention applies to the container's name as well.
     # The first part is the prefix
     # `ros_noetic_`. Then the byte id, and at the end `_development_container`.
-    container_name: ros_noetic_92_development_container
+    container_name: ros_noetic_a9_development_container
 
     stdin_open: true
     tty: true
@@ -39,6 +39,7 @@ services:
       - DISPLAY=${DISPLAY}
       - QT_X11_NO_MITSHM=1
       - NVIDIA_DRIVER_CAPABILITIES=all
+
     volumes:
       # ACTIONS_NEEDED
       # You may communicate between the container and the host via
@@ -62,4 +63,6 @@ services:
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
       - ${XAUTHORITY:-$HOME/.Xauthority}:/root/.Xauthority
-    #user: ${USERNAME:-robetarme_user}
+
+      - ./src:/home/robetarme_user/catkin_ws/src
+      - ./config:/home/robetarme_user/catkin_ws/config
