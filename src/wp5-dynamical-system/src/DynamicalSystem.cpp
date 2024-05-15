@@ -161,7 +161,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   Vector3d pathPointNext;
   pathPointNext.setZero();
   
-  if (iFollow_ < desiredPath_.size()) {
+  if (iFollow_ < desiredPath_.size()-1) {
 
     if(iFollow_== 0){
       pathPointNext(0) = desiredPath_[iFollow_ ][4];
