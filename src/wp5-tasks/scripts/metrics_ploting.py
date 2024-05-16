@@ -6,6 +6,7 @@ from geometry_msgs.msg import WrenchStamped
 from geometry_msgs.msg import PoseStamped
 from std_msgs.msg import Float64MultiArray
 import sys
+import math
 import select
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
@@ -68,16 +69,27 @@ class DataSubscriber:
         twist_linear_x_actual = [msg.data[0] for msg in actual_twist_data]
         twist_linear_y_actual = [msg.data[1] for msg in actual_twist_data]
         twist_linear_z_actual = [msg.data[2] for msg in actual_twist_data]
+
+
+        # Calculate errors at each step
+        errors = []
+        for dx, dy, dz, ax, ay, az in zip(twist_linear_x_desired, twist_linear_y_desired, twist_linear_z_desired,
+                                        twist_linear_x_actual, twist_linear_y_actual, twist_linear_z_actual):
+            error = math.sqrt((dx - ax) ** 2 + (dy - ay) ** 2 + (dz - az) ** 2)
+            errors.append(error)
+
+        # Calculate average error
+        average_error = sum(errors) / len(errors)
+
+        # Calculate RMSE
+        rmse = math.sqrt(sum(e ** 2 for e in errors) / len(errors))
+
+
         # Extract position data from actual_pose_data
         eef_time = [msg.header.stamp.to_sec() for msg in actual_pose_data]
         eef_time = np.array(eef_time) - eef_time[0]
         eef_size = len(eef_time) -10
         positions = np.array([np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z]) for msg in actual_pose_data])
-        # Calculate RMSE at each step
-        rmse_at_each_step = [np.sqrt(np.mean((np.array(actual.data) - np.array(desired.data))**2)) for actual, desired in zip(actual_twist_data, desired_twist_data)]
-        # Calculate mean total RMSE
-        mean_total_rmse = np.mean(rmse_at_each_step)
-
 
         # Plot Force
         plt.figure(figsize=(15, 9))
@@ -92,37 +104,37 @@ class DataSubscriber:
         # plt.savefig("../plots/" + str(start_time) + "_force.png")
         # plt.close()
         plt.show()
-
-
+        
         # Split the Desired vs. Actual Linear Speed plot into three subplots
         plt.figure(figsize=(15, 9))
 
         # Subplot 1: X Linear Speed
         plt.subplot(3, 1, 1)
-        plt.plot(eef_time[:eef_size], twist_linear_x_desired[:eef_size], label=r'$\dot{x}_{d1}$', linestyle='--',color='r')
-        plt.plot(eef_time[:eef_size], twist_linear_x_actual[:eef_size], label=r'$\dot{x}_{a1}$',color='r')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Linear Speed X (m/s)')
-        plt.title('Desired vs. Actual Linear Speed X')
+        plt.plot(eef_time[100:eef_size], twist_linear_x_desired[100:eef_size], label=r'$\dot{x}_{d1}$', linestyle='--',color='r')
+        plt.plot(eef_time[100:eef_size], twist_linear_x_actual[100:eef_size], label=r'$\dot{x}_{a1}$',color='r')
+        plt.xlabel('Time (s)', fontsize=14)
+        plt.ylabel('Linear Speed X (m/s)', fontsize=14)
+        plt.title('Desired vs. Actual Linear Speed X', fontsize=16)
         plt.legend(loc='upper right')
 
         # Subplot 2: Y Linear Speed
         plt.subplot(3, 1, 2)
-        plt.plot(eef_time[:eef_size], twist_linear_y_desired[:eef_size], label=r'$\dot{x}_{d2}$', linestyle='--',color='g')
-        plt.plot(eef_time[:eef_size], twist_linear_y_actual[:eef_size], label=r'$\dot{x}_{a2}$',color='g')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Linear Speed Y (m/s)')
-        plt.title('Desired vs. Actual Linear Speed Y')
+        plt.plot(eef_time[100:eef_size], twist_linear_y_desired[100:eef_size], label=r'$\dot{x}_{d2}$', linestyle='--',color='g')
+        plt.plot(eef_time[100:eef_size], twist_linear_y_actual[100:eef_size], label=r'$\dot{x}_{a2}$',color='g')
+        plt.xlabel('Time (s)', fontsize=14)
+        plt.ylabel('Linear Speed Y (m/s)', fontsize=14)
+        plt.title('Desired vs. Actual Linear Speed Y', fontsize=16)
         plt.legend(loc='upper right')
 
         # Subplot 3: Z Linear Speed
         plt.subplot(3, 1, 3)
-        plt.plot(eef_time[:eef_size], twist_linear_z_desired[:eef_size], label=r'$\dot{x}_{d3}$', linestyle='--',color='b')
-        plt.plot(eef_time[:eef_size], twist_linear_z_actual[:eef_size], label=r'$\dot{x}_{a3}$',color='b')
-        plt.xlabel('Time (s)')
-        plt.ylabel('Linear Speed Z (m/s)')
-        plt.title('Desired vs. Actual Linear Speed Z')
+        plt.plot(eef_time[100:eef_size], twist_linear_z_desired[100:eef_size], label=r'$\dot{x}_{d3}$', linestyle='--',color='b')
+        plt.plot(eef_time[100:eef_size], twist_linear_z_actual[100:eef_size], label=r'$\dot{x}_{a3}$',color='b')
+        plt.xlabel('Time (s)', fontsize=14)
+        plt.ylabel('Linear Speed Z (m/s)', fontsize=14)
+        plt.title('Desired vs. Actual Linear Speed Z', fontsize=16)
         plt.legend(loc='upper right')
+
 
         plt.tight_layout()
         # plt.savefig("../plots/" + str(start_time) + "_desired_vs_actual_linear_speed.png")
@@ -132,16 +144,16 @@ class DataSubscriber:
         # Plot Trajectory
         fig = plt.figure(figsize=(15, 9))
         ax = fig.add_subplot(111, projection='3d')
-        ax.plot3D(positions[:, 0], positions[:, 1], positions[:, 2])
+        ax.plot3D(positions[100:, 0], positions[100:, 1], positions[100:, 2])
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         ax.set_title('Actual Path')
         # Set equal scaling for all dimensions
-        max_range = np.array([positions[:,0].max()-positions[:,0].min(), positions[:,1].max()-positions[:,1].min(), positions[:,2].max()-positions[:,2].min()]).max()
-        mid_x = (positions[:,0].max()+positions[:,0].min()) * 0.5
-        mid_y = (positions[:,1].max()+positions[:,1].min()) * 0.5
-        mid_z = (positions[:,2].max()+positions[:,2].min()) * 0.5
+        max_range = np.array([positions[100:,0].max()-positions[100:,0].min(), positions[100:,1].max()-positions[100:,1].min(), positions[100:,2].max()-positions[100:,2].min()]).max()
+        mid_x = (positions[100:,0].max()+positions[100:,0].min()) * 0.5
+        mid_y = (positions[100:,1].max()+positions[100:,1].min()) * 0.5
+        mid_z = (positions[100:,2].max()+positions[100:,2].min()) * 0.5
         ax.set_xlim(mid_x - max_range * 0.5, mid_x + max_range * 0.5)
         ax.set_ylim(mid_y - max_range * 0.5, mid_y + max_range * 0.5)
         ax.set_zlim(mid_z - max_range * 0.5, mid_z + max_range * 0.5)
@@ -153,11 +165,11 @@ class DataSubscriber:
 
         # Plot RMSE
         plt.figure(figsize=(15, 9))
-        plt.plot(eef_time[:eef_size], rmse_at_each_step[:eef_size], label='RMSE')
-        plt.axhline(y=mean_total_rmse, color='r', linestyle='--', label='Mean Total RMSE: {:.4f}'.format(mean_total_rmse))
+        plt.plot(eef_time[100:eef_size], errors[100:eef_size], label='errors')
+        plt.axhline(y=rmse, color='r', linestyle='--', label='RMSE: {:.4f}'.format(rmse))
+        plt.axhline(y=average_error, color='b', linestyle='--', label='average_error: {:.4f}'.format(average_error))
         plt.xlabel('Time (s)')
         plt.ylabel('RMSE')
-        plt.title('Root Mean Squared Error between Actual and Desired Linear Speed')
         plt.legend()
         plt.tight_layout()
         # plt.savefig("../plots/" + str(start_time) + "_rmse.png")
