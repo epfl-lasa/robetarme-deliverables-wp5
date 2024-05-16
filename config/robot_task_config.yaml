@@ -1,7 +1,7 @@
 # Configuration to be used for the different tasks.
 # Possible robot_name to set, depending on the task :
-# - Iiwa7
-# - Ur5
+# - iiwa7
+# - Uur5_robotr5
 # - Cr7
 # - Cobod
 # Tristan Bonato : 2024-03-15

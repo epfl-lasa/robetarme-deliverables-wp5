@@ -48,7 +48,8 @@ RUN apt install -y \
     alsa-utils \
     libcgal-dev \
     python3-pip \
-    python-is-python3
+    python-is-python3 \
+    python3-tk
 
 RUN pip install matplotlib
 
