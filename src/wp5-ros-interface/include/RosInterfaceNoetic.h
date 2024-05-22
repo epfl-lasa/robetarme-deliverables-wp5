@@ -10,15 +10,15 @@
 
 #pragma once
 
-#include <cstdlib>
 #include <geometry_msgs/WrenchStamped.h>
 #include <ros/package.h>
 #include <ros/ros.h>
 #include <sensor_msgs/JointState.h>
+
+#include <cstdlib>
+#include <eigen3/Eigen/Dense>
 #include <tuple>
 #include <vector>
-#include <eigen3/Eigen/Dense>
-
 
 /**
  * @brief Class for ROS interface compatible with ROS Noetic
@@ -60,13 +60,19 @@ public:
    * @brief Sets the actual Pose of the end-effector.
    * @param data Vector containing the quaternion (x,y,z,w) and position (x,y,z) data.
    */
-  void setCartesianPose(std::pair<Eigen::Quaterniond, Eigen::Vector3d> pairActualQuatPos) ;
+  void setCartesianPose(std::pair<Eigen::Quaterniond, Eigen::Vector3d> pairActualQuatPos);
 
   /**
    * @brief Receives wrench data from force/torque sensor.
    * @return Vector containing wrench data.
    */
   std::vector<double> receiveWrench();
+
+  /**
+   * @brief set a bool to activate or desactivate the spray.
+   * @param data bool to activate (true) or disactivate the spray
+   */
+  void setActuatorSpray(bool data);
 
 private:
   /**
@@ -87,13 +93,15 @@ private:
   std::vector<double> wrenchSensor_;   /**< Vector containing wrench data from sensor. */
   std::string robotName_;              /**< Name of the robot. */
 
-  bool initJoint_;              /**< Flag indicating if joint state is initialized. */
-  bool initFTsensor_;           /**< Flag indicating if force/torque sensor is initialized. */
-  int nJoint_;                  /**< Number of joints. */
-  ros::NodeHandle nh_;          /**< Node handle for ROS. */
-  ros::Subscriber subFTsensor_; /**< Subscriber for force/torque sensor. */
-  ros::Subscriber subState_;    /**< Subscriber for joint state. */
-  ros::Publisher pubState_;     /**< Publisher for robot state. */
-  ros::Publisher pubStateDS_;   /**< Publisher for dynamical system state. */
+  bool initJoint_;                           /**< Flag indicating if joint state is initialized. */
+  bool initFTsensor_;                        /**< Flag indicating if force/torque sensor is initialized. */
+  int nJoint_;                               /**< Number of joints. */
+  ros::NodeHandle nh_;                       /**< Node handle for ROS. */
+  ros::Subscriber subFTsensor_;              /**< Subscriber for force/torque sensor. */
+  ros::Subscriber subState_;                 /**< Subscriber for joint state. */
+  ros::Publisher pubState_;                  /**< Publisher for robot state. */
+  ros::Publisher pubStateDS_;                /**< Publisher for dynamical system state. */
+  ros::Publisher pubActuatorSpray_;          /**< Publisher for actuator for the spray. */
   ros::Publisher pubStateCartesianTwistEEF_; /**< Publisher for Cartesian twist of end-effector. */
-  ros::Publisher pubStateCartesianPoseEEF_; /**< Publisher for Cartesian pose of end-effector. */};
+  ros::Publisher pubStateCartesianPoseEEF_;  /**< Publisher for Cartesian pose of end-effector. */
+};

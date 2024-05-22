@@ -15,8 +15,10 @@
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
+#include <std_msgs/Bool.h>
 #include <std_msgs/Float64MultiArray.h>
 #include <yaml-cpp/yaml.h>
+
 #include <fstream>
 
 using namespace std;
@@ -25,7 +27,7 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : n
   // Try to load parameters from YAML file
   try {
 
-      // Load parameters from YAML file
+    // Load parameters from YAML file
     string alternativeYamlPath = string(WP5_ROS_INTERFACE_DIR) + "/config/ros_interface_config.yaml";
     string yamlPath = string(WP5_ROS_INTERFACE_DIR) + "/../../config/ros_interface_config.yaml";
 
@@ -49,19 +51,22 @@ RosInterfaceNoetic::RosInterfaceNoetic(ros::NodeHandle& n, string robotName) : n
     string FTTopic = robotNode["ft_topic"].as<string>();
     string actualStateTopic = robotNode["joint_topic"].as<string>();
     string commandStateTopic = robotNode["joint_command"].as<string>();
+    //take the tools topics
+    string actuatorSprayTopic = robotNode["actuator_spray_topic"].as<string>();
 
     // Initialization
     jointsPosition_.assign(nJoint_, 0.0);
     jointsSpeed_.assign(nJoint_, 0.0);
     jointsTorque_.assign(nJoint_, 0.0);
+
     initJoint_ = false;
 
     // ROS init
     subFTsensor_ = nh_.subscribe(FTTopic, 10, &RosInterfaceNoetic::FTCallback, this);
     subState_ = nh_.subscribe(actualStateTopic, 10, &RosInterfaceNoetic::jointStateCallback, this);
+
     pubState_ = nh_.advertise<std_msgs::Float64MultiArray>(commandStateTopic, 1000);
-
-
+    pubActuatorSpray_ = nh_.advertise<std_msgs::Bool>(actuatorSprayTopic, 1000);
     pubStateDS_ = nh_.advertise<std_msgs::Float64MultiArray>("desiredDsTwist", 1000);
     pubStateCartesianTwistEEF_ = nh_.advertise<std_msgs::Float64MultiArray>("actualCartesianTwistEEF", 1000);
     pubStateCartesianPoseEEF_ = nh_.advertise<geometry_msgs::PoseStamped>("actualCartesianPoseEEF", 1000);
@@ -145,6 +150,12 @@ void RosInterfaceNoetic::sendState(vector<double>& data) {
   pubState_.publish(nextJointMsg);
 }
 
+void RosInterfaceNoetic::setActuatorSpray(bool dataBool) {
+  std_msgs::Bool actualTwistMsg;
+  actualTwistMsg.data = dataBool;
+  pubActuatorSpray_.publish(actualTwistMsg);
+}
+
 // These functions aff for purpose to plot the speed easily
 
 void RosInterfaceNoetic::setDesiredDsTwist(vector<double>& data) {
@@ -166,7 +177,7 @@ void RosInterfaceNoetic::setCartesianPose(pair<Eigen::Quaterniond, Eigen::Vector
   actualPoseMsg.pose.orientation.y = pairActualQuatPos.first.y();
   actualPoseMsg.pose.orientation.z = pairActualQuatPos.first.z();
   actualPoseMsg.pose.orientation.w = pairActualQuatPos.first.w();
-  
+
   // Populate the position part
   actualPoseMsg.pose.position.x = pairActualQuatPos.second.x();
   actualPoseMsg.pose.position.y = pairActualQuatPos.second.y();
@@ -174,11 +185,8 @@ void RosInterfaceNoetic::setCartesianPose(pair<Eigen::Quaterniond, Eigen::Vector
 
   // Set the header information (optional)
   actualPoseMsg.header.stamp = ros::Time::now(); // Set the current time as the timestamp
-  actualPoseMsg.header.frame_id = "base_link"; // Set the frame ID as needed
+  actualPoseMsg.header.frame_id = "base_link";   // Set the frame ID as needed
 
   // Publish the message
   pubStateCartesianPoseEEF_.publish(actualPoseMsg);
 }
-
-
-

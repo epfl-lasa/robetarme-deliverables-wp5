@@ -3,16 +3,19 @@ ur5_robot:
   joint_command: "/ur5/joint_group_vel_controller/command"
   # ft_topic: "/ur5/robotiq_ft_wrench"
   ft_topic: "/ft_sensor/netft_data"
+  actuator_spray_topic: "/actuator_spray/command"
   number_joint: 6
 
 iiwa7:
   joint_topic: "/iiwa/joint_states"
   joint_command: "/iiwa/TorqueController/command"
   ft_topic: ""
+  actuator_spray_topic: "/actuator_spray/command"
   number_joint: 7
 
 Cobod:
   joint_topic: "/cobod/joint_states"
   joint_command: "/cobod/joint_group_vel_controller/command"
+  actuator_spray_topic: "/actuator_spray/command"
   ft_topic: ""
   number_joint: 5

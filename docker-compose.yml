@@ -21,6 +21,8 @@ services:
             - driver: nvidia
               count: 1
               capabilities: [ gpu ]
+    devices:
+      - "/dev/ttyACM0:/dev/ttyACM0" # Specify your Arduino device here
     volumes:
       - ./src:/home/${ROS_USER}/catkin_ws/src
       - ./config:/home/${ROS_USER}/catkin_ws/config
