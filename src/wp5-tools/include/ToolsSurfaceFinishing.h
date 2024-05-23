@@ -1,5 +1,5 @@
 /**
- * @file ToolsShotcrete.h
+ * @file ToolsSurfaceFinishing.h
  * @author Louis Munier (lmunier@protonmail.com)
  * @brief
  * @version 0.1
@@ -17,13 +17,12 @@
  *
  * This class provides methods to manage a robotic arm with all the necessary functions to control it.
  */
-class ToolsShotcrete : public IToolsBase {
+class ToolsSurfaceFinishing : public IToolsBase {
 public:
-  explicit ToolsShotcrete();
+  explicit ToolsSurfaceFinishing();
   
 
 protected:
 private:
-  double offsetTool_;
-  double offsetTarget_;
+  
 };

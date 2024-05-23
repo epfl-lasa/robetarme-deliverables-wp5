@@ -1,6 +1,7 @@
 #include "DynamicalSystem.h"
 
 #include <yaml-cpp/yaml.h>
+
 #include <fstream>
 
 using namespace std;
@@ -12,7 +13,6 @@ DynamicalSystem::DynamicalSystem(double freq) {
 }
 
 void DynamicalSystem::parameterInitialization() {
-
 
   string alternativeYamlPath = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/config/control_config.yaml";
   string yamlPath = string(WP5_DYNAMICAL_SYSTEM_DIR) + "/../../config/control_config.yaml";
@@ -37,7 +37,6 @@ void DynamicalSystem::parameterInitialization() {
   toleranceToNextPoint_ = config["toleranceToNextPoint"].as<double>();
 
   toolOffsetFromTarget_ = config["toolOffsetFromTarget"].as<double>();
-  cout << "toolOffsetFromTarget_:" << toolOffsetFromTarget_ << endl;
 
   velocityLimit_ = config["velocityLimit"].as<double>();
 }
@@ -106,6 +105,8 @@ void DynamicalSystem::setLimitCycleRadius(double rad) { cycleRadiusLC_ = rad; }
 
 void DynamicalSystem::setToleranceNextPoint(double tol) { toleranceToNextPoint_ = tol; }
 
+void DynamicalSystem::setToolOffsetFromTarget_(double offset) { toolOffsetFromTarget_ = offset; }
+
 bool DynamicalSystem::isFinished() const { return finish_; }
 
 bool DynamicalSystem::isInitialized() const { return init_; }
@@ -160,20 +161,18 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   dVel.setZero();
   Vector3d pathPointNext;
   pathPointNext.setZero();
-  
-  if (iFollow_ < desiredPath_.size()-1) {
 
-    if(iFollow_== 0){
-      pathPointNext(0) = desiredPath_[iFollow_ ][4];
-      pathPointNext(1) = desiredPath_[iFollow_ ][5];
-      pathPointNext(2) = desiredPath_[iFollow_ ][6];
-    }
-    else {
+  if (iFollow_ < desiredPath_.size() - 1) {
+
+    if (iFollow_ == 0) {
+      pathPointNext(0) = desiredPath_[iFollow_][4];
+      pathPointNext(1) = desiredPath_[iFollow_][5];
+      pathPointNext(2) = desiredPath_[iFollow_][6];
+    } else {
       pathPointNext(0) = desiredPath_[iFollow_ + 1][4];
       pathPointNext(1) = desiredPath_[iFollow_ + 1][5];
       pathPointNext(2) = desiredPath_[iFollow_ + 1][6];
     }
-
 
     //use the point betweeen path as a linear DS
     dx = pathPointNext(0) - centerLimitCycle_(0);
@@ -188,9 +187,9 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     dVel(2) = dz * scaleVel;
 
     double dt = 1 / fs_;
-    double dxcheck= 0, dycheck, dzcheck;
+    double dxcheck = 0, dycheck, dzcheck;
     double normcheck = 0;
-    
+
     //check if the eef is folowing the limit cy0cle
     // dxcheck = centerLimitCycle_(0) - realPos_[0];
     // dycheck = centerLimitCycle_(1) - realPos_[1];

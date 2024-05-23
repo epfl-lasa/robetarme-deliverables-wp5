@@ -39,4 +39,6 @@ IToolsBase   */
 
 protected:
 private:
+  double offsetTool_;
+  double offsetTarget_;
 };
