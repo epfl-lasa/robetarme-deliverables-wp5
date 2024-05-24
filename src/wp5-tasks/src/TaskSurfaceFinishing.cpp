@@ -108,10 +108,9 @@ bool TaskSurfaceFinishing::execute() {
   }
   return dynamicalSystem_->checkLinearDs();
 }
-void TaskSurfaceFinishing::makeContact() {
-  
+// void TaskSurfaceFinishing::makeContact() {
 
-}
+// }
 
 void TaskSurfaceFinishing::set_bias() {
   int meanNum = 1000;
