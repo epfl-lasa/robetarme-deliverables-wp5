@@ -15,6 +15,7 @@ find_package(catkin REQUIRED COMPONENTS
   wp5_robotic_arms_drivers
   wp5_planner_ros
   wp5_dynamical_system
+  wp5_tools
 )
 
 find_package(Boost REQUIRED COMPONENTS system)
@@ -29,6 +30,7 @@ catkin_package(
   wp5_robotic_arms_drivers
   wp5_planner_ros
   wp5_dynamical_system
+  wp5_tools
   DEPENDS control_libraries YAML_CPP
 )
 

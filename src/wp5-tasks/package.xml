@@ -56,6 +56,7 @@
   <build_depend>wp5_ros_interface</build_depend>
   <build_depend>wp5_planner_ros</build_depend>
   <build_depend>wp5_dynamical_system</build_depend>
+  <build_depend>wp5_tools</build_depend>
 
   <build_export_depend>roscpp</build_export_depend>
   <build_export_depend>std_msgs</build_export_depend>
@@ -63,6 +64,8 @@
   <build_export_depend>wp5_ros_interface</build_export_depend>
   <build_export_depend>wp5_planner_ros</build_export_depend>
   <build_export_depend>wp5_dynamical_system</build_export_depend>
+  <build_export_depend>wp5_tools</build_export_depend>
+  
 
   <exec_depend>roscpp</exec_depend>
   <exec_depend>std_msgs</exec_depend>
@@ -70,6 +73,7 @@
   <exec_depend>wp5_ros_interface</exec_depend>
   <exec_depend>wp5_planner_ros</exec_depend>
   <exec_depend>wp5_dynamical_system</exec_depend>
+  <exec_depend>wp5_tools</exec_depend>
 
   <export>
     <!-- Other tools can request additional information be placed here -->

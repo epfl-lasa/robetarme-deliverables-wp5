@@ -28,7 +28,7 @@
     parameter MUST point to a .yaml file containing the appropriate values for
     the targetted robot.
 
-    If using the UnaiversalRobots/Universal_Robots_ROS_Driver, follow the steps
+    If using the UniversalRobots/Universal_Robots_ROS_Driver, follow the steps
     described in the readme of that repository to extract the kinematic
     calibration from the controller and generate the required .yaml file.
 
@@ -117,7 +117,7 @@
   <link name="base_link"/>
   <link name="base_link_inertia">
     <visual>
-      <origin rpy="0 0 3.14" xyz="0 0 0"/>
+      <origin rpy="0 0 3.141592653589793" xyz="0 0 0"/>
       <geometry>
         <mesh filename="package://ur_description/meshes/ur5/visual/base.dae"/>
       </geometry>
@@ -280,7 +280,7 @@
            link/frame) to introduce the necessary rotation over Z (of pi rad).
       -->
     <!-- <origin rpy="0 0 3.141592653589793" xyz="0 0 0"/>-->
-    <origin rpy="0 0 1.57" xyz="0.22 0 0.28"/>
+    <origin rpy="0 0 0" xyz="0 0 0"/>
   </joint>
   <joint name="shoulder_pan_joint" type="revolute">
     <parent link="base_link_inertia"/>

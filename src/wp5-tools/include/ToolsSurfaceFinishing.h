@@ -10,18 +10,18 @@
  */
 #pragma once
 
-#include "IToolsBase.h"
 #include <functional>
+
+#include "IToolsBase.h"
 
 /**
  * @brief Child class to create all the prototype fonctions needed in the different robotic arms.
  *
  * This class provides methods to manage a robotic arm with all the necessary functions to control it.
  */
-class ToolsShotcrete : public IToolsBase {
+class ToolsSurfaceFinishing : public IToolsBase {
 public:
-  explicit ToolsShotcrete();
-  // void activateTool(std::function<void()> func);
+  explicit ToolsSurfaceFinishing();
 
 protected:
 private:

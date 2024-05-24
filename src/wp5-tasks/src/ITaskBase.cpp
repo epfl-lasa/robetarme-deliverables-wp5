@@ -19,6 +19,30 @@ ITaskBase::ITaskBase(ros::NodeHandle& nh, double freq, string robotName) : nh_(n
   roboticArm_ = armFactory.createRoboticArm(robotName);
 }
 
+void ITaskBase::takeConfigTask(string taskname) {
+  string alternativeYamlPath = string(WP5_TASKS_DIR) + "/config/tasks_config.yaml";
+  string yamlPath = string(WP5_TASKS_DIR) + "/../../config/tasks_config.yaml";
+
+  // Check if the alternative YAML file exists
+  ifstream originalFile(yamlPath);
+  if (originalFile.good()) {
+    cout << "Using general YAML file: " << yamlPath << endl;
+  } else {
+    yamlPath = alternativeYamlPath;
+    cout << "Using local YAML file: " << yamlPath << endl;
+  }
+
+  // Load parameters from YAML file
+  YAML::Node config = YAML::LoadFile(yamlPath);
+  YAML::Node task = config[taskname];
+
+  // Access parameters from the YAML file
+  limitCycleSpeed_ = task["limitCycleSpeed"].as<double>();
+  convRate_ = task["convRate"].as<double>();
+  linearSpeed_ = task["linearSpeed"].as<double>();
+}
+
+
 bool ITaskBase::initialize() {
   if (roboticArm_) {
     cout << "----------------------" << roboticArm_->getName()

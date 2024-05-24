@@ -37,6 +37,16 @@ IToolsBase   */
    */
   virtual ~IToolsBase() = default;
 
+  /// @brief  get the offset tool
+  /// @return  the offset tool
+  double getOffset();
+
 protected:
+  void takeYaml(std::string name);
+
 private:
+  double offsetTool_;
+  double offsetTarget_;
+  double offsetTotal_;
+  std::string taskname_;
 };

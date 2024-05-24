@@ -18,11 +18,14 @@
 #include "BoustrophedonServer.h"
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"
+#include "IToolsBase.h"
 #include "PathPlanner.h"
 #include "RoboticArmIiwa7.h"
 #include "RoboticArmUr5.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
+#include "ToolsShotcrete.h"
+#include "ToolsSurfaceFinishing.h"
 #include "visualization_msgs/Marker.h"
 
 /**
@@ -155,6 +158,11 @@ protected:
   std::unique_ptr<IRoboticArmBase> roboticArm_ = nullptr;
 
   /**
+   * @brief Pointer to IToolsBase instance.
+   */
+  std::unique_ptr<IToolsBase> tools_ = nullptr;
+
+  /**
    * @brief Pointer to RosInterfaceNoetic instance.
    */
   std::unique_ptr<RosInterfaceNoetic> rosInterface_ = nullptr;
@@ -165,6 +173,25 @@ protected:
    * @return True if successful, false otherwise.
    */
   bool goToPoint(std::vector<double> firstQuatPosOffset) const;
+  /**
+   * @brief Take the configuration of the task.
+   * @param taskname Name of the task.
+   * @return  void
+   */
+  void takeConfigTask(std::string taskname);
+
+  /**
+   * @brief limit cycle speed
+   */
+  double limitCycleSpeed_;
+  /**
+   * @brief conergence rate for limit cycle
+   */
+  double convRate_;
+  /**
+   * @brief linear speed
+   */
+  double linearSpeed_;
 
 private:
   /**

@@ -1,5 +1,5 @@
 /**
- * @file RoboticArmUr5.cpp
+ * @file ToolsSurfaceFinishing.cpp
  * @author Louis Munier (lmunier@protonmail.com)
  * @author Tristan Bonato (tristan_bonato@hotmail.com)
  * @brief
@@ -10,7 +10,7 @@
  *
  */
 
-#include "ToolsShotcrete.h"
+#include "ToolsSurfaceFinishing.h"
 
 #include <yaml-cpp/yaml.h>
 
@@ -18,6 +18,4 @@
 
 using namespace std;
 
-ToolsShotcrete::ToolsShotcrete() { takeYaml("shotcrete"); }
-
-// ToolsShotcrete::activateTool(function<void()> func) { func(); }
+ToolsSurfaceFinishing::ToolsSurfaceFinishing() { takeYaml("surface_finishing"); }

@@ -12,8 +12,16 @@ TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName)
   // Create an unique pointer for the instance of PathPlanner
   pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
 
-  // Create an unique pointer for the instance of PathPlanner
+  // Create an unique pointer for the instance of boustrophedonServer_
   boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
+
+  // Create an unique pointer for the instance of Tool
+  tools_ = make_unique<ToolsShotcrete>();
+
+  takeConfigTask("shotcrete");
+  dynamicalSystem_->setOffset(tools_->getOffset());
+  dynamicalSystem_->setLimitCycleSpeedConv(limitCycleSpeed_, convRate_);
+  dynamicalSystem_->setLinearSpeed(linearSpeed_);
 }
 
 bool TaskShotcrete::computePath() {

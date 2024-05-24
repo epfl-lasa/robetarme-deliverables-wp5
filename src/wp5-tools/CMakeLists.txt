@@ -39,6 +39,7 @@ include_directories(
 add_library(${PROJECT_NAME} STATIC
     src/IToolsBase.cpp
     src/ToolsShotcrete.cpp
+    src/ToolsSurfaceFinishing.cpp
 )
 
 # Set lib version

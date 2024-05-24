@@ -10,11 +10,19 @@ TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, str
   // Create an unique pointer for the instance of TargetExtraction
   targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
 
-  // // Create an unique pointer for the instance of PathPlanner
-  // pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
+  // Create an unique pointer for the instance of TargetExtraction
+  tools_ = make_unique<ToolsSurfaceFinishing>();
 
-  // // Create an unique pointer for the instance of PathPlanner
-  // boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
+  takeConfigTask("surface_finishing");
+  dynamicalSystem_->setOffset(tools_->getOffset());
+  dynamicalSystem_->setLimitCycleSpeedConv(limitCycleSpeed_, convRate_);
+  dynamicalSystem_->setLinearSpeed(linearSpeed_);
+
+  // Create an unique pointer for the instance of PathPlanner
+  pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
+
+  // Create an unique pointer for the instance of PathPlanner
+  boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
   outputTwist_ = Eigen::VectorXd::Zero(6);
 }
 

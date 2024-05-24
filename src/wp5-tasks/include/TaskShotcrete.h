@@ -16,6 +16,7 @@
 #include "PathPlanner.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
+#include "IToolsBase.h"
 
 class TaskShotcrete : public ITaskBase {
 public:
@@ -33,4 +34,6 @@ private:
 
   // Create an unique pointer for the instance of PathPlanner
   std::unique_ptr<BoustrophedonServer> boustrophedonServer_ = nullptr;
+
+
 };

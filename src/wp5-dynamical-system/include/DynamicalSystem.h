@@ -47,6 +47,12 @@ public:
   void setLimitCycleSpeedConv(double angSpeed, double conv);
 
   /**
+   * @brief Sets the offset of the Limit Cycle.
+   * @param offset  The offset of the Limit Cycle.
+   */
+  void setOffset(double offset);
+
+  /**
    * @brief Sets the radius of the Limit Cycle.
    * @param rad The radius of the Limit Cycle.
    */

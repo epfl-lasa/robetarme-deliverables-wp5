@@ -6,7 +6,7 @@
 # - Cobod
 # Tristan Bonato : 2024-03-15
 shotcrete:
-  robot_name: "iiwa7"
+  robot_name: "ur5_robot"
 surface_finishing:
   robot_name: "ur5_robot"
 metal_additive:
