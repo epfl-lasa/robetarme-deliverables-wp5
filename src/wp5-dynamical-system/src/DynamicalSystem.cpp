@@ -105,6 +105,8 @@ void DynamicalSystem::setLimitCycleRadius(double rad) { cycleRadiusLC_ = rad; }
 
 void DynamicalSystem::setToleranceNextPoint(double tol) { toleranceToNextPoint_ = tol; }
 
+void DynamicalSystem::setToolOffsetFromTarget_(double offset) { toolOffsetFromTarget_ = offset; }
+
 bool DynamicalSystem::isFinished() const { return finish_; }
 
 bool DynamicalSystem::isInitialized() const { return init_; }

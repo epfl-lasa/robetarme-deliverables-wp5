@@ -101,13 +101,16 @@ bool TaskSurfaceFinishing::execute() {
     }
     rosInterface_->setCartesianTwist(actualTwist);
     rosInterface_->setDesiredDsTwist(desiredTwist);
-    rosInterface_->setDesiredDsTwist(desiredTwist);
 
     // rosLoop
     ros::spinOnce();
     getRosLoopRate_()->sleep();
   }
   return dynamicalSystem_->checkLinearDs();
+}
+void TaskSurfaceFinishing::makeContact() {
+  
+
 }
 
 void TaskSurfaceFinishing::set_bias() {

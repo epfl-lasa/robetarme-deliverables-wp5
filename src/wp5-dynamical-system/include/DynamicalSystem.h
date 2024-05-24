@@ -59,6 +59,12 @@ public:
   void setLimitCycleRadius(double rad);
 
   /**
+   * @brief Sets the offset from the target
+   * @param offset The offset
+   */
+  void setToolOffsetFromTarget_(double offset);
+
+  /**
    * @brief Sets the tolerance to the next point in the path.
    * @param tol The tolerance value.
    */

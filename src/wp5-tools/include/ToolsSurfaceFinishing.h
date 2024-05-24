@@ -1,5 +1,5 @@
 /**
- * @file ToolsShotcrete.h
+ * @file ToolsSurfaceFinishing.h
  * @author Louis Munier (lmunier@protonmail.com)
  * @brief
  * @version 0.1
