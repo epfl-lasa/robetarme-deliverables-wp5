@@ -105,7 +105,7 @@ int main(int argc, char** argv) {
     vector<double> desiredJoint = roboticArm->lowLevelController(stateJoints, twistDesiredEigen);
     rosInterface->sendState(desiredJoint);
 
-    if (dynamicalSystem->isFinished() == true) {
+    if (dynamicalSystem->checkLinearDs() == true) {
       vector<double> stopjoint(6);
       rosInterface->sendState(stopjoint);
       cout << "point:" << i << endl;
