@@ -97,7 +97,7 @@ public:
    * @brief Publish the initial pose.
    */
   void publishInitialPose();
-  void publishInitialPoseSelected(Eigen::Vector3d pointInitial);
+  void publishInitialPose(Eigen::Vector3d pointInitial);
 
   /**
    * @brief Get the transformed path.

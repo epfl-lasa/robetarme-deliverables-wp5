@@ -212,7 +212,6 @@ void PathPlanner::publishInitialPose() {
   vector<Vector3d> flatPolygons_ = getPlannerPoints();
   Vector3d pointInitial = flatPolygons_[imax];
   seeTargetFlat();
-  cout << points[imax] << endl;
   double delta = 0.1;
   // Create a publisher for the /initialpose topic
 
@@ -233,13 +232,13 @@ void PathPlanner::publishInitialPose() {
   initialPoseMsg.pose.covariance.fill(0.0); // Fill the covariance with zeros
 
   initialPosePub_.publish(initialPoseMsg);
+  //defin intialpose
+
   initialPose.header = initialPoseMsg.header;
   initialPose.pose = initialPoseMsg.pose.pose;
 }
 
-void PathPlanner::publishInitialPoseSelected(Vector3d pointInitial) {
-
-  double delta = 0.0;
+void PathPlanner::publishInitialPose(Vector3d pointInitial) {
   // Create a publisher for the /initialpose topic
 
   // Create and fill the message
@@ -247,8 +246,8 @@ void PathPlanner::publishInitialPoseSelected(Vector3d pointInitial) {
   initialPoseMsg.header.stamp = ros::Time(0);
   initialPoseMsg.header.frame_id = "base";
 
-  initialPoseMsg.pose.pose.position.x = pointInitial(0) + delta;
-  initialPoseMsg.pose.pose.position.y = pointInitial(1) - delta;
+  initialPoseMsg.pose.pose.position.x = pointInitial(0);
+  initialPoseMsg.pose.pose.position.y = pointInitial(1);
   initialPoseMsg.pose.pose.position.z = pointInitial(2);
 
   initialPoseMsg.pose.pose.orientation.x = 0.0;
@@ -259,9 +258,12 @@ void PathPlanner::publishInitialPoseSelected(Vector3d pointInitial) {
   initialPoseMsg.pose.covariance.fill(0.0); // Fill the covariance with zeros
 
   initialPosePub_.publish(initialPoseMsg);
+
+  //defin intialpose
   initialPose.header = initialPoseMsg.header;
   initialPose.pose = initialPoseMsg.pose.pose;
 }
+
 
 nav_msgs::Path PathPlanner::getTransformedPath(const nav_msgs::Path& originalPath) {
   nav_msgs::Path transformedPath;
