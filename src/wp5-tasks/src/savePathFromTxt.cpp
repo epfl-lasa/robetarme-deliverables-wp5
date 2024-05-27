@@ -33,7 +33,7 @@ boustrophedon_msgs::PlanMowingPathGoal createPlanMowingPathGoal(const std::vecto
   boustrophedon_msgs::PlanMowingPathGoal goal;
 
   goal.property.header.stamp = ros::Time::now();
-  goal.property.header.frame_id = "base";
+  goal.property.header.frame_id = "base_link";
   goal.property.polygon.points.resize(points.size());
 
   for (size_t i = 0; i < points.size(); ++i) {
@@ -50,6 +50,52 @@ boustrophedon_msgs::PlanMowingPathGoal createPlanMowingPathGoal(const std::vecto
   return goal;
 }
 
+// Calculate the perpendicular distance from a point to a line
+double perpendicularDistance(const Eigen::Vector3d& point,
+                             const Eigen::Vector3d& lineStart,
+                             const Eigen::Vector3d& lineEnd) {
+  Eigen::Vector3d line = lineEnd - lineStart;
+  Eigen::Vector3d pointLineStart = point - lineStart;
+  Eigen::Vector3d crossProduct = line.cross(pointLineStart);
+  return crossProduct.norm() / line.norm();
+}
+
+// Ramer-Douglas-Peucker algorithm
+void rdp(const std::vector<Eigen::Vector3d>& points, double epsilon, std::vector<Eigen::Vector3d>& result) {
+  if (points.size() < 2) {
+    throw std::invalid_argument("Not enough points to simplify");
+  }
+
+  double dmax = 0.0;
+  size_t index = 0;
+  size_t end = points.size() - 1;
+
+  for (size_t i = 1; i < end; ++i) {
+    double d = perpendicularDistance(points[i], points[0], points[end]);
+    if (d > dmax) {
+      index = i;
+      dmax = d;
+    }
+  }
+
+  if (dmax > epsilon) {
+    std::vector<Eigen::Vector3d> recResults1;
+    std::vector<Eigen::Vector3d> recResults2;
+    std::vector<Eigen::Vector3d> firstLine(points.begin(), points.begin() + index + 1);
+    std::vector<Eigen::Vector3d> lastLine(points.begin() + index, points.end());
+
+    rdp(firstLine, epsilon, recResults1);
+    rdp(lastLine, epsilon, recResults2);
+
+    result.assign(recResults1.begin(), recResults1.end() - 1);
+    result.insert(result.end(), recResults2.begin(), recResults2.end());
+  } else {
+    result.clear();
+    result.push_back(points[0]);
+    result.push_back(points[end]);
+  }
+}
+
 void printGoal(const boustrophedon_msgs::PlanMowingPathGoal& goal) {
   std::cout << "Goal points:" << std::endl;
   for (const auto& point : goal.property.polygon.points) {
@@ -58,8 +104,9 @@ void printGoal(const boustrophedon_msgs::PlanMowingPathGoal& goal) {
 }
 
 int main(int argc, char** argv) {
-  double rosFreq = 300;
+  double rosFreq = 30;
   string robotName = "ur5_robot";
+  bool checkPath = false;
 
   // Init ros
   ros::init(argc, argv, "calibration");
@@ -90,7 +137,7 @@ int main(int argc, char** argv) {
   int i_decrease = 0;
   double x, y, z;
   while (inputFile >> x >> y >> z) {
-    if ((i_decrease % 15) == 0) {
+    if ((i_decrease % 2) == 0) {
       Eigen::Vector3d point(x, y, z);
       polygonsPositions.push_back(point);
     }
@@ -103,12 +150,27 @@ int main(int argc, char** argv) {
     std::cout << point.transpose() << std::endl;
   }
 
+  double epsilon = 0.5; // Tolerance for simplification
+  std::vector<Eigen::Vector3d> simplifiedPolygon;
+  rdp(polygonsPositions, epsilon, simplifiedPolygon);
+
+  targetExtraction->setPolygons(simplifiedPolygon);
+  Quaterniond quatTarget = targetExtraction->getQuatTarget();
+  Vector3d posTarget = targetExtraction->getPosTarget();
+  targetExtraction->seeTarget();
+
+  // initialization
+  pathPlanner->setTarget(quatTarget, posTarget, simplifiedPolygon);
+  double optimumRadius = pathPlanner->getOptimumRadius();
+
+  boustrophedonServer->setOptimumRad(optimumRadius);
+
   cout << "Waiting for action server to start." << endl;
   boustrophedonServer->initRosLaunch();
   cout << "Action server started" << endl;
 
   boustrophedon_msgs::PlanMowingPathGoal goal;
-  goal = createPlanMowingPathGoal(polygonsPositions);
+  goal = createPlanMowingPathGoal(simplifiedPolygon);
 
   printGoal(goal);
   boustrophedonServer->polygonPub.publish(goal.property);
@@ -118,27 +180,18 @@ int main(int argc, char** argv) {
   nav_msgs::Path path;
   nav_msgs::Path pathTransformed;
 
-  while (ros::ok()) {
+  while (ros::ok() && !checkPath) {
     ros::Time start_time = ros::Time::now();
-    pathPlanner->publishInitialPoseSelected(polygonsPositions[0]);
-    geometry_msgs::PoseStamped initialPose;
 
-    const Eigen::Vector3d& firstPoint = polygonsPositions[0];
-    initialPose.pose.position.x = firstPoint.x();
-    initialPose.pose.position.y = firstPoint.y();
-    initialPose.pose.position.z = firstPoint.z();
-    initialPose.pose.orientation.x = 0.0;
-    initialPose.pose.orientation.y = 0.0;
-    initialPose.pose.orientation.z = 0.0;
-    initialPose.pose.orientation.w = 1.0;
+    pathPlanner->publishInitialPose(simplifiedPolygon[0]);
+    goal.robot_position = pathPlanner->getInitialPose();
 
-    goal.robot_position = initialPose;
-    boustrophedonServer->startPub.publish(goal.robot_position);
+    // boustrophedonServer->startPub.publish(goal.robot_position);
     boustrophedonServer->client.sendGoal(goal);
     ROS_INFO_STREAM("Sending goal");
 
     // Wait for the action to return
-    bool finishedBeforeTimeout = boustrophedonServer->client.waitForResult(ros::Duration(5.0));
+    bool finishedBeforeTimeout = boustrophedonServer->client.waitForResult(ros::Duration(30.0));
     actionlib::SimpleClientGoalState state = boustrophedonServer->client.getState();
     boustrophedon_msgs::PlanMowingPathResultConstPtr result = boustrophedonServer->client.getResult();
     if (result->plan.points.size() < 1) {
@@ -154,8 +207,8 @@ int main(int argc, char** argv) {
         // vector<double> firstQuatPos = vectorPathTransformed[0];
         // dynamicalSystem_->setPath(vectorPathTransformed);
         // boustrophedonServer->pathPub.publish(pathTransformed);
-        // boustrophedonServer->closeRosLaunch();
-        // checkPath = true;
+        boustrophedonServer->closeRosLaunch();
+        checkPath = true;
       }
     }
     ros::spinOnce();
