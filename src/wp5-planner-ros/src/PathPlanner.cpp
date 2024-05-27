@@ -5,10 +5,9 @@
 #include <ros/package.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 #include <yaml-cpp/yaml.h>
-#include <fstream>
-
 
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -215,6 +214,32 @@ void PathPlanner::publishInitialPose() {
   seeTargetFlat();
   cout << points[imax] << endl;
   double delta = 0.1;
+  // Create a publisher for the /initialpose topic
+
+  // Create and fill the message
+  initialPoseMsg.header.seq = 0;
+  initialPoseMsg.header.stamp = ros::Time(0);
+  initialPoseMsg.header.frame_id = "base";
+
+  initialPoseMsg.pose.pose.position.x = pointInitial(0) + delta;
+  initialPoseMsg.pose.pose.position.y = pointInitial(1) - delta;
+  initialPoseMsg.pose.pose.position.z = pointInitial(2);
+
+  initialPoseMsg.pose.pose.orientation.x = 0.0;
+  initialPoseMsg.pose.pose.orientation.y = 0.0;
+  initialPoseMsg.pose.pose.orientation.z = 0.0;
+  initialPoseMsg.pose.pose.orientation.w = 1.0;
+
+  initialPoseMsg.pose.covariance.fill(0.0); // Fill the covariance with zeros
+
+  initialPosePub_.publish(initialPoseMsg);
+  initialPose.header = initialPoseMsg.header;
+  initialPose.pose = initialPoseMsg.pose.pose;
+}
+
+void PathPlanner::publishInitialPoseSelected(Vector3d pointInitial) {
+
+  double delta = 0.0;
   // Create a publisher for the /initialpose topic
 
   // Create and fill the message

@@ -9,12 +9,13 @@
 
 #include <boustrophedon_msgs/ConvertPlanToPath.h>
 #include <boustrophedon_msgs/PlanMowingPathAction.h>
-#include <eigen3/Eigen/Dense>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
 #include <geometry_msgs/Quaternion.h>
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
+
+#include <eigen3/Eigen/Dense>
 #include <vector>
 
 /**
@@ -27,9 +28,9 @@ public:
   std::vector<double> firstPos; ///< Initial position.
   double sumRad, optimumRadius; ///< Sum of radii and optimum radius.
 
-  Eigen::Quaterniond targetQuat; ///< Quaternion representing target orientation.
-  Eigen::Vector3d targetPos; ///< Vector representing target position.
-  geometry_msgs::PoseStamped initialPose; ///< Initial pose.
+  Eigen::Quaterniond targetQuat;                           ///< Quaternion representing target orientation.
+  Eigen::Vector3d targetPos;                               ///< Vector representing target position.
+  geometry_msgs::PoseStamped initialPose;                  ///< Initial pose.
   geometry_msgs::PoseWithCovarianceStamped initialPoseMsg; ///< Initial pose message.
 
   /**
@@ -96,6 +97,7 @@ public:
    * @brief Publish the initial pose.
    */
   void publishInitialPose();
+  void publishInitialPoseSelected(Eigen::Vector3d pointInitial);
 
   /**
    * @brief Get the transformed path.
@@ -139,12 +141,12 @@ public:
 
 private:
   double flowRadius_, limitCycleRadius_, scaleFactor_; ///< Flow radius, limit cycle radius, and scale factor.
-  ros::NodeHandle nh_; ///< ROS node handle.
-  ros::Publisher initialPosePub_; ///< ROS publisher for the initial pose.
-  ros::Publisher transformedPolygonPub_; ///< ROS publisher for the transformed polygon.
-  std::vector<Eigen::Vector3d> polygonsPositions_; ///< Positions of polygons.
-  std::vector<Eigen::Vector3d> flatPolygons_; ///< Flat polygons.
-  
+  ros::NodeHandle nh_;                                 ///< ROS node handle.
+  ros::Publisher initialPosePub_;                      ///< ROS publisher for the initial pose.
+  ros::Publisher transformedPolygonPub_;               ///< ROS publisher for the transformed polygon.
+  std::vector<Eigen::Vector3d> polygonsPositions_;     ///< Positions of polygons.
+  std::vector<Eigen::Vector3d> flatPolygons_;          ///< Flat polygons.
+
   /**
    * @brief Find the center of a polygon.
    *

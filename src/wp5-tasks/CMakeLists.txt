@@ -56,3 +56,19 @@ target_link_libraries(${node_name} PRIVATE
   ${Boost_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
 )
+
+# Add the main node
+set(node_name_txt wp5_read_txt)
+add_executable(${node_name_txt}
+  src/ITaskBase.cpp
+  src/TaskShotcrete.cpp
+  src/TaskSurfaceFinishing.cpp
+  src/savePathFromTxt.cpp
+)
+
+target_link_libraries(${node_name_txt} PRIVATE
+  ${catkin_LIBRARIES}
+  ${control_libraries_LIBRARIES}
+  ${Boost_LIBRARIES}
+  ${YAML_CPP_LIBRARIES}
+)
