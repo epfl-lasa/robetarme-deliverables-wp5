@@ -120,6 +120,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   double norm;
   double scaleVel;
   Vector3d dVel;
+  checkLinearDs_ = false;
 
   pathPoint_(0) = desiredQuatPos[4];
   pathPoint_(1) = desiredQuatPos[5];
@@ -144,10 +145,10 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   }
 
   // Fill desiredQuat with the values from desiredOriVelocityFiltered_
-  Eigen::Quaterniond desiredQuat(desiredOriVelocityFiltered_(3), // w
-                                 desiredOriVelocityFiltered_(0), // x
-                                 desiredOriVelocityFiltered_(1), // y
-                                 desiredOriVelocityFiltered_(2)  // z
+  Eigen::Quaterniond desiredQuat(desiredQuatPos[3], // w
+                                 desiredQuatPos[0], // x
+                                 desiredQuatPos[1], // y
+                                 desiredQuatPos[2]  // z
   );
 
   return make_pair(desiredQuat, dVel);
