@@ -5,9 +5,8 @@
 #include <nav_msgs/Path.h>
 #include <ros/package.h>
 #include <yaml-cpp/yaml.h>
+
 #include <fstream>
-
-
 #include <iostream>
 
 using namespace std;
@@ -18,7 +17,7 @@ TargetExtraction::TargetExtraction(ros::NodeHandle& nh) {
 
   originalPolygonPub_ = nh.advertise<geometry_msgs::PolygonStamped>("/original_polygon", 1, true);
 
-    // Load parameters from YAML file
+  // Load parameters from YAML file
   string alternativeYamlPath = string(WP5_PLANNER_ROS_DIR) + "/config/target_config.yaml";
   string yamlPath = string(WP5_PLANNER_ROS_DIR) + "/../../config/target_config.yaml";
 
@@ -71,6 +70,37 @@ vector<Vector3d> TargetExtraction::getPolygons() {
   return polygonsPositions_;
 }
 
+void TargetExtraction::setPolygons(std::vector<Eigen::Vector3d> positions) {
+  polygonsPositions_ = positions;
+
+  //compute center
+  Eigen::Vector3d centroid(0.0, 0.0, 0.0);
+  for (const auto& pos : positions) {
+    centroid += pos;
+  }
+  centroid /= positions.size();
+  targetPos_ = centroid;
+
+  // compute orientatino
+
+  Eigen::MatrixXd centered(positions.size(), 3);
+  for (size_t i = 0; i < positions.size(); ++i) {
+    centered.row(i) = positions[i] - centroid;
+  }
+
+  // Compute the covariance matrix
+  Eigen::Matrix3d covariance = centered.transpose() * centered;
+
+  // Perform Singular Value Decomposition (SVD)
+  Eigen::JacobiSVD<Eigen::MatrixXd> svd(covariance, Eigen::ComputeThinU | Eigen::ComputeThinV);
+  Eigen::Matrix3d orientation = svd.matrixU(); // The matrix of the left singular vectors
+
+  // Convert the orientation matrix to a quaternion
+  Eigen::Quaterniond quaternion(orientation);
+
+  targetQuat_ = quaternion;
+}
+
 Quaterniond TargetExtraction::getQuatTarget() { return targetQuat_; }
 
 Vector3d TargetExtraction::getPosTarget() { return targetPos_; }
@@ -85,7 +115,7 @@ void TargetExtraction::CCVrpnTarget(const geometry_msgs::PoseStamped::ConstPtr m
 void TargetExtraction::seeTarget() {
 
   geometry_msgs::PolygonStamped visualpolygonTarget;
-  visualpolygonTarget.header.frame_id = "base";
+  visualpolygonTarget.header.frame_id = "base_link";
   visualpolygonTarget.header.stamp = ros::Time::now();
 
   for (const auto& point : polygonsPositions_) {
@@ -96,4 +126,39 @@ void TargetExtraction::seeTarget() {
     visualpolygonTarget.polygon.points.push_back(msg_point);
   }
   originalPolygonPub_.publish(visualpolygonTarget);
+}
+
+nav_msgs::Path TargetExtraction::convertFileToPath() {
+  string file_path = string(WP5_PLANNER_ROS_DIR) + "/data/txts/waypointInOriSpace.txt";
+  string frame_id = "base_link";
+  nav_msgs::Path path;
+  path.header.frame_id = frame_id;
+
+  std::ifstream infile(file_path);
+  if (!infile.is_open()) {
+    ROS_ERROR("Unable to open file: %s", file_path.c_str());
+    return path;
+  }
+
+  std::string line;
+  while (std::getline(infile, line)) {
+    std::istringstream iss(line);
+    double x, y, z;
+    if (!(iss >> x >> y >> z)) {
+      ROS_WARN("Invalid line format: %s", line.c_str());
+      continue; // Skip invalid lines
+    }
+
+    geometry_msgs::PoseStamped pose_stamped;
+    pose_stamped.header.frame_id = frame_id;
+    pose_stamped.pose.position.x = x;
+    pose_stamped.pose.position.y = y;
+    pose_stamped.pose.position.z = z;
+    pose_stamped.pose.orientation.w = 1.0; // Default orientation
+
+    path.poses.push_back(pose_stamped);
+  }
+
+  infile.close();
+  return path;
 }

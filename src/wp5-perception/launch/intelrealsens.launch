@@ -1,0 +1,17 @@
+<!-- launch/my_combined_launch_file.launch -->
+<launch>
+  <!-- Launch the RealSense2 camera node with specified parameters
+  <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+    <arg name="align_depth" value="true" />
+    <arg name="filters" value="pointcloud" />
+    <arg name="color_fps" value="30" />
+    <arg name="depth_fps" value="30" />
+    <arg name="color_height" value="720" />
+    <arg name="color_width" value="1280" />
+    <arg name="depth_height" value="720" />
+    <arg name="depth_width" value="1280" />
+  </include> -->
+
+  <!-- Launch your custom node -->
+  <node name="wp5-perception" pkg="wp5-perception" type="camera_connection.py" output="screen"/>
+</launch>

@@ -60,23 +60,24 @@ RUN apt install -y \
 
 RUN apt install -y python3-pip
 RUN pip install matplotlib
+RUN pip install transforms3d
+RUN pip install statsmodels
+RUN pip install opencv-python
+RUN pip install open3d
+RUN pip install --upgrade numpy pandas
+RUN pip install opencv-contrib-python
 
-# # Add GitHub's host key
-# RUN ln -s /usr/bin/python3 /usr/bin/python
-# RUN mkdir -p /root/.ssh
-# RUN --mount=type=secret,id=ssh_key ln -s /run/secrets/ssh_key /root/.ssh/id_ed25519
-# RUN ssh-keyscan -H github.com >> /root/.ssh/known_hosts
+
 
 FROM ros-ws as libraries
 
 # Setup the project using automatic script
-# Use a secret for the SSH key
 COPY ./scripts/setupControlLasaEnv.sh /run/setupControlLasaEnv.sh
 RUN bash /run/setupControlLasaEnv.sh
-# RUN --mount=type=secret,id=ssh_key /run/setupControlLasaEnv.sh
 
-# # Remove soft link to SSH key
-# RUN unlink /root/.ssh/id_ed25519
+COPY ./src/polygon_coverage_planning/install/prepare-jenkins-slave.sh /run/prepare-jenkins-slave.sh
+RUN bash /run/prepare-jenkins-slave.sh
+
 
 # Install moveit tools
 RUN apt update --fix-missing && apt upgrade -y && apt clean
@@ -87,6 +88,7 @@ RUN apt install -y \
     ros-${ROS_DISTRO}-pcl-ros \
     ros-${ROS_DISTRO}-teleop-twist-keyboard \
     ros-${ROS_DISTRO}-joint-state-publisher \
+    ros-${ROS_DISTRO}-realsense2-camera \
     ros-${ROS_DISTRO}-robot-state-publisher
 
 # Install trac ik

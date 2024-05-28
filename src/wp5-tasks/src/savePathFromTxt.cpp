@@ -18,6 +18,7 @@
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"
 #include "PathPlanner.h"
+#include "PolygonCoverage.h"
 #include "RoboticArmUr5.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
@@ -116,12 +117,14 @@ int main(int argc, char** argv) {
   // Create unique pointers for the instances
   std::unique_ptr<TargetExtraction> targetExtraction = nullptr;
   std::unique_ptr<PathPlanner> pathPlanner = nullptr;
-  std::unique_ptr<BoustrophedonServer> boustrophedonServer = nullptr;
+  // std::unique_ptr<BoustrophedonServer> boustrophedonServer = nullptr;
+  std::unique_ptr<PolygonCoverage> polygonCoverage = nullptr;
 
   // Instantiate the objects
   targetExtraction = std::make_unique<TargetExtraction>(nodeHandle);
   pathPlanner = std::make_unique<PathPlanner>(nodeHandle);
-  boustrophedonServer = std::make_unique<BoustrophedonServer>(nodeHandle);
+  // boustrophedonServer = std::make_unique<BoustrophedonServer>(nodeHandle);
+  polygonCoverage = std::make_unique<PolygonCoverage>(nodeHandle);
 
   cout << "computing path ..." << endl;
 
@@ -150,9 +153,14 @@ int main(int argc, char** argv) {
     std::cout << point.transpose() << std::endl;
   }
 
-  double epsilon = 0.5; // Tolerance for simplification
+  double epsilon = 0.2; // Tolerance for simplification
   std::vector<Eigen::Vector3d> simplifiedPolygon;
   rdp(polygonsPositions, epsilon, simplifiedPolygon);
+
+  // Output the read points for verification
+  for (const auto& point : simplifiedPolygon) {
+    std::cout << point.transpose() << std::endl;
+  }
 
   targetExtraction->setPolygons(simplifiedPolygon);
   Quaterniond quatTarget = targetExtraction->getQuatTarget();
@@ -163,72 +171,88 @@ int main(int argc, char** argv) {
   pathPlanner->setTarget(quatTarget, posTarget, simplifiedPolygon);
   double optimumRadius = pathPlanner->getOptimumRadius();
 
-  boustrophedonServer->setOptimumRad(optimumRadius);
+  // boustrophedonServer->setOptimumRad(optimumRadius);
 
   cout << "Waiting for action server to start." << endl;
-  boustrophedonServer->initRosLaunch();
-  cout << "Action server started" << endl;
+  polygonCoverage->initRosLaunch();
 
-  boustrophedon_msgs::PlanMowingPathGoal goal;
-  goal = createPlanMowingPathGoal(simplifiedPolygon);
+  vector<Vector3d> holl_points;
+  polygonCoverage->callSetPolygonService(simplifiedPolygon, holl_points);
 
-  printGoal(goal);
-  boustrophedonServer->polygonPub.publish(goal.property);
+  // boustrophedonServer->initRosLaunch();
+  // cout << "Action server started" << endl;
+
+  // boustrophedon_msgs::PlanMowingPathGoal goal;
+  // goal = createPlanMowingPathGoal(simplifiedPolygon);
+
+  // printGoal(goal);
+  // boustrophedonServer->polygonPub.publish(goal.property);
 
   cout << "Waiting for goal" << endl;
+  polygonCoverage->callStartService(simplifiedPolygon[0], simplifiedPolygon[3]);
 
-  nav_msgs::Path path;
+  // nav_msgs::Path path;
   nav_msgs::Path pathTransformed;
+  pathTransformed = targetExtraction->convertFileToPath();
 
-  while (ros::ok() && !checkPath) {
-    ros::Time start_time = ros::Time::now();
+  while (ros::ok()) {
 
-    pathPlanner->publishInitialPose(simplifiedPolygon[0]);
-    goal.robot_position = pathPlanner->getInitialPose();
+    polygonCoverage->publishNavmsg(pathTransformed);
 
-    // boustrophedonServer->startPub.publish(goal.robot_position);
-    boustrophedonServer->client.sendGoal(goal);
-    ROS_INFO_STREAM("Sending goal");
-
-    // Wait for the action to return
-    bool finishedBeforeTimeout = boustrophedonServer->client.waitForResult(ros::Duration(30.0));
-    actionlib::SimpleClientGoalState state = boustrophedonServer->client.getState();
-    boustrophedon_msgs::PlanMowingPathResultConstPtr result = boustrophedonServer->client.getResult();
-    if (result->plan.points.size() < 1) {
-      ROS_INFO("Action did not finish before the time out.");
-    } else {
-      ROS_INFO("Action finished: %s", state.toString().c_str());
-      cout << "Result with : " << result->plan.points.size() << endl;
-
-      if (result->plan.points.size() > 2) {
-        pathPlanner->convertStripingPlanToPath(result->plan, path);
-        // pathTransformed = pathPlanner->getTransformedPath(path);
-        // vector<vector<double>> vectorPathTransformed = pathPlanner->convertPathPlanToVectorVector(pathTransformed);
-        // vector<double> firstQuatPos = vectorPathTransformed[0];
-        // dynamicalSystem_->setPath(vectorPathTransformed);
-        // boustrophedonServer->pathPub.publish(pathTransformed);
-        boustrophedonServer->closeRosLaunch();
-        checkPath = true;
-      }
-    }
     ros::spinOnce();
     loopRate.sleep();
   }
+  polygonCoverage->closeRosLaunch();
 
-  cout << "path well compute" << endl;
+  //   ros::Time start_time = ros::Time::now();
 
-  std::ofstream outputFile(string(WP5_TASKS_DIR) + "/txts/path.txt");
-  if (!outputFile.is_open()) {
-    ROS_ERROR("Unable to open file for writing.");
-    return 0;
-  }
+  //   pathPlanner->publishInitialPose(simplifiedPolygon[0]);
+  //   goal.robot_position = pathPlanner->getInitialPose();
 
-  for (const auto& pose : path.poses) {
-    const geometry_msgs::Point& position = pose.pose.position;
-    outputFile << position.x << " " << position.y << " " << position.z << "\n";
-  }
+  //   // boustrophedonServer->startPub.publish(goal.robot_position);
+  //   boustrophedonServer->client.sendGoal(goal);
+  //   ROS_INFO_STREAM("Sending goal");
 
-  outputFile.close();
+  //   // Wait for the action to return
+  //   bool finishedBeforeTimeout = boustrophedonServer->client.waitForResult(ros::Duration(30.0));
+
+  //   actionlib::SimpleClientGoalState state = boustrophedonServer->client.getState();
+  //   boustrophedon_msgs::PlanMowingPathResultConstPtr result = boustrophedonServer->client.getResult();
+  //   if (result->plan.points.size() < 1) {
+  //     ROS_INFO("Action did not finish before the time out.");
+  //   } else {
+  //     ROS_INFO("Action finished: %s", state.toString().c_str());
+  //     cout << "Result with : " << result->plan.points.size() << endl;
+
+  //     if (result->plan.points.size() > 2) {
+  //       pathPlanner->convertStripingPlanToPath(result->plan, path);
+  //       // pathTransformed = pathPlanner->getTransformedPath(path);
+  //       // vector<vector<double>> vectorPathTransformed = pathPlanner->convertPathPlanToVectorVector(pathTransformed);
+  //       // vector<double> firstQuatPos = vectorPathTransformed[0];
+  //       // dynamicalSystem_->setPath(vectorPathTransformed);
+  //       // boustrophedonServer->pathPub.publish(pathTransformed);
+  //       boustrophedonServer->closeRosLaunch();
+  //       checkPath = true;
+  //     }
+  //   }
+  //   ros::spinOnce();
+  //   loopRate.sleep();
+  // }
+
+  // cout << "path well compute" << endl;
+
+  // std::ofstream outputFile(string(WP5_TASKS_DIR) + "/txts/path.txt");
+  // if (!outputFile.is_open()) {
+  //   ROS_ERROR("Unable to open file for writing.");
+  //   return 0;
+  // }
+
+  // for (const auto& pose : path.poses) {
+  //   const geometry_msgs::Point& position = pose.pose.position;
+  //   outputFile << position.x << " " << position.y << " " << position.z << "\n";
+  // }
+
+  // outputFile.close();
 
   return 0;
 }

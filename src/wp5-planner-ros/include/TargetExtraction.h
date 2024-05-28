@@ -7,9 +7,11 @@
 
 #pragma once
 
-#include <eigen3/Eigen/Dense>
 #include <geometry_msgs/PoseStamped.h>
+#include <nav_msgs/Path.h>
 #include <ros/ros.h>
+
+#include <eigen3/Eigen/Dense>
 #include <string>
 #include <vector>
 
@@ -61,12 +63,18 @@ public:
    */
   void seeTarget();
 
+  /**
+   * @brief Method to set polygons
+   */
+  void setPolygons(std::vector<Eigen::Vector3d> polygonsPositions);
+  nav_msgs::Path convertFileToPath();
+
 private:
-  bool targetReceived_ = false; ///< Flag indicating if the target pose has been received.
-  double heightTarget_, widthTarget_; ///< Height and width of the target.
-  Eigen::Quaterniond targetQuat_; ///< Quaternion representing the orientation of the target.
-  Eigen::Vector3d targetPos_; ///< Vector representing the position of the target.
+  bool targetReceived_ = false;                    ///< Flag indicating if the target pose has been received.
+  double heightTarget_, widthTarget_;              ///< Height and width of the target.
+  Eigen::Quaterniond targetQuat_;                  ///< Quaternion representing the orientation of the target.
+  Eigen::Vector3d targetPos_;                      ///< Vector representing the position of the target.
   std::vector<Eigen::Vector3d> polygonsPositions_; ///< Vertices of the target polygon.
-  ros::Subscriber poseTargetSub_; ///< ROS subscriber for receiving the target pose.
-  ros::Publisher originalPolygonPub_; ///< ROS publisher for publishing the original polygon.
+  ros::Subscriber poseTargetSub_;                  ///< ROS subscriber for receiving the target pose.
+  ros::Publisher originalPolygonPub_;              ///< ROS publisher for publishing the original polygon.
 };

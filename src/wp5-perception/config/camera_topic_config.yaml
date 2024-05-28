@@ -1,0 +1,7 @@
+color_image_topic: /camera/color/image_raw
+depth_image_topic: /camera/aligned_depth_to_color/image_raw
+publisher_topic: /camera/depth/color/points_crop
+
+    # Create a point cloud subscriber using message_filters for synchronized processing
+    color_sub = message_filters.Subscriber("/camera/color/image_raw", Image)
+    depth_sub = message_filters.Subscriber("/camera/depth/image_rect_raw", Image)

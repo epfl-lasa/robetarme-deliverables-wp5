@@ -15,15 +15,22 @@ find_package(catkin REQUIRED COMPONENTS
   geometry_msgs
   boustrophedon_msgs
   boustrophedon_server
+  polygon_coverage_planners
+  polygon_coverage_msgs
+  polygon_coverage_ros
 )
 find_package(yaml-cpp REQUIRED)
+
+
 
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS roscpp actionlib geometry_msgs boustrophedon_msgs boustrophedon_server
+  CATKIN_DEPENDS roscpp actionlib geometry_msgs boustrophedon_msgs boustrophedon_server  polygon_coverage_planners polygon_coverage_msgs polygon_coverage_ros
   DEPENDS YAML_CPP
 )
+
+
 
 include_directories(
   include
@@ -36,6 +43,7 @@ add_library(${PROJECT_NAME} STATIC
   src/PathPlanner.cpp
   src/TargetExtraction.cpp
   src/BoustrophedonServer.cpp
+  src/PolygonCoverage.cpp
 )
 
 # Specify libraries to link a library or executable target against
