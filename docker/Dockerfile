@@ -56,9 +56,12 @@ RUN apt install -y \
     ros-${ROS_DISTRO}-ros-controllers \
     ros-${ROS_DISTRO}-moveit \
     ros-${ROS_DISTRO}-rosparam-shortcuts \
-    libcgal-dev
+    pybind11-dev \
+    libcgal-dev \
+    python3-pip \
+    python-dev
 
-RUN apt install -y python3-pip
+
 RUN pip install matplotlib
 RUN pip install transforms3d
 RUN pip install statsmodels
@@ -66,8 +69,7 @@ RUN pip install opencv-python
 RUN pip install open3d
 RUN pip install --upgrade numpy pandas
 RUN pip install opencv-contrib-python
-
-
+RUN pip install pybind11
 
 FROM ros-ws as libraries
 

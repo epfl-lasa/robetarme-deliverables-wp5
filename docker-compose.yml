@@ -23,12 +23,17 @@ services:
     #           capabilities: [ gpu ]
     # devices:
     #   - "/dev/ttyACM0:/dev/ttyACM0" # Specify your Arduino device here
+    privileged: true
     volumes:
       - ./src:/home/${ROS_USER}/catkin_ws/src
       - ./config:/home/${ROS_USER}/catkin_ws/config
       - /tmp/.X11-unix:/tmp/.X11-unix
+      - /dev:/dev
     stdin_open: true
     tty: true
+    device_cgroup_rules:
+      - "c 81:* rmw"
+      - "c 189:* rmw"
 
 secrets:
   ssh_key:

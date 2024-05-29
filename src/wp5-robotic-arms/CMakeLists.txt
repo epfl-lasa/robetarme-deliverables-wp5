@@ -9,6 +9,8 @@ endif()
 add_compile_options(-O3)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
+set(PYBIND11_PYTHON_VERSION "3.8")
+
 
 # Save the path during compilation to solve inclusion problems with linked files
 add_definitions("-DWP5_ROBOTIC_ARMS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
@@ -18,13 +20,15 @@ find_package(catkin REQUIRED COMPONENTS)
 find_package(Eigen3 3.4 REQUIRED)
 find_package(control_libraries 7.3.0 REQUIRED)
 find_package(yaml-cpp REQUIRED)
+find_package(pybind11 REQUIRED)
+
 
 ## The catkin_package macro generates cmake config files for your package
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
   CATKIN_DEPENDS
-  DEPENDS EIGEN3 control_libraries YAML_CPP
+  DEPENDS EIGEN3 control_libraries YAML_CPP pybind11
 )
 
 include_directories(

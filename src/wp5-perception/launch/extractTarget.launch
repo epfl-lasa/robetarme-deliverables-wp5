@@ -1,0 +1,6 @@
+<!-- launch/my_combined_launch_file.launch -->
+<launch>
+
+  <!-- Launch your custom node -->
+  <node name="wp5_perception" pkg="wp5_perception" type="camera_connection.py" output="screen"/>
+</launch>

@@ -65,21 +65,33 @@ public:
   void callSetPolygonService(const std::vector<Eigen::Vector3d>& hull_points,
                              const std::vector<Eigen::Vector3d>& hole_points);
 
-  ros::Publisher pathPubFlat_;  ///< ROS publisher for paths flat.
-  ros::Publisher pathPubFinal_; ///< ROS publisher for paths final.
-  ros::Subscriber posArraySub_; ///< ROS publisher for starting the action.
-
   void poseArrayCallback(const geometry_msgs::PoseArray::ConstPtr& msg);
 
-  nav_msgs::Path convertPoseArrayToPath(const geometry_msgs::PoseArray& pose_array);
+  void convertPoseArrayToPath(const geometry_msgs::PoseArray& pose_array);
+  nav_msgs::Path getPathFromPolygonFlat();
+  void seePolygonFlat(std::vector<Eigen::Vector3d>);
 
   void publishNavmsg(nav_msgs::Path);
+  void writePathToFile(const nav_msgs::Path& path, const std::string& file_path);
+  nav_msgs::Path convertFileToNavMsgsPath();
+  bool pointCloudTransformer();
+  std::vector<Eigen::Vector3d> rdp(const std::vector<Eigen::Vector3d>& points, double epsilon);
+  std::vector<std::vector<double>> convertNavPathToVectorVector(const nav_msgs::Path& inputPath);
+  std::vector<Eigen::Vector3d> readFlatPolygonFromTxt();
 
 private:
-  ros::NodeHandle nh_;   ///< ROS node handle.
-  double optimumRad;     ///< Optimum radius.
-  pid_t launchProcessId; ///< PID of the roslaunch process.
-  double wallDistance_;  ///< Wall distance.
-  double lateralFov_;    ///< Lateral field of view.
-  nav_msgs::Path path_;  ///< Path.
+  ros::NodeHandle nh_;            ///< ROS node handle.
+  ros::Publisher PolygonFlatPub_; ///< ROS publisher for the original polygon.
+  ros::Publisher pathPubFlat_;    ///< ROS publisher for paths flat.
+  ros::Publisher pathPubFinal_;   ///< ROS publisher for paths final.
+  ros::Subscriber posArraySub_;   ///< ROS publisher for starting the action.
+  double optimumRad;              ///< Optimum radius.
+  pid_t launchProcessId;          ///< PID of the roslaunch process.
+  double wallDistance_;           ///< Wall distance.
+  double lateralFov_;             ///< Lateral field of view.
+  nav_msgs::Path path_;           ///< Path.
+
+  double perpendicularDistance(const Eigen::Vector3d& point,
+                               const Eigen::Vector3d& lineStart,
+                               const Eigen::Vector3d& lineEnd);
 };
