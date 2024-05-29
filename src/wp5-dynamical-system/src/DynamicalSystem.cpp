@@ -122,6 +122,13 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   Vector3d dVel;
   checkLinearDs_ = false;
 
+  // Fill desiredQuat with the values from desiredOriVelocityFiltered_
+  Eigen::Quaterniond desiredQuat(desiredQuatPos[3], // w
+                                 desiredQuatPos[0], // x
+                                 desiredQuatPos[1], // y
+                                 desiredQuatPos[2]  // z
+  );
+
   pathPoint_(0) = desiredQuatPos[4];
   pathPoint_(1) = desiredQuatPos[5];
   pathPoint_(2) = desiredQuatPos[6];
@@ -129,6 +136,14 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   dx = pathPoint_(0) - realPos_(0);
   dy = pathPoint_(1) - realPos_(1);
   dz = pathPoint_(2) - realPos_(2);
+
+  // Calculate the difference between the two quaternions
+  Eigen::Quaterniond relativeRotation = desiredQuat * realQuat_.conjugate();
+  // Calculate the norm of the difference
+  double normQuat = relativeRotation.norm();
+
+  // Output the result
+  std::cout << "The normQuat of the difference between q1 and q2 is: " << normQuat << std::endl;
 
   norm = sqrt(dx * dx + dy * dy + dz * dz);
   scaleVel = linearVelExpected_ / norm;
@@ -143,13 +158,6 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
     dVel(2) = 0;
     checkLinearDs_ = true;
   }
-
-  // Fill desiredQuat with the values from desiredOriVelocityFiltered_
-  Eigen::Quaterniond desiredQuat(desiredQuatPos[3], // w
-                                 desiredQuatPos[0], // x
-                                 desiredQuatPos[1], // y
-                                 desiredQuatPos[2]  // z
-  );
 
   return make_pair(desiredQuat, dVel);
 }
