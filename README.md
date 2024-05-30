@@ -111,6 +111,11 @@ You can perform surface finishing with taskType:=surface_finishing
 
 We welcome contributions to this repository. If you find any issues or have suggestions for improvements, please feel free to open an issue or submit a pull request.
 
+## License
+
+This project is licensed under the GNU Affero General Public License (AGPL) 
+
+
 ## Contact
 
 If you have any questions or need further assistance, please contact either :
