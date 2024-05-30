@@ -77,7 +77,10 @@ public:
   bool pointCloudTransformer();
   std::vector<Eigen::Vector3d> rdp(const std::vector<Eigen::Vector3d>& points, double epsilon);
   std::vector<std::vector<double>> convertNavPathToVectorVector(const nav_msgs::Path& inputPath);
-  std::vector<Eigen::Vector3d> readFlatPolygonFromTxt();
+  std::vector<Eigen::Vector3d> getFlatPolygonFromTxt();
+  void getPathFromFeatureSpaceToRealSpace();
+  void convertPclToPolygon();
+  void featureSpaceAlgorithm();
 
 private:
   ros::NodeHandle nh_;            ///< ROS node handle.

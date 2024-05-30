@@ -4,6 +4,8 @@ import open3d as o3d
 # Step 1: Load point cloud data from .ply file
 point_cloud = o3d.io.read_point_cloud("../data/pointclouds/pointcloud_target.ply")
 
+
+
 # Step 2: Load transformation matrix from .npy file
 transformation_matrix = np.load("../data/matrix/Y1_matrices.npy")
 # Print the transformation matrix

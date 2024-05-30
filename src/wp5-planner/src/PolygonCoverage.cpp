@@ -201,6 +201,7 @@ void PolygonCoverage::seePolygonFlat(std::vector<Eigen::Vector3d> polygonsPositi
   PolygonFlatPub_.publish(visualpolygonTarget);
 }
 
+//TODO : add quaternion to the navmsgs::Path
 nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
   string file_path = string(WP5_PLANNER_DIR) + "/data/paths/waypointInOriSpace.txt";
   string frame_id = "base_link";
@@ -338,7 +339,7 @@ vector<vector<double>> PolygonCoverage::convertNavPathToVectorVector(const nav_m
 
   return path;
 }
-vector<Eigen::Vector3d> PolygonCoverage::readFlatPolygonFromTxt() {
+vector<Eigen::Vector3d> PolygonCoverage::getFlatPolygonFromTxt() {
 
   // Extract polygons for boustrophedon
   ifstream inputFile(string(WP5_PLANNER_DIR) + "/data/polygons/boundary_planeData_curved.txt");
@@ -361,3 +362,10 @@ vector<Eigen::Vector3d> PolygonCoverage::readFlatPolygonFromTxt() {
   inputFile.close();
   return polygonsPositions;
 }
+
+//TODO: fill the function with RUIs code
+void PolygonCoverage::getPathFromFeatureSpaceToRealSpace() {}
+//TODO: fill the function with RUIs code
+void PolygonCoverage::convertPclToPolygon() {}
+//TODO: fill the function with RUIs code
+void PolygonCoverage::featureSpaceAlgorithm() {}

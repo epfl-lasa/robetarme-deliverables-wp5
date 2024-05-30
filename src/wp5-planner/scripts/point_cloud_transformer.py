@@ -68,6 +68,7 @@ def main()->bool:
 
     # Step 1: Load point cloud data from .ply file
     point_cloud = o3d.io.read_point_cloud(package_path + "/data/pointclouds/pointcloud_target.ply")
+
     # Step 2: Load transformation matrix from .npy file
     transformation_matrix = np.load(package_path+ "/data/matrix/Y1_matrices.npy")
     # Step 3: Apply transformation matrix to point cloud
@@ -83,12 +84,13 @@ def main()->bool:
     else:
         print("Failed to save transformed point cloud.")
         
-    return checkSuccess
-    # # Publisher for the transformed point cloud
+    # # # Publisher for the transformed point cloud
     # transformed_pc_pub = rospy.Publisher('/camera/depth/color/points_crop_transformed', PointCloud2, queue_size=10)
 
     # # Keep the node running
     # rospy.spin()
+    return checkSuccess
+
 
 if __name__ == '__main__':
     main()

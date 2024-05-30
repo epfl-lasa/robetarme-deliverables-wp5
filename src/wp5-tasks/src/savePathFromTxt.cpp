@@ -49,35 +49,39 @@ int main(int argc, char** argv) {
   cout << "transformation check:" << endl;
   cout << checkpython << endl;
 
-  cout << "computing path ..." << endl;
+  // trasnform the point cloud to the featur space
+  polygonCoverage->featureSpaceAlgorithm();
 
-  //TODO: send the pointcloud transformer to python code from RUI
   // it will save the polygons to the .txt file
+  polygonCoverage->convertPclToPolygon();
 
   // Read the polygon from the txt file
-  vector<Vector3d> polygonsPositions = polygonCoverage->readFlatPolygonFromTxt();
+  vector<Vector3d> polygonsPositions = polygonCoverage->getFlatPolygonFromTxt();
 
   // Simplify the polygon
   double epsilon = 0.2; // Tolerance for simplification
   vector<Vector3d> simplifiedPolygon = polygonCoverage->rdp(polygonsPositions, epsilon);
 
-  // Output the read points for verification
-  for (const auto& point : simplifiedPolygon) {
-    cout << point.transpose() << endl;
-  }
-
   polygonCoverage->seePolygonFlat(simplifiedPolygon);
 
-  cout << "Waiting for action server to start." << endl;
+  //start boustrophedon aogirthm
   polygonCoverage->initRosLaunch();
 
+  //set target for boustrophedon
   vector<Vector3d> holl_points;
   polygonCoverage->callSetPolygonService(simplifiedPolygon, holl_points);
 
-  cout << "Waiting for goal" << endl;
+  //set start and finish point for boustrophedon
   polygonCoverage->callStartService(simplifiedPolygon[0], simplifiedPolygon[0]);
+  string file_path_flat = string(WP5_TASKS_DIR) + "/txts/path_flat.txt";
+  polygonCoverage->writePathToFile(polygonCoverage->getPathFromPolygonFlat(), file_path_flat);
 
-  // nav_msgs::Path path;
+  polygonCoverage->closeRosLaunch();
+
+  // send the path from feature space to hae it on realspace
+  polygonCoverage->getPathFromFeatureSpaceToRealSpace();
+
+  // read the .txt with the point of the path to follows
   nav_msgs::Path pathTransformed;
   pathTransformed = polygonCoverage->convertFileToNavMsgsPath();
 
@@ -86,19 +90,15 @@ int main(int argc, char** argv) {
   ros::spinOnce();
   loopRate.sleep();
 
-  polygonCoverage->closeRosLaunch();
-
   vector<vector<double>> vectorPathTransformed = polygonCoverage->convertNavPathToVectorVector(pathTransformed);
 
   //TODO: check if the path is well computed
   cout << "path well compute" << endl;
   // dynamicalSystem_->setPath(vectorPathTransformed);
 
-  string file_path_flat = string(WP5_TASKS_DIR) + "/txts/path_flat.txt";
   string file_path_original = string(WP5_TASKS_DIR) + "/txts/path_original.txt";
 
   polygonCoverage->writePathToFile(pathTransformed, file_path_original);
-  polygonCoverage->writePathToFile(polygonCoverage->getPathFromPolygonFlat(), file_path_flat);
 
   return 0;
 }

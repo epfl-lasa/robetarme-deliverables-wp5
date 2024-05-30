@@ -54,22 +54,27 @@ RUN apt install -y \
     ros-${ROS_DISTRO}-vrpn-client-ros \
     ros-${ROS_DISTRO}-ros-control \
     ros-${ROS_DISTRO}-ros-controllers \
-    ros-${ROS_DISTRO}-moveit \
+    ros-${ROS_DISTRO}-moveit \V
     ros-${ROS_DISTRO}-rosparam-shortcuts \
     pybind11-dev \
     libcgal-dev \
     python3-pip \
-    python-dev
+    python-dev \
+    python3-tk 
 
+RUN  pip install --upgrade pip     
 
+RUN pip install --upgrade pip setuptools
 RUN pip install matplotlib
 RUN pip install transforms3d
 RUN pip install statsmodels
 RUN pip install opencv-python
-RUN pip install open3d
+RUN apt remove python3-yaml -y
+RUN pip install open3d==0.18.0
 RUN pip install --upgrade numpy pandas
 RUN pip install opencv-contrib-python
 RUN pip install pybind11
+
 
 FROM ros-ws as libraries
 
