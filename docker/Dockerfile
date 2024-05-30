@@ -36,10 +36,6 @@ RUN sh -c \
     'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" \
     > /etc/apt/sources.list.d/ros-latest.list'
 
-RUN wget http://packages.ros.org/ros.key -O - | apt-key add -
-RUN apt update --fix-missing && apt upgrade -y && apt clean
-RUN apt install -y python3-catkin-tools
-
 # Create catkin workspace
 RUN mkdir -p ${HOME}/catkin_ws/src
 RUN chown -R ${USER}:${USER} ${HOME}/catkin_ws
@@ -51,30 +47,33 @@ RUN apt install -y \
     apt-transport-https \
     less \
     alsa-utils \
+    pybind11-dev \
+    libcgal-dev \
+    python-dev \
+    python3-pip \
+    python3-tk \
+    mono-complete
+
+RUN apt update --fix-missing && apt upgrade -y && apt clean
+RUN apt install -y \
     ros-${ROS_DISTRO}-vrpn-client-ros \
     ros-${ROS_DISTRO}-ros-control \
     ros-${ROS_DISTRO}-ros-controllers \
-    ros-${ROS_DISTRO}-moveit \V
     ros-${ROS_DISTRO}-rosparam-shortcuts \
-    pybind11-dev \
-    libcgal-dev \
-    python3-pip \
-    python-dev \
-    python3-tk 
+    ros-${ROS_DISTRO}-rviz
 
-RUN  pip install --upgrade pip     
-
-RUN pip install --upgrade pip setuptools
-RUN pip install matplotlib
-RUN pip install transforms3d
-RUN pip install statsmodels
-RUN pip install opencv-python
-RUN apt remove python3-yaml -y
-RUN pip install open3d==0.18.0
-RUN pip install --upgrade numpy pandas
-RUN pip install opencv-contrib-python
-RUN pip install pybind11
-
+RUN apt remove -y python3-yaml
+RUN pip install --upgrade pip
+RUN pip install \
+    matplotlib \
+    transforms3d \
+    statsmodels \
+    opencv-python \
+    open3d==0.18.0 \
+    numpy \
+    pandas \
+    opencv-contrib-python \
+    pybind11
 
 FROM ros-ws as libraries
 
@@ -85,11 +84,11 @@ RUN bash /run/setupControlLasaEnv.sh
 COPY ./src/polygon_coverage_planning/install/prepare-jenkins-slave.sh /run/prepare-jenkins-slave.sh
 RUN bash /run/prepare-jenkins-slave.sh
 
-
 # Install moveit tools
 RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y \
     python3-vcstool \
+    ros-${ROS_DISTRO}-moveit \
     ros-${ROS_DISTRO}-rqt-joint-trajectory-controller \
     ros-${ROS_DISTRO}-moveit-commander \
     ros-${ROS_DISTRO}-pcl-ros \
@@ -114,6 +113,10 @@ RUN if [ "${USE_SIMD}" = "ON" ] ; \
 # Add cmake option to bash rc if needed
 RUN if [ "${USE_SIMD}" = "ON" ] ; \
     then echo "export ENABLE_SIMD=ON" >> /home/${USER}/.bashrc ; fi
+
+RUN wget http://packages.ros.org/ros.key -O - | apt-key add -
+RUN apt update --fix-missing && apt upgrade -y && apt clean
+RUN apt install -y python3-catkin-tools
 
 FROM cmake-options as simulation-tools
 
