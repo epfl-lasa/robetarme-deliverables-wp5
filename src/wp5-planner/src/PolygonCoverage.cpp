@@ -256,6 +256,7 @@ bool PolygonCoverage::pointCloudTransformer() {
             sys.path.insert(0, package_path + "/scripts")  # Adjust the path to your script location if necessary
             import point_cloud_transformer
             result = point_cloud_transformer.main()
+            return result
         )");
 
     // Convert the Python result to a C++ boolean directly

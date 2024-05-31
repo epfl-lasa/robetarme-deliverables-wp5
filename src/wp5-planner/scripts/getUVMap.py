@@ -4,8 +4,6 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import sys
 import rospkg
-print(o3d.__version__)
-
 
 # Initialize the ROS package manager
 rospack = rospkg.RosPack()
@@ -74,10 +72,16 @@ uv_coords_index_unique=unique_rows
 
 
 if uv_coords_index_unique.shape[0] != vertices_3D.shape[0]:
-    print(f"\033[91mERROR: uv_coords_index_unique has different number of vertices_3D\033[0m")
+    print("succes")
+    # print(f"\033[91mERROR: uv_coords_index_unique has different number of vertices_3D\033[0m")
 else:
     #--- put the 3D vertices in the uv_coords_index_unique
-    print(f"\033[91m SUCCESS !!! \033[0m")
+    # print(f"\033[91m SUCCESS !!! \033[0m")
     uv_coords_index_unique= np.hstack((uv_coords_index_unique,vertices_3D))
     unique_uv_coords=uv_coords_index_unique[:,1:]
 
+Uv_path_reshaped = data_path + 'UVmap'
+
+np.savetxt(Uv_path_reshaped + "/uv_points_{name_file}.txt", unique_uv_coords, fmt='%f', delimiter=' ')
+np.savetxt(Uv_path_reshaped +"/uv_map_{name_file}.txt", uv_coords_index_unique, fmt='%f', delimiter=' ')
+np.savetxt(Uv_path_reshaped +"/normvector_{name_file}.txt", normals_vector, fmt='%f', delimiter=' ')

@@ -34,7 +34,9 @@ RUN apt install -y \
 
 RUN sh -c \
     'echo "deb http://packages.ros.org/ros/ubuntu `lsb_release -sc` main" \
-    > /etc/apt/sources.list.d/ros-latest.list'
+    > /etc/apt/sources.list.d/ros1-latest.list'
+
+
 
 # Create catkin workspace
 RUN mkdir -p ${HOME}/catkin_ws/src
@@ -52,7 +54,13 @@ RUN apt install -y \
     python-dev \
     python3-pip \
     python3-tk \
-    mono-complete
+    mono-complete 
+
+# Setup the aica control libraries
+COPY ./scripts/setupControlLasaEnv.sh /run/setupControlLasaEnv.sh
+RUN bash /run/setupControlLasaEnv.sh
+
+RUN apt install -y python-is-python3 
 
 RUN apt update --fix-missing && apt upgrade -y && apt clean
 RUN apt install -y \
@@ -64,23 +72,23 @@ RUN apt install -y \
 
 RUN apt remove -y python3-yaml
 RUN pip install --upgrade pip
-RUN pip install \
+RUN pip3 install --upgrade pip
+RUN pip3 install \
     matplotlib \
     transforms3d \
     statsmodels \
     opencv-python \
-    open3d==0.18.0 \
     numpy \
     pandas \
     opencv-contrib-python \
     pybind11
 
+# RUN pip3 install --ignore-installed open3d
+
+
 FROM ros-ws as libraries
 
 # Setup the project using automatic script
-COPY ./scripts/setupControlLasaEnv.sh /run/setupControlLasaEnv.sh
-RUN bash /run/setupControlLasaEnv.sh
-
 COPY ./src/polygon_coverage_planning/install/prepare-jenkins-slave.sh /run/prepare-jenkins-slave.sh
 RUN bash /run/prepare-jenkins-slave.sh
 
