@@ -62,7 +62,7 @@ RUN apt install -y \
     ros-${ROS_DISTRO}-ros-control \
     ros-${ROS_DISTRO}-ros-controllers \
     ros-${ROS_DISTRO}-moveit \
-    ros-${ROS_DISTRO}-rosparam-shortcuts 
+    ros-${ROS_DISTRO}-rosparam-shortcuts
 
 # Install moveit tools
 RUN apt update --fix-missing && apt upgrade -y && apt clean
@@ -93,9 +93,6 @@ RUN apt install -y \
 COPY ./scripts/setupControlLasaEnv.sh /run/setupControlLasaEnv.sh
 RUN chmod +x /run/setupControlLasaEnv.sh
 RUN ./run/setupControlLasaEnv.sh
-
-
-
 #-------------------------------------------------------------------------------
 
 
@@ -124,11 +121,6 @@ RUN cd /home/${USER}/catkin_ws                                              && \
     source /home/${USER}/catkin_ws/devel/setup.bash
 # ------------------------------------------------------------------------------
 
-USER ${USER}
-RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${HOME}/catkin_ws && catkin build"
-RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
-RUN echo "source ${HOME}/catkin_ws/devel/setup.bash" >> ~/.bashrc
-
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Do not modify below this line
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -152,8 +144,8 @@ RUN chown -R robetarme_user /home/${USER}
 # `fix-perms.sh` fixes permissions for volumes when the host user uid does not
 # coincide with the container user uid
 #-------------------------------------------------------------------------------
-COPY fix-perms.sh /fix-perms.sh
-COPY entrypointd.sh /entrypoint.sh
+COPY ./docker/fix-perms.sh /fix-perms.sh
+COPY ./docker/entrypointd.sh /entrypoint.sh
 RUN chmod +x /fix-perms.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

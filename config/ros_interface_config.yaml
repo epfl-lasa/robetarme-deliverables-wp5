@@ -10,7 +10,7 @@ iiwa7:
   ft_topic: ""
   number_joint: 7
 
-Cobod:
+cobod:
   joint_topic: "/cobod/joint_states"
   joint_command: "/cobod/joint_group_vel_controller/command"
   ft_topic: ""
