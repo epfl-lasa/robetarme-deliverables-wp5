@@ -25,7 +25,11 @@ PolygonCoverage::PolygonCoverage(ros::NodeHandle& n) : nh_(n) {
   pathPubFlat_ = nh_.advertise<nav_msgs::Path>("/result_path_flat", 10, true);
   pathPubFinal_ = nh_.advertise<nav_msgs::Path>("/result_path_final", 10, true);
   posArraySub_ = nh_.subscribe("/waypoint_list", 10, &PolygonCoverage::poseArrayCallback, this);
+  py::initialize_interpreter();
 }
+
+PolygonCoverage::~PolygonCoverage() { py::finalize_interpreter(); }
+
 void PolygonCoverage::setOptimumRad(double rad) { optimumRad = rad; }
 
 void PolygonCoverage::initRosLaunch() {
@@ -169,9 +173,10 @@ void PolygonCoverage::publishNavmsg(nav_msgs::Path path) {
 }
 
 // Function to write the positions from a nav_msgs::Path to a file
-void PolygonCoverage::writePathToFile(const nav_msgs::Path& path, const std::string& file_path) {
+void PolygonCoverage::writePathToFile(const nav_msgs::Path& path, const std::string& name) {
+  // Extract polygons for boustrophedon
+  std::string file_path = string(WP5_PLANNER_DIR) + "/data/paths/" + name + ".txt";
   std::ofstream outputFile(file_path);
-
   if (!outputFile.is_open()) {
     ROS_ERROR("Unable to open file for writing.");
     return;
@@ -235,37 +240,6 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
 
   infile.close();
   return path;
-}
-bool PolygonCoverage::pointCloudTransformer() {
-  bool success = false; // Default value indicating failure
-
-  py::scoped_interpreter guard{}; // Start the interpreter and keep it alive
-
-  try {
-    // Run the Python script
-    py::object result = py::eval<py::eval_statements>(R"(
-            import sys
-            import rospkg
-
-            # Initialize the ROS package manager
-            rospack = rospkg.RosPack()
-
-            # Get the path of a specific ROS package
-            package_path = rospack.get_path('wp5_planner')
-
-            sys.path.insert(0, package_path + "/scripts")  # Adjust the path to your script location if necessary
-            import point_cloud_transformer
-            result = point_cloud_transformer.main()
-            return result
-        )");
-
-    // Convert the Python result to a C++ boolean directly
-    success = py::bool_(result);
-  } catch (const py::error_already_set& e) {
-    std::cerr << "Python error: " << e.what() << std::endl;
-  }
-
-  return success; // Return the result
 }
 
 // Calculate the perpendicular distance from a point to a line
@@ -343,7 +317,8 @@ vector<vector<double>> PolygonCoverage::convertNavPathToVectorVector(const nav_m
 vector<Eigen::Vector3d> PolygonCoverage::getFlatPolygonFromTxt() {
 
   // Extract polygons for boustrophedon
-  ifstream inputFile(string(WP5_PLANNER_DIR) + "/data/polygons/boundary_planeData_curved.txt");
+  ifstream inputFile(string(WP5_PLANNER_DIR)
+                     + "/data/boundary/boundary_planeData_uv_map_pointcloud_target_transformed.txt");
   vector<Eigen::Vector3d> polygonsPositions;
 
   if (!inputFile.is_open()) {
@@ -364,9 +339,155 @@ vector<Eigen::Vector3d> PolygonCoverage::getFlatPolygonFromTxt() {
   return polygonsPositions;
 }
 
+bool PolygonCoverage::pointCloudTransformer() {
+  bool success = false; // Default value indicating failure
+
+  try {
+    // Run the Python script
+    py::object result = py::eval<py::eval_statements>(R"(
+            import sys
+            import rospkg
+
+            # Initialize the ROS package manager
+            rospack = rospkg.RosPack()
+
+            # Get the path of a specific ROS package
+            package_path = rospack.get_path('wp5_planner')
+
+            sys.path.insert(0, package_path + "/scripts")  # Adjust the path to your script location if necessary
+            import point_cloud_transformer
+            result = point_cloud_transformer.main()
+            result
+        )");
+
+    // Convert the Python result to a C++ boolean directly
+    success = py::cast<bool>(result);
+  } catch (const py::error_already_set& e) {
+    std::cerr << "Python error: " << e.what() << std::endl;
+  }
+
+  return success; // Return the result
+}
+
 //TODO: fill the function with RUIs code
-void PolygonCoverage::getPathFromFeatureSpaceToRealSpace() {}
+bool PolygonCoverage::getPathFromFeatureSpaceToRealSpace() {
+  bool success = false; // Default value indicating failure
+
+  try {
+    // Run the Python script
+    py::object result = py::eval<py::eval_statements>(R"(
+            import sys
+            import rospkg
+
+            # Initialize the ROS package manager
+            rospack = rospkg.RosPack()
+
+            # Get the path of a specific ROS package
+            package_path = rospack.get_path('wp5_planner')
+
+            sys.path.insert(0, package_path + "/scripts")  # Adjust the path to your script location if necessary
+            import transformWaypoints
+            result = transformWaypoints.main()
+            result
+        )");
+
+    // Convert the Python result to a C++ boolean directly
+    success = py::cast<bool>(result);
+  } catch (const py::error_already_set& e) {
+    std::cerr << "Python error: " << e.what() << std::endl;
+  }
+
+  return success; // Return the result
+}
 //TODO: fill the function with RUIs code
-void PolygonCoverage::convertPclToPolygon() {}
+bool PolygonCoverage::convertPclToPolygon() {
+  bool success = false; // Default value indicating failure
+
+  try {
+    // Run the Python script
+    py::object result = py::eval<py::eval_statements>(R"(
+            import sys
+            import rospkg
+
+            # Initialize the ROS package manager
+            rospack = rospkg.RosPack()
+
+            # Get the path of a specific ROS package
+            package_path = rospack.get_path('wp5_planner')
+
+            sys.path.insert(0, package_path + "/scripts")  # Adjust the path to your script location if necessary
+            import ExtractPolygons
+            result = ExtractPolygons.main()
+            result
+        )");
+
+    // Convert the Python result to a C++ boolean directly
+    success = py::cast<bool>(result);
+  } catch (const py::error_already_set& e) {
+    std::cerr << "Python error: " << e.what() << std::endl;
+  }
+
+  return success; // Return the result
+}
 //TODO: fill the function with RUIs code
-void PolygonCoverage::featureSpaceAlgorithm() {}
+bool PolygonCoverage::makeMesh() {
+  bool success = false; // Default value indicating failure
+
+  try {
+    // Run the Python script
+    py::object result = py::eval<py::eval_statements>(R"(
+            import sys
+            import rospkg
+
+            # Initialize the ROS package manager
+            rospack = rospkg.RosPack()
+
+            # Get the path of a specific ROS package
+            package_path = rospack.get_path('wp5_planner')
+
+            sys.path.insert(0, package_path + "/scripts")  # Adjust the path to your script location if necessary
+            import initializationFeatureSpace
+            result = initializationFeatureSpace.main()
+            result
+        )");
+
+    // Convert the Python result to a C++ boolean directly
+    success = py::cast<bool>(result);
+  } catch (const py::error_already_set& e) {
+    std::cerr << "Python error: " << e.what() << std::endl;
+  }
+
+  return success; // Return the result
+}
+
+
+//TODO: fill the function with RUIs code
+bool PolygonCoverage::makeUVmap() {
+  bool success = false; // Default value indicating failure
+
+  try {
+    // Run the Python script
+    py::object result = py::eval<py::eval_statements>(R"(
+            import sys
+            import rospkg
+
+            # Initialize the ROS package manager
+            rospack = rospkg.RosPack()
+
+            # Get the path of a specific ROS package
+            package_path = rospack.get_path('wp5_planner')
+
+            sys.path.insert(0, package_path + "/scripts")  # Adjust the path to your script location if necessary
+            import getUVMap
+            result = getUVMap.main()
+            result
+        )");
+
+    // Convert the Python result to a C++ boolean directly
+    success = py::cast<bool>(result);
+  } catch (const py::error_already_set& e) {
+    std::cerr << "Python error: " << e.what() << std::endl;
+  }
+
+  return success; // Return the result
+}

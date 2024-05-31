@@ -1,3 +1,4 @@
+# ExtractPolygons
 import os
 import numpy as np
 import matplotlib.pyplot as plt
@@ -41,12 +42,10 @@ def main():
     rospack = rospkg.RosPack()
 
     package_path = rospack.get_path('wp5_planner')
-    uv_path = package_path + '/data/UVmap/'
-    data_path = package_path + '/data'
     file_name = 'uv_map_pointcloud_target_transformed'
 
     load_data_path = package_path + '/data/UVmap/'
-    save_data_path = package_path + '/boundary/'
+    save_data_path = package_path + '/data/boundary/'
 
     # Load data from a text file
     txt_name = load_data_path + file_name + '.txt'
@@ -74,6 +73,11 @@ def main():
     hull = ConvexHull(np.vstack((Y, Z)).T)
     boundary_planeData = np.vstack((Y[hull.vertices], Z[hull.vertices]))
 
-    filename = f'{save_data_path}boundary_planeData_{file_name}.txt'
+    filename = save_data_path +"boundary_planeData_"+file_name + ".txt"
     np.savetxt(filename, boundary_planeData.T, delimiter='\t')  # Transpose to save in correct format
 
+
+
+
+if __name__ == '__main__':
+    main()

@@ -37,6 +37,8 @@ public:
    */
   PolygonCoverage(ros::NodeHandle& n);
 
+  ~PolygonCoverage();
+
   /**
    * @brief Initialize ROS launch.
    */
@@ -78,9 +80,10 @@ public:
   std::vector<Eigen::Vector3d> rdp(const std::vector<Eigen::Vector3d>& points, double epsilon);
   std::vector<std::vector<double>> convertNavPathToVectorVector(const nav_msgs::Path& inputPath);
   std::vector<Eigen::Vector3d> getFlatPolygonFromTxt();
-  void getPathFromFeatureSpaceToRealSpace();
-  void convertPclToPolygon();
-  void featureSpaceAlgorithm();
+  bool getPathFromFeatureSpaceToRealSpace();
+  bool convertPclToPolygon();
+  bool makeMesh();
+  bool makeUVmap();
 
 private:
   ros::NodeHandle nh_;            ///< ROS node handle.

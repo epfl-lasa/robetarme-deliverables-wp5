@@ -1,3 +1,4 @@
+#initializationFeatureSpace
 import open3d as o3d
 import numpy as np
 import matplotlib.pyplot as plt
@@ -84,7 +85,7 @@ def adapt_radii_based_on_density(pcd):
     # radii = np.linspace(min_distance*0.9, max_distance*1.1, num_radii).tolist()
     radii = [min_distance*0.8,min_distance*0.8*2, min_distance*0.8*4, min_distance*0.8*8]
     radii = [round(r, 6) for r in radii]  # Apply round to each element in radii
-    print(f"Radii: {radii}")  # Print the radii
+    # print(f"Radii: {radii}")  # Print the radii
     return radii
 
 def display_inlier_outlier(cloud, ind):
@@ -195,7 +196,6 @@ def main()->bool:
     bbox = mesh.get_axis_aligned_bounding_box()
     mesh_poisson = mesh.crop(bbox)
     mesh_smooth = mesh_poisson.filter_smooth_simple(number_of_iterations=3)
-    o3d.visualization.draw_geometries([mesh_smooth])
 
     path_file = data_path + '/meshes/' + name_file + '.obj'
     o3d.io.write_triangle_mesh(path_file, mesh_smooth)

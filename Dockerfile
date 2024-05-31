@@ -67,8 +67,8 @@ RUN pip3 install \
     numpy \
     pandas \
     opencv-contrib-python \
-    pybind11
-    
+    "pybind11[global]"    
+
 RUN pip3 install --ignore-installed open3d
 
 ### Add ros library
@@ -136,16 +136,12 @@ COPY src/ /home/${USER}/catkin_ws/src/
 
 # ------------------------------------------------------------------------------
 # catkin build ROS noetic packages
-# RUN cd /home/${USER}/catkin_ws                                              && \
-#     source /opt/ros/noetic/setup.bash                                       && \
-#     catkin build                                                            && \
-#     source /home/${USER}/catkin_ws/devel/setup.bash
+RUN cd /home/${USER}/catkin_ws                                              && \
+    source /opt/ros/noetic/setup.bash                                       && \
+    catkin build                                                            && \
+    source /home/${USER}/catkin_ws/devel/setup.bash
 # ------------------------------------------------------------------------------
 
-# USER ${USER}
-# # RUN bash -c "source /opt/ros/${ROS_DISTRO}/setup.bash && cd ${HOME}/catkin_ws && catkin build"
-# RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
-# RUN echo "source ${HOME}/catkin_ws/devel/setup.bash" >> ~/.bashrc
 
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 # Do not modify below this line

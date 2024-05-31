@@ -46,14 +46,24 @@ int main(int argc, char** argv) {
   //TODO: understand why checkpython is false
   cout << "transformation of the poinctloud to the robot frame ..." << endl;
   bool checkpython = polygonCoverage->pointCloudTransformer();
-  cout << "transformation check:" << endl;
-  cout << checkpython << endl;
 
+  cout << "initializazion pathplanner:" << endl;
+  cout << "step 1 : featurespace" << endl;
+
+
+  //TODO: change name of the functino and fill
+  //MAKE GRID
   // trasnform the point cloud to the featur space
-  polygonCoverage->featureSpaceAlgorithm();
+  polygonCoverage->makeMesh();
+  //GETUVMAP
+  polygonCoverage->makeUVmap();
+
+  cout << "step 2: convert polygon from pointcloud" << endl;
 
   // it will save the polygons to the .txt file
   polygonCoverage->convertPclToPolygon();
+
+  cout << "step 3: boustrophedon in feature space" << endl;
 
   // Read the polygon from the txt file
   vector<Vector3d> polygonsPositions = polygonCoverage->getFlatPolygonFromTxt();
@@ -73,10 +83,12 @@ int main(int argc, char** argv) {
 
   //set start and finish point for boustrophedon
   polygonCoverage->callStartService(simplifiedPolygon[0], simplifiedPolygon[0]);
-  string file_path_flat = string(WP5_TASKS_DIR) + "/txts/path_flat.txt";
-  polygonCoverage->writePathToFile(polygonCoverage->getPathFromPolygonFlat(), file_path_flat);
+  string name = "waypointInFeatureSpace";
+  polygonCoverage->writePathToFile(polygonCoverage->getPathFromPolygonFlat(), name);
 
   polygonCoverage->closeRosLaunch();
+
+  cout << "step 4: boustrophedon in original space" << endl;
 
   // send the path from feature space to hae it on realspace
   polygonCoverage->getPathFromFeatureSpaceToRealSpace();
@@ -96,9 +108,8 @@ int main(int argc, char** argv) {
   cout << "path well compute" << endl;
   // dynamicalSystem_->setPath(vectorPathTransformed);
 
-  string file_path_original = string(WP5_TASKS_DIR) + "/txts/path_original.txt";
-
-  polygonCoverage->writePathToFile(pathTransformed, file_path_original);
+   name = "waypointInOriginalSpace";
+  polygonCoverage->writePathToFile(pathTransformed, name);
 
   return 0;
 }
