@@ -83,12 +83,14 @@ def main()->bool:
 
     else:
         print("Failed to save transformed point cloud.")
-        
-    # # # Publisher for the transformed point cloud
-    # transformed_pc_pub = rospy.Publisher('/camera/depth/color/points_crop_transformed', PointCloud2, queue_size=10)
+        checkSuccess = False
+        return checkSuccess
 
+    # Publisher for the transformed point cloud
+    transformed_pc_pub = rospy.Publisher('/camera/depth/color/points_crop_transformed', PointCloud2, queue_size=10)
     # # Keep the node running
-    # rospy.spin()
+    rospy.spin()
+
     return checkSuccess
 
 

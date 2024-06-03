@@ -50,7 +50,6 @@ int main(int argc, char** argv) {
   cout << "initializazion pathplanner:" << endl;
   cout << "step 1 : featurespace" << endl;
 
-
   //TODO: change name of the functino and fill
   //MAKE GRID
   // trasnform the point cloud to the featur space
@@ -84,6 +83,10 @@ int main(int argc, char** argv) {
   //set start and finish point for boustrophedon
   polygonCoverage->callStartService(simplifiedPolygon[0], simplifiedPolygon[0]);
   string name = "waypointInFeatureSpace";
+  while (ros::ok() && !polygonCoverage->checkPathReceived()) {
+    ros::spinOnce();
+    loopRate.sleep();
+  }
   polygonCoverage->writePathToFile(polygonCoverage->getPathFromPolygonFlat(), name);
 
   polygonCoverage->closeRosLaunch();
@@ -107,9 +110,6 @@ int main(int argc, char** argv) {
   //TODO: check if the path is well computed
   cout << "path well compute" << endl;
   // dynamicalSystem_->setPath(vectorPathTransformed);
-
-   name = "waypointInOriginalSpace";
-  polygonCoverage->writePathToFile(pathTransformed, name);
 
   return 0;
 }

@@ -26,6 +26,7 @@ PolygonCoverage::PolygonCoverage(ros::NodeHandle& n) : nh_(n) {
   pathPubFinal_ = nh_.advertise<nav_msgs::Path>("/result_path_final", 10, true);
   posArraySub_ = nh_.subscribe("/waypoint_list", 10, &PolygonCoverage::poseArrayCallback, this);
   py::initialize_interpreter();
+  checkPath_ = false;
 }
 
 PolygonCoverage::~PolygonCoverage() { py::finalize_interpreter(); }
@@ -160,10 +161,12 @@ void PolygonCoverage::convertPoseArrayToPath(const geometry_msgs::PoseArray& pos
 }
 
 nav_msgs::Path PolygonCoverage::getPathFromPolygonFlat() { return path_; }
+bool PolygonCoverage::checkPathReceived() { return checkPath_; }
 
 void PolygonCoverage::poseArrayCallback(const geometry_msgs::PoseArray::ConstPtr& msg) {
   convertPoseArrayToPath(*msg);
   ROS_INFO("Received path with %lu poses", msg->poses.size());
+  checkPath_ = true;
   // Publish the path or do further processing with it
 }
 
@@ -205,8 +208,6 @@ void PolygonCoverage::seePolygonFlat(std::vector<Eigen::Vector3d> polygonsPositi
   }
   PolygonFlatPub_.publish(visualpolygonTarget);
 }
-
-//TODO : add quaternion to the navmsgs::Path
 nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
   string file_path = string(WP5_PLANNER_DIR) + "/data/paths/waypointInOriSpace.txt";
   string frame_id = "base_link";
@@ -222,8 +223,8 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
   std::string line;
   while (std::getline(infile, line)) {
     std::istringstream iss(line);
-    double x, y, z;
-    if (!(iss >> x >> y >> z)) {
+    double x, y, z, quatw, quatx, quaty, quatz;
+    if (!(iss >> x >> y >> z >> quatw >> quatx >> quaty >> quatz)) {
       ROS_WARN("Invalid line format: %s", line.c_str());
       continue; // Skip invalid lines
     }
@@ -233,7 +234,10 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
     pose_stamped.pose.position.x = x;
     pose_stamped.pose.position.y = y;
     pose_stamped.pose.position.z = z;
-    pose_stamped.pose.orientation.w = 1.0; // Default orientation
+    pose_stamped.pose.orientation.w = quatw;
+    pose_stamped.pose.orientation.x = quatx;
+    pose_stamped.pose.orientation.y = quaty;
+    pose_stamped.pose.orientation.z = quatz;
 
     path.poses.push_back(pose_stamped);
   }
@@ -241,6 +245,7 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
   infile.close();
   return path;
 }
+
 
 // Calculate the perpendicular distance from a point to a line
 double PolygonCoverage::perpendicularDistance(const Eigen::Vector3d& point,
@@ -317,12 +322,11 @@ vector<vector<double>> PolygonCoverage::convertNavPathToVectorVector(const nav_m
 vector<Eigen::Vector3d> PolygonCoverage::getFlatPolygonFromTxt() {
 
   // Extract polygons for boustrophedon
-  ifstream inputFile(string(WP5_PLANNER_DIR)
-                     + "/data/boundary/boundary_planeData_uv_map_pointcloud_target_transformed.txt");
+  ifstream inputFile(string(WP5_PLANNER_DIR) + "/data/boundary/boundary_planeData_uv_map_pointcloud_target_transformed.txt");
   vector<Eigen::Vector3d> polygonsPositions;
 
   if (!inputFile.is_open()) {
-    cerr << "Unable to open file" << endl;
+    cerr << "Unable to open file boundary" << endl;
     return polygonsPositions;
   }
 
@@ -460,7 +464,6 @@ bool PolygonCoverage::makeMesh() {
   return success; // Return the result
 }
 
-
 //TODO: fill the function with RUIs code
 bool PolygonCoverage::makeUVmap() {
   bool success = false; // Default value indicating failure
@@ -491,3 +494,4 @@ bool PolygonCoverage::makeUVmap() {
 
   return success; // Return the result
 }
+

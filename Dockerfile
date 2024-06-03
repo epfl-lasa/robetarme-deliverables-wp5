@@ -67,6 +67,7 @@ RUN pip3 install \
     numpy \
     pandas \
     opencv-contrib-python \
+    numpy-quaternion \
     "pybind11[global]"    
 
 RUN pip3 install --ignore-installed open3d

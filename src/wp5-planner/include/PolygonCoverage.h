@@ -84,6 +84,7 @@ public:
   bool convertPclToPolygon();
   bool makeMesh();
   bool makeUVmap();
+  bool checkPathReceived();
 
 private:
   ros::NodeHandle nh_;            ///< ROS node handle.
@@ -96,6 +97,7 @@ private:
   double wallDistance_;           ///< Wall distance.
   double lateralFov_;             ///< Lateral field of view.
   nav_msgs::Path path_;           ///< Path.
+  bool checkPath_;                     ///< Check path.
 
   double perpendicularDistance(const Eigen::Vector3d& point,
                                const Eigen::Vector3d& lineStart,

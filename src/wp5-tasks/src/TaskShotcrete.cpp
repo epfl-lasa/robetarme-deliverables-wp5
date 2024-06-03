@@ -12,8 +12,8 @@ TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName)
   // Create an unique pointer for the instance of PathPlanner
   pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
 
-  // Create an unique pointer for the instance of boustrophedonServer_
-  boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
+  // Instantiate the objects
+  polygonCoverage_ = std::make_unique<PolygonCoverage>(nodeHandle);
 
   // Create an unique pointer for the instance of Tool
   tools_ = make_unique<ToolsShotcrete>();
@@ -25,77 +25,77 @@ TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName)
 }
 
 bool TaskShotcrete::computePath() {
-  cout << "computing path ..." << endl;
 
-  // extract polygons for boustrophedon
-  // WARNING: need the position of the target from Optitrack to continue
-  vector<Vector3d> polygonsPositions = targetExtraction_->getPolygons();
-  Quaterniond quatTarget = targetExtraction_->getQuatTarget();
-  Vector3d posTarget = targetExtraction_->getPosTarget();
-  targetExtraction_->seeTarget();
+  bool checkPath = false;
 
-  // initialization
-  pathPlanner_->setTarget(quatTarget, posTarget, polygonsPositions);
-  double optimumRadius = pathPlanner_->getOptimumRadius();
+  //TODO: understand why checkpython is false
+  cout << "transformation of the poinctloud to the robot frame ..." << endl;
+  bool checkpython = polygonCoverage_->pointCloudTransformer();
 
-  boustrophedonServer_->setOptimumRad(optimumRadius);
-  // wait for the action server to startnew_rad
+  cout << "initializazion pathplanner:" << endl;
+  cout << "step 1 : featurespace" << endl;
 
-  cout << "Waiting for action server to start." << endl;
-  boustrophedonServer_->initRosLaunch();
+  //TODO: change name of the functino and fill
+  //MAKE GRID
+  // trasnform the point cloud to the featur space
+  polygonCoverage_->makeMesh();
+  //GETUVMAP
+  polygonCoverage_->makeUVmap();
 
-  cout << "Action server started" << endl;
+  cout << "step 2: convert polygon from pointcloud" << endl;
 
-  boustrophedon_msgs::PlanMowingPathGoal goal;
-  goal = pathPlanner_->ComputeGoal();
-  boustrophedonServer_->polygonPub.publish(goal.property);
+  // it will save the polygons to the .txt file
+  polygonCoverage_->convertPclToPolygon();
 
-  cout << "Waiting for goal" << endl;
+  cout << "step 3: boustrophedon in feature space" << endl;
 
-  nav_msgs::Path path;
-  nav_msgs::Path pathTransformed;
+  // Read the polygon from the txt file
+  vector<Vector3d> polygonsPositions = polygonCoverage_->getFlatPolygonFromTxt();
 
-  while (ros::ok() && !checkPath) {
-    ros::Time start_time = ros::Time::now();
-    pathPlanner_->publishInitialPose();
-    goal.robot_position = pathPlanner_->getInitialPose();
-    boustrophedonServer_->startPub.publish(goal.robot_position);
-    boustrophedonServer_->client.sendGoal(goal);
-    ROS_INFO_STREAM("Sending goal");
+  // Simplify the polygon
+  double epsilon = 0.2; // Tolerance for simplification
+  vector<Vector3d> simplifiedPolygon = polygonCoverage_->rdp(polygonsPositions, epsilon);
 
-    // wait for the action to return
-    bool finishedBeforeTimeout = boustrophedonServer_->client.waitForResult(ros::Duration(30.0));
-    actionlib::SimpleClientGoalState state = boustrophedonServer_->client.getState();
-    boustrophedon_msgs::PlanMowingPathResultConstPtr result = boustrophedonServer_->client.getResult();
-    if (result->plan.points.size() < 1) {
-      ROS_INFO("Action did not finish before the time out.");
-    } else {
-      ROS_INFO("Action finished: %s", state.toString().c_str());
+  polygonCoverage_->seePolygonFlat(simplifiedPolygon);
 
-      cout << "Result with : " << result->plan.points.size() << endl;
+  //start boustrophedon aogirthm
+  polygonCoverage_->initRosLaunch();
 
-      if (result->plan.points.size() > 2) {
-        pathPlanner_->convertStripingPlanToPath(result->plan, path);
+  //set target for boustrophedon
+  vector<Vector3d> holl_points;
+  polygonCoverage_->callSetPolygonService(simplifiedPolygon, holl_points);
 
-        pathTransformed = pathPlanner_->getTransformedPath(path);
-
-        vector<vector<double>> vectorPathTransformed = pathPlanner_->convertPathPlanToVectorVector(pathTransformed);
-
-        vector<double> firstQuatPos = vectorPathTransformed[0];
-        dynamicalSystem_->setPath(vectorPathTransformed);
-
-        boustrophedonServer_->pathPub.publish(pathTransformed);
-
-        boustrophedonServer_->closeRosLaunch();
-        checkPath = true;
-      }
-    }
+  //set start and finish point for boustrophedon
+  polygonCoverage_->callStartService(simplifiedPolygon[0], simplifiedPolygon[0]);
+  string name = "waypointInFeatureSpace";
+  while (ros::ok() && !polygonCoverage_->checkPathReceived()) {
     ros::spinOnce();
     getRosLoopRate_()->sleep();
   }
-  cout << "path well compute" << endl;
+  polygonCoverage_->writePathToFile(polygonCoverage_->getPathFromPolygonFlat(), name);
 
-  return checkPath;
+  polygonCoverage_->closeRosLaunch();
+
+  cout << "step 4: boustrophedon in original space" << endl;
+
+  // send the path from feature space to hae it on realspace
+  polygonCoverage_->getPathFromFeatureSpaceToRealSpace();
+
+  // read the .txt with the point of the path to follows
+  nav_msgs::Path pathTransformed;
+  pathTransformed = polygonCoverage_->convertFileToNavMsgsPath();
+
+  polygonCoverage_->publishNavmsg(pathTransformed);
+
+  ros::spinOnce();
+  getRosLoopRate_()->sleep();
+
+  vector<vector<double>> vectorPathTransformed = polygonCoverage_->convertNavPathToVectorVector(pathTransformed);
+
+  //TODO: check if the path is well computed
+  cout << "path well compute" << endl;
+  dynamicalSystem_->setPath(vectorPathTransformed);
+  return checkPath= true;
 }
 
 bool TaskShotcrete::execute() {

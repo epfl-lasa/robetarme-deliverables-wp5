@@ -71,13 +71,18 @@ def main():
     Y = planeData[1, :]
     Z = planeData[2, :]
     hull = ConvexHull(np.vstack((Y, Z)).T)
-    boundary_planeData = np.vstack((Y[hull.vertices], Z[hull.vertices]))
+    boundary_planeData = np.vstack((Y[hull.vertices], Z[hull.vertices], np.full(len(hull.vertices), 0.1)))
 
-    filename = save_data_path +"boundary_planeData_"+file_name + ".txt"
+    filename = save_data_path+"planeData_"+ file_name+".txt"
+
     np.savetxt(filename, boundary_planeData.T, delimiter='\t')  # Transpose to save in correct format
-
-
-
+    
+    filename = save_data_path+"boundary_planeData_"+ file_name+".txt"
+    np.savetxt(filename, boundary_planeData.T, delimiter='\t')  # Transpose to save in correct format
+    filename_plant = save_data_path+"planeData_"+ file_name+".txt"
+    np.savetxt(filename_plant, planeData.T, delimiter='\t')  # Transpose to save in correct format
+    filename_curve = save_data_path+"curveData_"+ file_name+".txt"
+    np.savetxt(filename_curve, cuverData.T, delimiter='\t')  # Transpose to save in correct format
 
 if __name__ == '__main__':
     main()
