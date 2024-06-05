@@ -1,0 +1,10 @@
+(cl:defpackage boustrophedon_msgs-srv
+  (:use )
+  (:export
+   "CONVERTPLANTOPATH"
+   "<CONVERTPLANTOPATH-REQUEST>"
+   "CONVERTPLANTOPATH-REQUEST"
+   "<CONVERTPLANTOPATH-RESPONSE>"
+   "CONVERTPLANTOPATH-RESPONSE"
+  ))
+

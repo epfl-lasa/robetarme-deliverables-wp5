@@ -1,0 +1,8 @@
+prefix=/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/polygon_coverage_benchmark
+
+Name: polygon_coverage_benchmark
+Description: Description of polygon_coverage_benchmark
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

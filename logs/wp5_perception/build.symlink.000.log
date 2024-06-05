@@ -1,0 +1,8 @@
+Symlinking /home/bonato/Documents/robetarme-deliverables-wp5/devel/share/wp5_perception/cmake/wp5_perceptionConfig-version.cmake
+Symlinking /home/bonato/Documents/robetarme-deliverables-wp5/devel/share/wp5_perception/cmake/wp5_perceptionConfig.cmake
+Symlinking /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/point_cloud_transformer.py
+Symlinking /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/camera.sh
+Symlinking /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/target_extraction.py
+Symlinking /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/cmake.lock
+Symlinking /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/target_substraction.py
+Symlinking /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/pkgconfig/wp5_perception.pc

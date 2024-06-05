@@ -1,0 +1,10 @@
+wp5-perception
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/cmake.lock /home/bonato/Documents/robetarme-deliverables-wp5/devel/./cmake.lock
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/share/wp5_perception/cmake/wp5_perceptionConfig-version.cmake /home/bonato/Documents/robetarme-deliverables-wp5/devel/share/wp5_perception/cmake/wp5_perceptionConfig-version.cmake
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/share/wp5_perception/cmake/wp5_perceptionConfig.cmake /home/bonato/Documents/robetarme-deliverables-wp5/devel/share/wp5_perception/cmake/wp5_perceptionConfig.cmake
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/lib/wp5_perception/point_cloud_transformer.py /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/point_cloud_transformer.py
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/lib/wp5_perception/camera.sh /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/camera.sh
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/lib/wp5_perception/target_extraction.py /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/target_extraction.py
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/lib/wp5_perception/cmake.lock /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/cmake.lock
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/lib/wp5_perception/target_substraction.py /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/wp5_perception/target_substraction.py
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/lib/pkgconfig/wp5_perception.pc /home/bonato/Documents/robetarme-deliverables-wp5/devel/lib/pkgconfig/wp5_perception.pc

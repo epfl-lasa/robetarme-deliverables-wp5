@@ -87,17 +87,19 @@ public:
   bool checkPathReceived();
 
 private:
-  ros::NodeHandle nh_;            ///< ROS node handle.
-  ros::Publisher PolygonFlatPub_; ///< ROS publisher for the original polygon.
-  ros::Publisher pathPubFlat_;    ///< ROS publisher for paths flat.
-  ros::Publisher pathPubFinal_;   ///< ROS publisher for paths final.
-  ros::Subscriber posArraySub_;   ///< ROS publisher for starting the action.
-  double optimumRad;              ///< Optimum radius.
-  pid_t launchProcessId;          ///< PID of the roslaunch process.
-  double wallDistance_;           ///< Wall distance.
-  double lateralFov_;             ///< Lateral field of view.
-  nav_msgs::Path path_;           ///< Path.
-  bool checkPath_;                     ///< Check path.
+  ros::NodeHandle nh_;                           ///< ROS node handle.
+  ros::Publisher PolygonFlatPub_;                ///< ROS publisher for the original polygon.
+  ros::Publisher pathPubFlat_;                   ///< ROS publisher for paths flat.
+  ros::Publisher pathPubFinal_;                  ///< ROS publisher for paths final.
+  ros::Subscriber posArraySub_;                  ///< ROS publisher for starting the action.
+  ros::Subscriber pointcloudTransformedCropSub_; ///< ROS subscriber for the transformed point cloud.
+  double optimumRad;                             ///< Optimum radius.
+  pid_t launchProcessId;                         ///< PID of the roslaunch process.
+  double wallDistance_;                          ///< Wall distance.
+  double lateralFov_;                            ///< Lateral field of view.
+  nav_msgs::Path path_;                          ///< Path.
+  bool checkPath_;                               ///< Check path.
+  bool checkSave_;                               ///< Check save.
 
   double perpendicularDistance(const Eigen::Vector3d& point,
                                const Eigen::Vector3d& lineStart,

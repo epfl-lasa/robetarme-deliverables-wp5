@@ -1,0 +1,8 @@
+prefix=/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_ros_interface
+
+Name: wp5_ros_interface
+Description: Description of wp5_ros_interface
+Version: 0.0.0
+Cflags: -I/home/bonato/Documents/robetarme-deliverables-wp5/src/wp5-ros-interface/include
+Libs: -L${prefix}/lib -lwp5_ros_interface /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.6.2
+Requires: roscpp roslib message_runtime std_msgs sensor_msgs geometry_msgs

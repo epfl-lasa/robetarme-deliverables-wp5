@@ -1,9 +1,12 @@
 #include "PolygonCoverage.h"
 
+#include <pcl/io/ply_io.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <polygon_coverage_msgs/PolygonWithHoles.h>
 #include <polygon_coverage_msgs/PolygonWithHolesStamped.h>
 #include <pybind11/embed.h>
 #include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <Eigen/Dense>
@@ -25,13 +28,35 @@ PolygonCoverage::PolygonCoverage(ros::NodeHandle& n) : nh_(n) {
   pathPubFlat_ = nh_.advertise<nav_msgs::Path>("/result_path_flat", 10, true);
   pathPubFinal_ = nh_.advertise<nav_msgs::Path>("/result_path_final", 10, true);
   posArraySub_ = nh_.subscribe("/waypoint_list", 10, &PolygonCoverage::poseArrayCallback, this);
+  pointcloudTransformedCropSub_ =
+      nh_.subscribe("/camera/pointcloud_transformed_crop", 10, &PolygonCoverage::pointCloudTransformer, this);
   py::initialize_interpreter();
   checkPath_ = false;
+  checkSave_ = false;
 }
 
 PolygonCoverage::~PolygonCoverage() { py::finalize_interpreter(); }
 
+void PolygonCoverage::pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
+  // Convert ROS PointCloud2 message to PCL point cloud
+  pcl::PCLPointCloud2 pcl_pc2;
+  pcl_conversions::toPCL(*msg, pcl_pc2);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::fromPCLPointCloud2(pcl_pc2, *cloud);
+
+  if (checkSave_) {
+    std::string file_name = string(WP5_PLANNER_DIR) + "/data/pointclouds/pointcloud_target_transformed.ply";
+
+    // Save point cloud as .ply file
+    pcl::io::savePLYFile(file_name, *cloud);
+    ROS_INFO("Point cloud saved as pointcloud_target_transformed.ply");
+    checkSave_ = false;
+  }
+}
+
 void PolygonCoverage::setOptimumRad(double rad) { optimumRad = rad; }
+void PolygonCoverage::getPointcloud() { checkSave_ = true; }
+
 
 void PolygonCoverage::initRosLaunch() {
 
@@ -246,7 +271,6 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
   return path;
 }
 
-
 // Calculate the perpendicular distance from a point to a line
 double PolygonCoverage::perpendicularDistance(const Eigen::Vector3d& point,
                                               const Eigen::Vector3d& lineStart,
@@ -322,7 +346,8 @@ vector<vector<double>> PolygonCoverage::convertNavPathToVectorVector(const nav_m
 vector<Eigen::Vector3d> PolygonCoverage::getFlatPolygonFromTxt() {
 
   // Extract polygons for boustrophedon
-  ifstream inputFile(string(WP5_PLANNER_DIR) + "/data/boundary/boundary_planeData_uv_map_pointcloud_target_transformed.txt");
+  ifstream inputFile(string(WP5_PLANNER_DIR)
+                     + "/data/boundary/boundary_planeData_uv_map_pointcloud_target_transformed.txt");
   vector<Eigen::Vector3d> polygonsPositions;
 
   if (!inputFile.is_open()) {
@@ -494,4 +519,3 @@ bool PolygonCoverage::makeUVmap() {
 
   return success; // Return the result
 }
-

@@ -1,0 +1,11 @@
+[31m[1mCMake Error[0m at /home/bonato/Documents/robetarme-deliverables-wp5/src/wp5-tools/CMakeLists.txt:18 (find_package):
+  Could not find a configuration file for package "Eigen3" that is compatible
+  with requested version "3.4".
+
+  The following configuration files were considered but not accepted:
+
+    /usr/lib/cmake/eigen3/Eigen3Config.cmake, version: 3.3.7
+    /lib/cmake/eigen3/Eigen3Config.cmake, version: 3.3.7
+
+
+
