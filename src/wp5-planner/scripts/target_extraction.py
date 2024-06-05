@@ -25,11 +25,17 @@ def mouse_callback(event, x, y, flags, param):
             roi_mask = np.zeros_like(color_image[:, :, 0])
             roi_corners = np.array([points], dtype=np.int32)
             cv2.fillPoly(roi_mask, roi_corners, (255,))
+            save_points_to_file(points)  # Save points to file
         elif len(points) > 4:
             points = points[:-1]  # Limit to 4 points
             roi_mask = np.zeros_like(color_image[:, :, 0])
             roi_corners = np.array([points], dtype=np.int32)
             cv2.fillPoly(roi_mask, roi_corners, (255,))
+
+def save_points_to_file(points):
+    with open('../target_boundary/points.txt', 'w') as file:
+        for point in points:
+            file.write(f"{point[0]},{point[1]}\n")
 
 # Define a callback function to handle incoming color image messages
 def color_image_callback(msg):

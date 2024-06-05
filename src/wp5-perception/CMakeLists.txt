@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.0.2)
 project(wp5_perception)
 
+add_definitions("-DWP5_PERCEPTION_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
+
 # Find catkin macros and libraries
 find_package(catkin REQUIRED COMPONENTS
   rospy
@@ -20,6 +22,9 @@ catkin_package()
 
 # Install Python scripts
 catkin_install_python(PROGRAMS
-  src/camera_connection.py
+  src/target_extraction.py
+  src/point_cloud_transformer.py
+  src/camera.sh
+  src/target_substraction.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )

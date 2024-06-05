@@ -66,6 +66,7 @@ RUN pip3 install \
     opencv-python \
     numpy \
     pandas \
+    pyvista \
     opencv-contrib-python \
     numpy-quaternion \
     "pybind11[global]"    
@@ -84,7 +85,9 @@ RUN apt install -y \
     ros-${ROS_DISTRO}-pcl-ros \
     ros-${ROS_DISTRO}-realsense2-camera \   
     ros-${ROS_DISTRO}-rviz \  
-    ros-${ROS_DISTRO}-rosparam-shortcuts 
+    ros-${ROS_DISTRO}-rosparam-shortcuts  \ 
+    ros-${ROS_DISTRO}-pcl-conversions \ 
+    python3-pcl
 
 # Install moveit tools
 RUN apt update --fix-missing && apt upgrade -y && apt clean
@@ -173,6 +176,8 @@ RUN chmod +x /fix-perms.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 #-------------------------------------------------------------------------------
+WORKDIR /home/${USER}/catkin_ws                                    
+RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
+RUN echo "source devel/setup.bash" >> ~/.bashrc
 
-WORKDIR /home/${USER}
 CMD ["/bin/bash"]

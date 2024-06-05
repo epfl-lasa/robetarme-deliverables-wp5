@@ -1,6 +1,11 @@
-<!-- launch/my_combined_launch_file.launch -->
 <launch>
+  <!-- Launch camera.sh script -->
+  <!-- Launch the RealSense2 camera node with specified parameters -->
+  <include file="$(find wp5_perception)/launch/intelrealsens.launch">
+  </include>
 
-  <!-- Launch your custom node -->
-  <node name="wp5_perception" pkg="wp5_perception" type="camera_connection.py" output="screen"/>
+
+  <!-- Launch target_extraction.py script -->
+  <node name="target_extraction" pkg="wp5_perception" type="target_extraction.py" output="screen" />
+
 </launch>

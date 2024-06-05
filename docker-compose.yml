@@ -5,6 +5,8 @@
 
 services:
   ros_noetic_92_development:
+    env_file:
+      - .env
     build:
       context: .
       dockerfile: Dockerfile
