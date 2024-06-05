@@ -6,11 +6,11 @@ using namespace Eigen;
 TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName) : ITaskBase(nh, freq, robotName) {
   ros::NodeHandle nodeHandle = getRosNodehandle_();
 
-  // Create an unique pointer for the instance of TargetExtraction
-  targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
+  // // Create an unique pointer for the instance of TargetExtraction
+  // targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
 
-  // Create an unique pointer for the instance of PathPlanner
-  pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
+  // // Create an unique pointer for the instance of PathPlanner
+  // pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
 
   // Instantiate the objects
   polygonCoverage_ = std::make_unique<PolygonCoverage>(nodeHandle);
