@@ -79,7 +79,7 @@ def main()->bool:
     rospy.Subscriber('/camera/depth/points_crop', PointCloud2, point_cloud_callback)
 
     # Publisher for the transformed point cloud
-    transformed_pc_pub = rospy.Publisher('/camera/depth/color/points_crop_transformed', PointCloud2, queue_size=100)
+    transformed_pc_pub = rospy.Publisher('/camera/pointclouds/crop_transformed', PointCloud2, queue_size=100)
     # Create a timer to control the frequency
             # Spin
     rospy.spin()

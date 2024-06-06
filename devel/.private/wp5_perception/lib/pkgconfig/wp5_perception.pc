@@ -1,0 +1,8 @@
+prefix=/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception
+
+Name: wp5_perception
+Description: Description of wp5_perception
+Version: 0.0.1
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

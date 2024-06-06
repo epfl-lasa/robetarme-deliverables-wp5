@@ -1,8 +1,0 @@
-prefix=/home/ridgeback-indoornav/Documents/robetarme-deliverables-wp5/devel
-
-Name: polygon_coverage_solvers
-Description: Description of polygon_coverage_solvers
-Version: 0.0.0
-Cflags: -I/home/ridgeback-indoornav/Documents/robetarme-deliverables-wp5/src/polygon_coverage_planning/polygon_coverage_solvers/include -I/opt/ros/noetic/include -I/usr/include
-Libs: -L${prefix}/lib -lpolygon_coverage_solvers
-Requires: 

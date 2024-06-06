@@ -1,0 +1,8 @@
+prefix=/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/boustrophedon_msgs
+
+Name: boustrophedon_msgs
+Description: Description of boustrophedon_msgs
+Version: 0.0.1
+Cflags: -I/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/boustrophedon_msgs/include
+Libs: -L${prefix}/lib 
+Requires: 

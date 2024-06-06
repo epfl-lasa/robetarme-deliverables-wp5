@@ -1,0 +1,1 @@
+/home/bonato/Documents/robetarme-deliverables-wp5/devel/.private/wp5_perception/share/wp5_perception/cmake/wp5_perceptionConfig.cmake
