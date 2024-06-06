@@ -1,9 +1,12 @@
 #include "PolygonCoverage.h"
 
+#include <pcl/io/ply_io.h>
+#include <pcl_conversions/pcl_conversions.h>
 #include <polygon_coverage_msgs/PolygonWithHoles.h>
 #include <polygon_coverage_msgs/PolygonWithHolesStamped.h>
 #include <pybind11/embed.h>
 #include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <Eigen/Dense>
@@ -25,6 +28,9 @@ PolygonCoverage::PolygonCoverage(ros::NodeHandle& n) : nh_(n) {
   pathPubFlat_ = nh_.advertise<nav_msgs::Path>("/result_path_flat", 10, true);
   pathPubFinal_ = nh_.advertise<nav_msgs::Path>("/result_path_final", 10, true);
   posArraySub_ = nh_.subscribe("/waypoint_list", 10, &PolygonCoverage::poseArrayCallback, this);
+  pointCloudSub_ =
+      nh_.subscribe("/camera/depth/points_crop_transformed", 1, &PolygonCoverage::pointCloudCallback, this);
+
   py::initialize_interpreter();
   checkPath_ = false;
 }
@@ -32,6 +38,34 @@ PolygonCoverage::PolygonCoverage(ros::NodeHandle& n) : nh_(n) {
 PolygonCoverage::~PolygonCoverage() { py::finalize_interpreter(); }
 
 void PolygonCoverage::setOptimumRad(double rad) { optimumRad = rad; }
+
+void PolygonCoverage::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& msg) {
+  // Convert PointCloud2 message to PCL point cloud
+  pcl::PCLPointCloud2 pcl_pc2;
+  pcl_conversions::toPCL(*msg, pcl_pc2);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::fromPCLPointCloud2(pcl_pc2, *cloud);
+
+  // Save the point cloud only if requested
+  if (save_requested_) {
+    std::string file_path = std::string(WP5_PLANNER_DIR) + "/data/pointclouds/pointcloud_target_transformed.ply";
+
+    if (pcl::io::savePLYFile(file_path, *cloud) == 0) {
+      ROS_INFO("Transformed point cloud saved as pointcloud_target_transformed.ply");
+    } else {
+      ROS_ERROR("Failed to save transformed point cloud to %s", file_path.c_str());
+    }
+
+    save_requested_ = false; // Reset the flag after saving
+  }
+}
+
+void PolygonCoverage::getPointCloud() {
+  save_requested_ = true;
+  while (save_requested_) {
+    ros::spinOnce();
+  }
+}
 
 void PolygonCoverage::initRosLaunch() {
 
@@ -151,10 +185,10 @@ void PolygonCoverage::callStartService(const Eigen::Vector3d& start, const Eigen
 void PolygonCoverage::convertPoseArrayToPath(const geometry_msgs::PoseArray& pose_array) {
   path_.header = pose_array.header;
 
-  for (const auto& pose : pose_array.poses) {
+  for (size_t i = 1; i < pose_array.poses.size() - 2; ++i) {
     geometry_msgs::PoseStamped pose_stamped;
     pose_stamped.header = pose_array.header;
-    pose_stamped.pose = pose;
+    pose_stamped.pose = pose_array.poses[i];
     path_.poses.push_back(pose_stamped);
   }
   pathPubFlat_.publish(path_);
@@ -246,7 +280,6 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
   return path;
 }
 
-
 // Calculate the perpendicular distance from a point to a line
 double PolygonCoverage::perpendicularDistance(const Eigen::Vector3d& point,
                                               const Eigen::Vector3d& lineStart,
@@ -322,7 +355,8 @@ vector<vector<double>> PolygonCoverage::convertNavPathToVectorVector(const nav_m
 vector<Eigen::Vector3d> PolygonCoverage::getFlatPolygonFromTxt() {
 
   // Extract polygons for boustrophedon
-  ifstream inputFile(string(WP5_PLANNER_DIR) + "/data/boundary/boundary_planeData_uv_map_pointcloud_target_transformed.txt");
+  ifstream inputFile(string(WP5_PLANNER_DIR)
+                     + "/data/boundary/boundary_planeData_uv_map_pointcloud_target_transformed.txt");
   vector<Eigen::Vector3d> polygonsPositions;
 
   if (!inputFile.is_open()) {
@@ -494,4 +528,3 @@ bool PolygonCoverage::makeUVmap() {
 
   return success; // Return the result
 }
-

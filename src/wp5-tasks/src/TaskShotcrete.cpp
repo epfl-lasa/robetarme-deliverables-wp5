@@ -6,11 +6,11 @@ using namespace Eigen;
 TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName) : ITaskBase(nh, freq, robotName) {
   ros::NodeHandle nodeHandle = getRosNodehandle_();
 
-  // Create an unique pointer for the instance of TargetExtraction
-  targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
+  // // Create an unique pointer for the instance of TargetExtraction
+  // targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
 
-  // Create an unique pointer for the instance of PathPlanner
-  pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
+  // // Create an unique pointer for the instance of PathPlanner
+  // pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
 
   // Instantiate the objects
   polygonCoverage_ = std::make_unique<PolygonCoverage>(nodeHandle);
@@ -29,8 +29,11 @@ bool TaskShotcrete::computePath() {
   bool checkPath = false;
 
   //TODO: understand why checkpython is false
-  cout << "transformation of the poinctloud to the robot frame ..." << endl;
-  bool checkpython = polygonCoverage_->pointCloudTransformer();
+  cout << "get Pointcloud.. " << endl;
+
+  polygonCoverage_->getPointCloud();
+  ros::spinOnce();
+  getRosLoopRate_()->sleep();
 
   cout << "initializazion pathplanner:" << endl;
   cout << "step 1 : featurespace" << endl;
@@ -95,7 +98,7 @@ bool TaskShotcrete::computePath() {
   //TODO: check if the path is well computed
   cout << "path well compute" << endl;
   dynamicalSystem_->setPath(vectorPathTransformed);
-  return checkPath= true;
+  return checkPath = true;
 }
 
 bool TaskShotcrete::execute() {

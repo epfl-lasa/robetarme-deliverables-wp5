@@ -143,7 +143,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   double normQuat = relativeRotation.norm();
 
   // Output the result
-  std::cout << "The normQuat of the difference between q1 and q2 is: " << normQuat << std::endl;
+  // std::cout << "The normQuat of the difference between q1 and q2 is: " << normQuat << std::endl;
 
   norm = sqrt(dx * dx + dy * dy + dz * dz);
   scaleVel = linearVelExpected_ / norm;

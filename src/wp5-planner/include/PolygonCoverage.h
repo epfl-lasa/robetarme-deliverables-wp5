@@ -15,6 +15,7 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
 #include <sys/types.h>
@@ -85,6 +86,7 @@ public:
   bool makeMesh();
   bool makeUVmap();
   bool checkPathReceived();
+  void getPointCloud();
 
 private:
   ros::NodeHandle nh_;            ///< ROS node handle.
@@ -97,9 +99,13 @@ private:
   double wallDistance_;           ///< Wall distance.
   double lateralFov_;             ///< Lateral field of view.
   nav_msgs::Path path_;           ///< Path.
-  bool checkPath_;                     ///< Check path.
+  bool checkPath_;                ///< Check path.
+  ros::Subscriber pointCloudSub_;
+  bool save_requested_;
 
   double perpendicularDistance(const Eigen::Vector3d& point,
                                const Eigen::Vector3d& lineStart,
                                const Eigen::Vector3d& lineEnd);
-};
+  void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& msg);
+
+  };

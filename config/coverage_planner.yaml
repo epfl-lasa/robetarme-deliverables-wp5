@@ -1,8 +1,8 @@
 decomposition_type: 0 # [0: Boustrophedon, 1: Trapezoidal]
-cost_function_type: 1 # [0: Euclidean Distance, 1: Time, 2: Number of Waypoints]
+cost_function_type: 2 # [0: Euclidean Distance, 1: Time, 2: Number of Waypoints]
 v_max: 0.5 # Only for time optimization.
 a_max: 0.001 # Only for time optimization.
-wall_distance: 0.05
+wall_distance: 0.1
 offset_polygons: false
 sweep_single_direction: true
 
@@ -10,7 +10,7 @@ sweep_single_direction: true
 sensor_model_type: 1 # [0: Line, 1: Frustum]
 lateral_overlap: 0.0
 lateral_footprint: 1.0 # Only for line sensor model.
-lateral_fov: 0.5 # Only for frustum sensor model.
+lateral_fov: 1.2 # Only for frustum sensor model.
 
 latch_topics: true
 
