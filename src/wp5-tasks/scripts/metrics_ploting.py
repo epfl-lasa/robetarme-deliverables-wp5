@@ -19,7 +19,7 @@ class DataSubscriber:
         self.actual_pose_data = []  # Added for actual pose data
         self.record_time = 0
         self.start_time = None
-        self.force_sub = rospy.Subscriber('/ft_sensor/netft_data', WrenchStamped, self.force_callback)
+        self.force_sub = rospy.Subscriber('/robotiq_ft_wrench', WrenchStamped, self.force_callback)
         self.desired_twist_sub = rospy.Subscriber('/desiredDsTwist', Float64MultiArray, self.desired_twist_callback)
         self.actual_twist_sub = rospy.Subscriber('/actualCartesianTwistEEF', Float64MultiArray, self.actual_twist_callback)
         self.actual_pose_sub = rospy.Subscriber('/actualCartesianPoseEEF', PoseStamped, self.actual_pose_callback)  # Subscriber for actual pose data

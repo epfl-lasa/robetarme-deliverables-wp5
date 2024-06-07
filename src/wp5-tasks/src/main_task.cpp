@@ -28,7 +28,7 @@ using namespace Eigen;
 
 int main(int argc, char** argv) {
   bool valid = false;
-  double rosFreq = 300;
+  double rosFreq = 150;
   TaskFactory taskFactory;
 
   // Init ros

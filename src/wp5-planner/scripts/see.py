@@ -1,7 +1,7 @@
 import pyvista as pv
 
 # Path to your .ply file
-file_path = "../data/pointclouds/pointcloud_target_uniformizid.ply"
+file_path = "../data/pointclouds/pointcloud_target_transformed.ply"
 
 # Load the .ply file
 mesh = pv.read(file_path)
