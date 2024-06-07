@@ -10,6 +10,7 @@
 #include <string>
 
 #include "BoustrophedonServer.h"
+#include "PolygonCoverage.h"
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"
 #include "ITaskBase.h"
@@ -39,6 +40,8 @@ private:
 
   // Create an unique pointer for the instance of PathPlanner
   std::unique_ptr<BoustrophedonServer> boustrophedonServer_ = nullptr;
+
+  std::unique_ptr<PolygonCoverage> polygonCoverage_ = nullptr;
 
   Eigen::VectorXd decoderWrench();
   Eigen::VectorXd contactUpdateDS();

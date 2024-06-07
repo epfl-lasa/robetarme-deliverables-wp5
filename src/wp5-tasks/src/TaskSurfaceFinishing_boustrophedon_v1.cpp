@@ -8,7 +8,7 @@ TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, str
   ros::NodeHandle nodeHandle = getRosNodehandle_();
 
   // Create an unique pointer for the instance of TargetExtraction
-  polygonCoverage_ = std::make_unique<PolygonCoverage>(nodeHandle);
+  targetExtraction_ = make_unique<TargetExtraction>(nodeHandle);
 
   // Create an unique pointer for the instance of TargetExtraction
   tools_ = make_unique<ToolsSurfaceFinishing>();
@@ -19,86 +19,35 @@ TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, str
   dynamicalSystem_->setLinearSpeed(linearSpeed_);
 
   // Create an unique pointer for the instance of PathPlanner
+  pathPlanner_ = make_unique<PathPlanner>(nodeHandle);
 
   // Create an unique pointer for the instance of PathPlanner
+  boustrophedonServer_ = make_unique<BoustrophedonServer>(nodeHandle);
   outputTwist_ = Eigen::VectorXd::Zero(6);
 }
 
 bool TaskSurfaceFinishing::computePath() {
+  cout << "computing path ..." << endl;
 
-  bool checkPath = false;
+  // extract polygons for boustrophedon
+  // WARNING: need the position of the target from Optitrack to continue
+  vector<Vector3d> polygonsPositions = targetExtraction_->getPolygons();
+  Quaterniond quatTarget = targetExtraction_->getQuatTarget();
+  Vector3d posTarget = targetExtraction_->getPosTarget();
+  targetExtraction_->seeTarget();
 
-  //TODO: understand why checkpython is false
-  cout << "get Pointcloud.. " << endl;
+  vector<double> targetQuatPos = {
+      quatTarget.x(), quatTarget.y(), quatTarget.z(), quatTarget.w(), posTarget(0), posTarget(1), posTarget(2)};
 
-  polygonCoverage_->getPointCloud();
-  ros::spinOnce();
-  getRosLoopRate_()->sleep();
-
-  cout << "initializazion pathplanner:" << endl;
-  cout << "step 1 : featurespace" << endl;
-
-  //TODO: change name of the functino and fill
-  //MAKE GRID
-  // trasnform the point cloud to the featur space
-  polygonCoverage_->makeMesh();
-  //GETUVMAP
-  polygonCoverage_->makeUVmap();
-
-  cout << "step 2: convert polygon from pointcloud" << endl;
-
-  // it will save the polygons to the .txt file
-  polygonCoverage_->convertPclToPolygon();
-
-  cout << "step 3: boustrophedon in feature space" << endl;
-
-  // Read the polygon from the txt file
-  vector<Vector3d> polygonsPositions = polygonCoverage_->getFlatPolygonFromTxt();
-
-  // Simplify the polygon
-  double epsilon = 0.2; // Tolerance for simplification
-  vector<Vector3d> simplifiedPolygon = polygonCoverage_->rdp(polygonsPositions, epsilon);
-
-  polygonCoverage_->seePolygonFlat(simplifiedPolygon);
-
-  //start boustrophedon aogirthm
-  polygonCoverage_->initRosLaunch();
-
-  //set target for boustrophedon
-  vector<Vector3d> holl_points;
-  polygonCoverage_->callSetPolygonService(simplifiedPolygon, holl_points);
-
-  //set start and finish point for boustrophedon
-  polygonCoverage_->callStartService(simplifiedPolygon[0], simplifiedPolygon[0]);
-  string name = "waypointInFeatureSpace";
-  while (ros::ok() && !polygonCoverage_->checkPathReceived()) {
-    ros::spinOnce();
-    getRosLoopRate_()->sleep();
+  std::vector<std::vector<double>> result;
+  for (int i = 0; i < 10; ++i) {
+    result.push_back(targetQuatPos);
   }
-  polygonCoverage_->writePathToFile(polygonCoverage_->getPathFromPolygonFlat(), name);
 
-  polygonCoverage_->closeRosLaunch();
+  dynamicalSystem_->setPath(result);
 
-  cout << "step 4: boustrophedon in original space" << endl;
-
-  // send the path from feature space to hae it on realspace
-  polygonCoverage_->getPathFromFeatureSpaceToRealSpace();
-
-  // read the .txt with the point of the path to follows
-  nav_msgs::Path pathTransformed;
-  pathTransformed = polygonCoverage_->convertFileToNavMsgsPath();
-
-  polygonCoverage_->publishNavmsg(pathTransformed);
-
-  ros::spinOnce();
-  getRosLoopRate_()->sleep();
-
-  vector<vector<double>> vectorPathTransformed = polygonCoverage_->convertNavPathToVectorVector(pathTransformed);
-
-  //TODO: check if the path is well computed
-  cout << "path well compute" << endl;
-  dynamicalSystem_->setPath(vectorPathTransformed);
   checkPath = true;
+
   return checkPath;
 }
 

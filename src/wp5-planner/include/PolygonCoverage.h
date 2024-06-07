@@ -100,7 +100,7 @@ private:
   double lateralFov_;             ///< Lateral field of view.
   nav_msgs::Path path_;           ///< Path.
   bool checkPath_;                ///< Check path.
-  ros::Subscriber pointCloudSub_;
+  ros::Subscriber pointcloudTransformedCropSub_;
   bool save_requested_;
 
   double perpendicularDistance(const Eigen::Vector3d& point,

@@ -29,34 +29,15 @@ PolygonCoverage::PolygonCoverage(ros::NodeHandle& n) : nh_(n) {
   pathPubFinal_ = nh_.advertise<nav_msgs::Path>("/result_path_final", 10, true);
   posArraySub_ = nh_.subscribe("/waypoint_list", 10, &PolygonCoverage::poseArrayCallback, this);
   pointcloudTransformedCropSub_ =
-      nh_.subscribe("/camera/pointcloud_transformed_crop", 10, &PolygonCoverage::pointCloudTransformer, this);
+      nh_.subscribe("/camera/depth/points_crop_transformed", 10, &PolygonCoverage::pointCloudCallback, this);
   py::initialize_interpreter();
   checkPath_ = false;
-  checkSave_ = false;
+  save_requested_ = false;
 }
 
 PolygonCoverage::~PolygonCoverage() { py::finalize_interpreter(); }
 
-void PolygonCoverage::pointCloudCallback(const sensor_msgs::PointCloud2::ConstPtr& msg) {
-  // Convert ROS PointCloud2 message to PCL point cloud
-  pcl::PCLPointCloud2 pcl_pc2;
-  pcl_conversions::toPCL(*msg, pcl_pc2);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
-  pcl::fromPCLPointCloud2(pcl_pc2, *cloud);
-
-  if (checkSave_) {
-    std::string file_name = string(WP5_PLANNER_DIR) + "/data/pointclouds/pointcloud_target_transformed.ply";
-
-    // Save point cloud as .ply file
-    pcl::io::savePLYFile(file_name, *cloud);
-    ROS_INFO("Point cloud saved as pointcloud_target_transformed.ply");
-    checkSave_ = false;
-  }
-}
-
 void PolygonCoverage::setOptimumRad(double rad) { optimumRad = rad; }
-void PolygonCoverage::getPointcloud() { checkSave_ = true; }
-
 
 void PolygonCoverage::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& msg) {
   // Convert PointCloud2 message to PCL point cloud
@@ -352,7 +333,6 @@ vector<vector<double>> PolygonCoverage::convertNavPathToVectorVector(const nav_m
 
   size_t size = inputPath.poses.size();
   vector<vector<double>> path;
-
   for (size_t i = 0; i < size; i++) {
     geometry_msgs::PoseStamped pose = inputPath.poses[i];
     vector<double> quatPos;

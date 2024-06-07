@@ -59,6 +59,7 @@ def main():
 
     # Perform rotation and transformations as in the MATLAB code
     rotM = euler_angle_to_rotation_matrix([0,0,(-90/360)*(2*math.pi)])
+    # rotM = euler_angle_to_rotation_matrix([0,0,(90/360)*(2*math.pi)])
     planeData_rote = np.dot(rotM, planeData_raw)
 
     center_cuverData = np.mean(cuverData, axis=1)
