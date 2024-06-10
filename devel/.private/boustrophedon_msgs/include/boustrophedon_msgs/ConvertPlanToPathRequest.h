@@ -221,3 +221,15 @@ namespace message_operations
 template<class ContainerAllocator>
 struct Printer< ::boustrophedon_msgs::ConvertPlanToPathRequest_<ContainerAllocator> >
 {
+  template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::boustrophedon_msgs::ConvertPlanToPathRequest_<ContainerAllocator>& v)
+  {
+    s << indent << "plan: ";
+    s << std::endl;
+    Printer< ::boustrophedon_msgs::StripingPlan_<ContainerAllocator> >::stream(s, indent + "  ", v.plan);
+  }
+};
+
+} // namespace message_operations
+} // namespace ros
+
+#endif // BOUSTROPHEDON_MSGS_MESSAGE_CONVERTPLANTOPATHREQUEST_H

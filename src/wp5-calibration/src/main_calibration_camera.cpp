@@ -46,6 +46,8 @@ int main(int argc, char** argv) {
   ros::NodeHandle nh;
   ros::Rate loopRate(rosFreq);
 
+  string path_package = string(WP5_CALIBRATION_DIR) + "/txts/path_calibration_camera.txt";
+
   // ros::Publisher marker_pub = nh.advertise<visualization_msgs::Marker>("interpolated_points", 10);
   ros::Publisher eef_pub = nh.advertise<geometry_msgs::PoseStamped>("calibration/ee_pose", 10);
   ros::Publisher record_pub = nh.advertise<std_msgs::Bool>("calibration/recording", 10);
@@ -80,7 +82,7 @@ int main(int argc, char** argv) {
   roboticArm = make_unique<RoboticArmUr5>();
 
   //make the path for the around tjhe ur5 for calibration
-  std::vector<std::vector<double>> concatenatedQuatPos = pathCalibrationCamera();
+  std::vector<std::vector<double>> concatenatedQuatPos = pathCalibrationCamera(path_package);
   dynamicalSystem->setPath(concatenatedQuatPos);
   dynamicalSystem->setToleranceNextPoint(0.04);
   dynamicalSystem->setLinearSpeed(0.05);

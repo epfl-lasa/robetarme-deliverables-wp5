@@ -128,6 +128,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
                                  desiredQuatPos[1], // y
                                  desiredQuatPos[2]  // z
   );
+  desiredQuat_ = desiredQuat;
 
   pathPoint_(0) = desiredQuatPos[4];
   pathPoint_(1) = desiredQuatPos[5];
@@ -138,7 +139,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
   dz = pathPoint_(2) - realPos_(2);
 
   // Calculate the difference between the two quaternions
-  Eigen::Quaterniond relativeRotation = desiredQuat * realQuat_.conjugate();
+  Eigen::Quaterniond relativeRotation = desiredQuat_ * realQuat_.conjugate();
   // Calculate the norm of the difference
   double normQuat = relativeRotation.norm();
 
@@ -159,7 +160,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getLinearDsOnePosition(vector<doubl
     checkLinearDs_ = true;
   }
 
-  return make_pair(desiredQuat, dVel);
+  return make_pair(desiredQuat_, dVel);
 }
 
 pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
@@ -170,14 +171,28 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   dVel.setZero();
   Vector3d pathPointNext;
   pathPointNext.setZero();
+  // Fill desiredQuat with the values from desiredOriVelocityFiltered_
+  (desiredPath_[iFollow_][3], // w
+   desiredPath_[iFollow_][0], // x
+   desiredPath_[iFollow_][1], // y
+   desiredPath_[iFollow_][2]  // z
+  );
 
   if (iFollow_ < desiredPath_.size() - 1) {
 
     if (iFollow_ == 0) {
+      desiredQuat_.w() = desiredPath_[iFollow_][3];
+      desiredQuat_.x() = desiredPath_[iFollow_][0];
+      desiredQuat_.y() = desiredPath_[iFollow_][1];
+      desiredQuat_.z() = desiredPath_[iFollow_][2];
       pathPointNext(0) = desiredPath_[iFollow_][4];
       pathPointNext(1) = desiredPath_[iFollow_][5];
       pathPointNext(2) = desiredPath_[iFollow_][6];
     } else {
+      desiredQuat_.w() = desiredPath_[iFollow_ + 1][3];
+      desiredQuat_.x() = desiredPath_[iFollow_ + 1][0];
+      desiredQuat_.y() = desiredPath_[iFollow_ + 1][1];
+      desiredQuat_.z() = desiredPath_[iFollow_ + 1][2];
       pathPointNext(0) = desiredPath_[iFollow_ + 1][4];
       pathPointNext(1) = desiredPath_[iFollow_ + 1][5];
       pathPointNext(2) = desiredPath_[iFollow_ + 1][6];
@@ -236,15 +251,9 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     desiredVel_ = desiredVel_ / desiredVel_.norm() * velocityLimit_;
     cout << "TOO FAST!, limite speed =" << velocityLimit_ << endl;
   }
-  // Fill desiredQuat with the values from desiredOriVelocityFiltered_
-  Eigen::Quaterniond desiredQuat(desiredOriVelocityFiltered_(3), // w
-                                 desiredOriVelocityFiltered_(0), // x
-                                 desiredOriVelocityFiltered_(1), // y
-                                 desiredOriVelocityFiltered_(2)  // z
-  );
 
-  return make_pair(desiredQuat, desiredVel_);
-  // return make_pair(desiredQuat, dVel);
+  return make_pair(desiredQuat_, desiredVel_);
+  // return make_pair(desiredQuat_, dVel);
 }
 
 std::vector<double> DynamicalSystem::getFirstQuatPos() const { return firstQuatPos_; }

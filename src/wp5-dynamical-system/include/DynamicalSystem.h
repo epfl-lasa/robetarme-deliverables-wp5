@@ -165,6 +165,8 @@ private:
   std::vector<double> firstQuatPos_;
   std::vector<double> lastQuatPos_;
   Eigen::Vector3d desiredVel_;
+  Eigen::Quaterniond desiredQuat_;
+
 
   Eigen::Vector3d realPos_;
   Eigen::Quaterniond realQuat_;

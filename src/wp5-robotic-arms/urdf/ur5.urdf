@@ -70,7 +70,7 @@
   </transmission>
   <transmission name="shoulder_lift_trans">
     <type>transmission_interface/SimpleTransmission</type>
-    <joint name="shoulder_lift_joint">
+    <joint name="shoulder_lift_joint"> expected a declaration
       <hardwareInterface>hardware_interface/PositionJointInterface</hardwareInterface>
     </joint>
     <actuator name="shoulder_lift_motor">

@@ -137,9 +137,9 @@ def test_remove_statistical_outlier(pcd, nb_neighbors_list, std_ratio_list):
 def main()->bool:
     # Initialize the ROS package manager
     rospack = rospkg.RosPack()
-
     package_path = rospack.get_path('wp5_planner')
     data_path = package_path + '/data'
+    # data_path = '../data'
 
     name_file = 'pointcloud_target_transformed'
 
@@ -160,7 +160,6 @@ def main()->bool:
     pcd.normals = o3d.utility.Vector3dVector(np.zeros((1, 3)))  # invalidate existing normals
     pcd.estimate_normals()
     pcd.orient_normals_consistent_tangent_plane(100)
-
     radii = adapt_radii_based_on_density(pcd)
 
     # # Define the methods and their parameters
@@ -186,20 +185,34 @@ def main()->bool:
     #             best_std = std
     #             best_mesh = mesh
 
-    mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth=9)
+    # Create mesh from point cloud using Poisson reconstruction
+    mesh, densities = o3d.geometry.TriangleMesh.create_from_point_cloud_poisson(pcd, depth=10)
+
     # Step 1: Clean the mesh
     mesh.remove_duplicated_vertices()
     mesh.remove_duplicated_triangles()
     mesh.remove_non_manifold_edges()
+    mesh.remove_degenerate_triangles()
+
+    # Step 2: Density-based filtering
+    vertices_to_remove = densities < np.quantile(densities, 0.05)  # Remove vertices with densities in the bottom 5%
+    mesh.remove_vertices_by_mask(vertices_to_remove)
+
     # Ensure the mesh has vertex normals
     mesh.compute_vertex_normals()
-    bbox = mesh.get_axis_aligned_bounding_box()
+
+    # Step 3: Crop the mesh to a tight bounding box
+    bbox = pcd.get_axis_aligned_bounding_box()
     mesh_poisson = mesh.crop(bbox)
+
+    # Step 4: Smooth the mesh (optional)
     mesh_smooth = mesh_poisson.filter_smooth_simple(number_of_iterations=3)
 
+    # Save the mesh to a file
     path_file = data_path + '/meshes/' + name_file + '.obj'
-    o3d.io.write_triangle_mesh(path_file, mesh_smooth)
-
+    o3d.io.write_triangle_mesh(path_file, mesh_poisson)
+    # Optional: Visualize the results
+    # o3d.visualization.draw_geometries([pcd, mesh_poisson], window_name='Poisson Mesh', width=800, height=600)
 
     return True
 

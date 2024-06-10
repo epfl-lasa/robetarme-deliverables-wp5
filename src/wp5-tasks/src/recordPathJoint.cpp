@@ -25,39 +25,40 @@ TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName)
 }
 
 bool TaskShotcrete::computePath() {
+  string alternativeYamlPath = string(WP5_TASKS_DIR) + "/txts/path_calibration.txt";
 
-  // string alternativeYamlPath = string(WP5_TASKS_DIR) + "/txts/path_calibration.txt";
+  // Open the output file in write mode
+  ofstream outputFile(alternativeYamlPath);
 
-  // // Open the output file in write mode
-  // ofstream outputFile(alternativeYamlPath);
+  // Check if the file is open
+  if (!outputFile.is_open()) {
+    cerr << "Failed to open the file." << endl;
+    return 1;
+  }
 
-  // // Check if the file is open
-  // if (!outputFile.is_open()) {
-  //   cerr << "Failed to open the file." << endl;
-  //   return 1;
-  // }
+  // Wait for Enter key press instead of sleep(5)
+  cout << "Press Enter to start...";
+  cin.get(); // Waits for Enter key press
+  while (ros::ok()) {
+    ros::spinOnce();
+    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
+    stateJoints = rosInterface_->receiveState();
+    vector<double> actualJoint = get<0>(stateJoints);
 
-  // // Wait for Enter key press instead of sleep(5)
-  // cout << "Press Enter to start...";
-  // cin.get(); // Waits for Enter key press
-  // while (ros::ok()) {
-  //   ros::spinOnce();
-  //   tuple<vector<double>, vector<double>, vector<double>> stateJoints;
-  //   stateJoints = rosInterface_->receiveState();
-  //   vector<double> actualJoint = get<0>(stateJoints);
+    // Write the values to the file in 6 columns
 
-  //   // Write the values to the file in 6 columns
+    outputFile << actualJoint[0] << " " << actualJoint[1] << " " << actualJoint[2] << " " << actualJoint[3] << " "
+               << actualJoint[4] << " " << actualJoint[5] << endl;
+    ros::Duration(2).sleep(); // Sleep for 5 seconds
+    cout << "record joint state in 3 sec " << endl;
+    ros::Duration(3).sleep(); // Sleep for 5 seconds
+  }
+  // Close the output file
+  outputFile.close();
 
-  //   outputFile << actualJoint[0] << " " << actualJoint[1] << " " << actualJoint[2] << " " << actualJoint[3] << " "
-  //              << actualJoint[4] << " " << actualJoint[5] << endl;
-  //   ros::Duration(2).sleep(); // Sleep for 5 seconds
-  //   cout << "record joint state in 3 sec " << endl;
-  //   ros::Duration(3).sleep(); // Sleep for 5 seconds
-  // }
-  // // Close the output file
-  // outputFile.close();
+  return false;
 
-  // return false;
+  //------------------------------------------------------------------------------------------------
   bool checkPath = false;
 
   //TODO: understand why checkpython is false

@@ -3,6 +3,8 @@
 #include <std_msgs/Bool.h>
 
 #include <Eigen/Dense>
+#include <fstream>
+#include <iostream>
 
 using namespace std;
 using namespace Eigen;
@@ -128,70 +130,44 @@ vector<vector<double>> pathCalibration() {
   return concatenatedQuatPos;
 }
 
-vector<vector<double>> pathCalibrationCamera() {
-  double size = 0.8;
-  double heigtStep = 0.2;
-  double heigtminimal = 0.5;
-  double i = 1;
-  int n = 12;
-  std::vector<std::vector<double>> concatenatedQuatPos;
+vector<vector<double>> pathCalibrationCamera(const string& filename) {
 
-  Vector3d p1(0.26, 0.198, 1.0);
-  Quaterniond q1(-0.19414157222403933, 0.7450078313135486, 0.3123063452536237, -0.5565403201298049);
-  Vector3d p2(0.2732354992385943, 0.19453366119625992, 0.8);
-  Quaterniond q2(0.45, -0.46, -0.34, 0.7);
-  Vector3d p3(0.48459948593552965, 0.4114042526763986, 0.85);
-  Quaterniond q3(0.62, 0.62, -0.18, -0.43);
-  Vector3d p4(0.6629256296089461, 0.05162022661732567, 0.9853390823848523);
-  Quaterniond q4(-0.1913603335637698, 0.7466248662326888, 0.31030201629895104, -0.5564577167603915);
-  Vector3d p5(0.3522821119794277, 0.24078264008416814, 0.92);
-  Quaterniond q5(0.6, 0.4239406184741184, -0.5109122142734902, -0.5593981937893171);
+  int n = 15;
+  vector<vector<double>> concatenatedQuatPos;
 
-  // Interpolate points
-  std::vector<std::vector<double>> interpolatedPoints1 = interpolate2Points(p1, p2, n);
-  std::vector<std::vector<double>> interpolateQuaternions1 = interpolateQuaternions(q1, q2, n);
-
-  // Concatenate interpolated quaternions and points
-  for (size_t i = 0; i < interpolatedPoints1.size(); ++i) {
-    std::vector<double> data;
-    data.insert(data.end(), interpolateQuaternions1[i].begin(), interpolateQuaternions1[i].end());
-    data.insert(data.end(), interpolatedPoints1[i].begin(), interpolatedPoints1[i].end());
-    concatenatedQuatPos.push_back(data);
+  ifstream infile(filename);
+  if (!infile.is_open()) {
+    cerr << "Unable to open file: " << filename << endl;
+    return concatenatedQuatPos;
   }
 
-  std::vector<std::vector<double>> interpolatedPoints2 = interpolate2Points(p2, p3, n);
-  std::vector<std::vector<double>> interpolateQuaternions2 = interpolateQuaternions(q2, q3, n);
+  vector<Vector3d> points;
+  vector<Quaterniond> quaternions;
 
-  // Concatenate interpolated quaternions and points
-  for (size_t i = 0; i < interpolatedPoints2.size(); ++i) {
-    std::vector<double> data;
-    data.insert(data.end(), interpolateQuaternions2[i].begin(), interpolateQuaternions2[i].end());
-    data.insert(data.end(), interpolatedPoints2[i].begin(), interpolatedPoints2[i].end());
-    concatenatedQuatPos.push_back(data);
+  double x, y, z, qx, qy, qz, qw;
+  while (infile >> qx >> qy >> qz >> qw >> x >> y >> z) {
+    Eigen::Vector3d point(x, y, z);
+    Quaterniond quaternion(qw, qx, qy, qz);
+    points.push_back(point);
+    quaternions.push_back(quaternion);
   }
 
-  std::vector<std::vector<double>> interpolatedPoints3 = interpolate2Points(p3, p4, n);
-  std::vector<std::vector<double>> interpolateQuaternions3 = interpolateQuaternions(q3, q4, n);
+  infile.close();
 
-  // Concatenate interpolated quaternions and points
-  for (size_t i = 0; i < interpolatedPoints3.size(); ++i) {
-    std::vector<double> data;
-    data.insert(data.end(), interpolateQuaternions3[i].begin(), interpolateQuaternions3[i].end());
-    data.insert(data.end(), interpolatedPoints3[i].begin(), interpolatedPoints3[i].end());
-    concatenatedQuatPos.push_back(data);
+  for (size_t i = 0; i < points.size() - 1; ++i) {
+    vector<vector<double>> interpolatedPoints = interpolate2Points(points[i], points[i + 1], n);
+    vector<vector<double>> interpolatedQuaternions = interpolateQuaternions(quaternions[i], quaternions[i + 1], n);
+
+    for (size_t j = 0; j < interpolatedPoints.size(); ++j) {
+      vector<double> data;
+      data.insert(data.end(), interpolatedQuaternions[j].begin(), interpolatedQuaternions[j].end());
+      data.insert(data.end(), interpolatedPoints[j].begin(), interpolatedPoints[j].end());
+      concatenatedQuatPos.push_back(data);
+    }
   }
-
-  std::vector<std::vector<double>> interpolatedPoints4 = interpolate2Points(p4, p5, n);
-  std::vector<std::vector<double>> interpolateQuaternions4 = interpolateQuaternions(q4, q5, n);
-
-  // Concatenate interpolated quaternions and points
-  for (size_t i = 0; i < interpolatedPoints4.size(); ++i) {
-    std::vector<double> data;
-    data.insert(data.end(), interpolateQuaternions4[i].begin(), interpolateQuaternions4[i].end());
-    data.insert(data.end(), interpolatedPoints4[i].begin(), interpolatedPoints4[i].end());
-    concatenatedQuatPos.push_back(data);
-  }
-
+  for (size_t i = 0; i < concatenatedQuatPos.size(); ++i) {
+   cout << concatenatedQuatPos[i][0] << " " << concatenatedQuatPos[i][1] << " " << concatenatedQuatPos[i][2] << " " << concatenatedQuatPos[i][3] << " " << concatenatedQuatPos[i][4] << " " << concatenatedQuatPos[i][5] << " " << concatenatedQuatPos[i][6] << endl;
+  }  
   return concatenatedQuatPos;
 }
 geometry_msgs::PoseStamped fillPoseStamped(const Eigen::Vector3d& position, const Eigen::Quaterniond& orientation) {

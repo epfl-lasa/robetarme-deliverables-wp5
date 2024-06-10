@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_BUILD_TYPE Release)
 
 # Save the path during compilation to solve inclusion problems with linked files
-add_definitions("-DWP5_TASKS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
+add_definitions("-DWP5_CALIBRATION_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
 find_package(catkin REQUIRED COMPONENTS
   roscpp
@@ -65,6 +65,18 @@ add_executable(wp5_calibration_camera_node
 src/main_calibration_camera.cpp
 )
 target_link_libraries(wp5_calibration_camera_node PRIVATE
+${catkin_LIBRARIES}
+${control_libraries_LIBRARIES}
+${Boost_LIBRARIES}
+${YAML_CPP_LIBRARIES}
+)
+
+
+# Add the main_temp node
+add_executable(wp5_calibration_camera_joint_node
+src/main_calibration_camera_jointspace.cpp
+)
+target_link_libraries(wp5_calibration_camera_joint_node PRIVATE
 ${catkin_LIBRARIES}
 ${control_libraries_LIBRARIES}
 ${Boost_LIBRARIES}
