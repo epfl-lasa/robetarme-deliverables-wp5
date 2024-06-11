@@ -13,18 +13,26 @@ set(CMAKE_BUILD_TYPE Release)
 # Save the path during compilation to solve inclusion problems with linked files
 add_definitions("-DWP5_TOOLS_DIR=\"${CMAKE_CURRENT_SOURCE_DIR}\"")
 
+
+find_package(catkin REQUIRED COMPONENTS
+  roscpp
+  roslib
+  std_msgs
+  sensor_msgs
+  geometry_msgs
+)
+
 # Find packages if any
 find_package(catkin REQUIRED COMPONENTS)
 find_package(Eigen3 3.4 REQUIRED)
-find_package(control_libraries 7.3.0 REQUIRED)
 find_package(yaml-cpp REQUIRED)
 
 ## The catkin_package macro generates cmake config files for your package
 catkin_package(
   INCLUDE_DIRS include
   LIBRARIES ${PROJECT_NAME}
-  CATKIN_DEPENDS
-  DEPENDS EIGEN3 control_libraries YAML_CPP
+  CATKIN_DEPENDS roscpp roslib std_msgs sensor_msgs geometry_msgs
+  DEPENDS EIGEN3  YAML_CPP
 )
 
 include_directories(
@@ -59,8 +67,8 @@ target_include_directories(${PROJECT_NAME} PRIVATE
 add_dependencies(${PROJECT_NAME} ${catkin_EXPORTED_TARGETS} ${${PROJECT_NAME}_EXPORTED_TARGETS})
 target_link_libraries(${PROJECT_NAME} PRIVATE
   ${catkin_LIBRARIES}
+  ${roslib_LIBRARIES}
   Eigen3::Eigen
-  ${control_libraries_LIBRARIES}
   ${YAML_CPP_LIBRARIES}
 )
 

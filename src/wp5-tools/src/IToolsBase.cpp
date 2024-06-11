@@ -10,14 +10,13 @@
  *
  */
 #include "IToolsBase.h"
-#include "fstream"
 
-
-#include <OsqpEigen/OsqpEigen.h>
+#include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
+#include "fstream"
+
 using namespace std;
-using namespace Eigen;
 
 void IToolsBase::takeYaml(string taskname) {
   taskname_ = taskname;

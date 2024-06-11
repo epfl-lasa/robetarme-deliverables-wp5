@@ -9,13 +9,15 @@
  * @copyright Copyright (c) 2024 - EPFL
  *
  */
-
 #include "ToolsSurfaceFinishing.h"
 
+#include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
 
 #include <fstream>
 
+#include "ToolsSurfaceFinishing.h"
+
 using namespace std;
 
-ToolsSurfaceFinishing::ToolsSurfaceFinishing() { takeYaml("surface_finishing"); }
+ToolsSurfaceFinishing::ToolsSurfaceFinishing(ros::NodeHandle& n) : IToolsBase(n) { takeYaml("surface_finishing"); }

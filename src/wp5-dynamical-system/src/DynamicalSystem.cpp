@@ -171,12 +171,7 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   dVel.setZero();
   Vector3d pathPointNext;
   pathPointNext.setZero();
-  // Fill desiredQuat with the values from desiredOriVelocityFiltered_
-  (desiredPath_[iFollow_][3], // w
-   desiredPath_[iFollow_][0], // x
-   desiredPath_[iFollow_][1], // y
-   desiredPath_[iFollow_][2]  // z
-  );
+
 
   if (iFollow_ < desiredPath_.size() - 1) {
 
@@ -252,8 +247,8 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     cout << "TOO FAST!, limite speed =" << velocityLimit_ << endl;
   }
 
-  return make_pair(desiredQuat_, desiredVel_);
-  // return make_pair(desiredQuat_, dVel);
+  // return make_pair(desiredQuat_, desiredVel_);
+  return make_pair(desiredQuat_, dVel);
 }
 
 std::vector<double> DynamicalSystem::getFirstQuatPos() const { return firstQuatPos_; }
@@ -279,7 +274,7 @@ VectorXd DynamicalSystem::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Ve
   if (tmpAngularVel.norm() > maxDq)
     tmpAngularVel = maxDq * tmpAngularVel.normalized();
 
-  double dsGainOri = 0.50;
+  double dsGainOri = 2;
   double thetaGq = (-.5 / (4 * maxDq * maxDq)) * tmpAngularVel.transpose() * tmpAngularVel;
   Vector3d omegaOut = 2 * dsGainOri * (1 + exp(thetaGq)) * tmpAngularVel;
 
@@ -300,11 +295,7 @@ Vector3d DynamicalSystem::updateLimitCycle3DPosVelWith2DLC(Vector3d pos, Vector3
   Vector3d posEig;
 
   //--- trans real ori to rotation matrix
-  Quaterniond new_quat;
-  new_quat.w() = desiredOriVelocityFiltered_(3);
-  new_quat.x() = desiredOriVelocityFiltered_(0);
-  new_quat.y() = desiredOriVelocityFiltered_(1);
-  new_quat.z() = desiredOriVelocityFiltered_(2);
+  Quaterniond new_quat = desiredQuat_;
   Matrix3d rotMat = new_quat.toRotationMatrix();
 
   pos = pos - targetPoseCircleDS;

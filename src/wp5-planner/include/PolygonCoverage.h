@@ -15,9 +15,9 @@
 #include <geometry_msgs/PoseArray.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <geometry_msgs/Twist.h>
-#include <sensor_msgs/PointCloud2.h>
 #include <nav_msgs/Path.h>
 #include <ros/ros.h>
+#include <sensor_msgs/PointCloud2.h>
 #include <sys/types.h>
 
 #include <eigen3/Eigen/Dense>
@@ -79,6 +79,7 @@ public:
   nav_msgs::Path convertFileToNavMsgsPath();
   bool pointCloudTransformer();
   std::vector<Eigen::Vector3d> rdp(const std::vector<Eigen::Vector3d>& points, double epsilon);
+  std::vector<std::vector<double>> rdp(std::vector<std::vector<double>>& path, double epsilon);
   std::vector<std::vector<double>> convertNavPathToVectorVector(const nav_msgs::Path& inputPath);
   std::vector<Eigen::Vector3d> getFlatPolygonFromTxt();
   bool getPathFromFeatureSpaceToRealSpace();
@@ -106,6 +107,8 @@ private:
   double perpendicularDistance(const Eigen::Vector3d& point,
                                const Eigen::Vector3d& lineStart,
                                const Eigen::Vector3d& lineEnd);
+  double perpendicularDistance(const std::vector<double>& pt,
+                               const std::vector<double>& lineStart,
+                               const std::vector<double>& lineEnd);
   void pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr& msg);
-
-  };
+};

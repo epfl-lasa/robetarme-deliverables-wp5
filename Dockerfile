@@ -176,7 +176,7 @@ RUN chmod +x /fix-perms.sh
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 #-------------------------------------------------------------------------------
-WORKDIR /home/${USER}/catkin_ws                                    
+RUN echo "cd /home/${USER}/catkin_ws" >> ~/.bashrc
 RUN echo "source /opt/ros/${ROS_DISTRO}/setup.bash" >> ~/.bashrc
 RUN echo "source devel/setup.bash" >> ~/.bashrc
 

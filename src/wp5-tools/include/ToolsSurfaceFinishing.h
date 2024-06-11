@@ -21,7 +21,7 @@
  */
 class ToolsSurfaceFinishing : public IToolsBase {
 public:
-  explicit ToolsSurfaceFinishing();
+  explicit ToolsSurfaceFinishing(ros::NodeHandle& n);
 
 protected:
 private:

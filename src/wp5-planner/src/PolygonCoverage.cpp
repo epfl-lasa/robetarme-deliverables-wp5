@@ -10,11 +10,11 @@
 #include <tf2_geometry_msgs/tf2_geometry_msgs.h>
 
 #include <Eigen/Dense>
-#include <chrono> // Include this header for std::chrono
+#include <chrono> // Include this header for chrono
 #include <fstream>
 #include <iostream>
 #include <string>
-#include <thread> // Include this header for std::this_thread
+#include <thread> // Include this header for this_thread
 
 #include "polygon_coverage_msgs/PlannerService.h"
 #include "polygon_coverage_msgs/PolygonService.h"
@@ -48,7 +48,7 @@ void PolygonCoverage::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr&
 
   // Save the point cloud only if requested
   if (save_requested_) {
-    std::string file_path = std::string(WP5_PLANNER_DIR) + "/data/pointclouds/pointcloud_target_transformed.ply";
+    string file_path = string(WP5_PLANNER_DIR) + "/data/pointclouds/pointcloud_target_transformed.ply";
 
     if (pcl::io::savePLYFile(file_path, *cloud) == 0) {
       ROS_INFO("Transformed point cloud saved as pointcloud_target_transformed.ply");
@@ -104,8 +104,8 @@ void PolygonCoverage::closeRosLaunch() {
   }
 }
 
-void PolygonCoverage::callSetPolygonService(const std::vector<Eigen::Vector3d>& hull_points,
-                                            const std::vector<Eigen::Vector3d>& hole_points) {
+void PolygonCoverage::callSetPolygonService(const vector<Eigen::Vector3d>& hull_points,
+                                            const vector<Eigen::Vector3d>& hole_points) {
   // Create a service client
   ros::ServiceClient client = nh_.serviceClient<polygon_coverage_msgs::PolygonService>("/coverage_planner/set_polygon");
 
@@ -210,10 +210,10 @@ void PolygonCoverage::publishNavmsg(nav_msgs::Path path) {
 }
 
 // Function to write the positions from a nav_msgs::Path to a file
-void PolygonCoverage::writePathToFile(const nav_msgs::Path& path, const std::string& name) {
+void PolygonCoverage::writePathToFile(const nav_msgs::Path& path, const string& name) {
   // Extract polygons for boustrophedon
-  std::string file_path = string(WP5_PLANNER_DIR) + "/data/paths/" + name + ".txt";
-  std::ofstream outputFile(file_path);
+  string file_path = string(WP5_PLANNER_DIR) + "/data/paths/" + name + ".txt";
+  ofstream outputFile(file_path);
   if (!outputFile.is_open()) {
     ROS_ERROR("Unable to open file for writing.");
     return;
@@ -227,7 +227,7 @@ void PolygonCoverage::writePathToFile(const nav_msgs::Path& path, const std::str
   outputFile.close();
 }
 
-void PolygonCoverage::seePolygonFlat(std::vector<Eigen::Vector3d> polygonsPositions) {
+void PolygonCoverage::seePolygonFlat(vector<Eigen::Vector3d> polygonsPositions) {
 
   geometry_msgs::PolygonStamped visualpolygonTarget;
   visualpolygonTarget.header.frame_id = "base_link";
@@ -248,15 +248,16 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
   nav_msgs::Path path;
   path.header.frame_id = frame_id;
 
-  std::ifstream infile(file_path);
+  ifstream infile(file_path);
   if (!infile.is_open()) {
     ROS_ERROR("Unable to open file: %s", file_path.c_str());
     return path;
   }
 
-  std::string line;
-  while (std::getline(infile, line)) {
-    std::istringstream iss(line);
+  string line;
+  int i = 0;
+  while (getline(infile, line)) {
+    istringstream iss(line);
     double x, y, z, quatw, quatx, quaty, quatz;
     if (!(iss >> x >> y >> z >> quatw >> quatx >> quaty >> quatz)) {
       ROS_WARN("Invalid line format: %s", line.c_str());
@@ -265,6 +266,8 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
 
     geometry_msgs::PoseStamped pose_stamped;
     pose_stamped.header.frame_id = frame_id;
+    pose_stamped.header.seq = i;
+
     pose_stamped.pose.position.x = x;
     pose_stamped.pose.position.y = y;
     pose_stamped.pose.position.z = z;
@@ -274,6 +277,7 @@ nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
     pose_stamped.pose.orientation.z = quatz;
 
     path.poses.push_back(pose_stamped);
+    i++;
   }
 
   infile.close();
@@ -291,10 +295,10 @@ double PolygonCoverage::perpendicularDistance(const Eigen::Vector3d& point,
 }
 
 // Ramer-Douglas-Peucker algorithm
-std::vector<Eigen::Vector3d> PolygonCoverage::rdp(const std::vector<Eigen::Vector3d>& points, double epsilon) {
-  std::vector<Eigen::Vector3d> result;
+vector<Eigen::Vector3d> PolygonCoverage::rdp(const vector<Eigen::Vector3d>& points, double epsilon) {
+  vector<Eigen::Vector3d> result;
   if (points.size() < 2) {
-    throw std::invalid_argument("Not enough points to simplify");
+    throw invalid_argument("Not enough points to simplify");
   }
 
   double dmax = 0.0;
@@ -310,10 +314,10 @@ std::vector<Eigen::Vector3d> PolygonCoverage::rdp(const std::vector<Eigen::Vecto
   }
 
   if (dmax > epsilon) {
-    std::vector<Eigen::Vector3d> recResults1;
-    std::vector<Eigen::Vector3d> recResults2;
-    std::vector<Eigen::Vector3d> firstLine(points.begin(), points.begin() + index + 1);
-    std::vector<Eigen::Vector3d> lastLine(points.begin() + index, points.end());
+    vector<Eigen::Vector3d> recResults1;
+    vector<Eigen::Vector3d> recResults2;
+    vector<Eigen::Vector3d> firstLine(points.begin(), points.begin() + index + 1);
+    vector<Eigen::Vector3d> lastLine(points.begin() + index, points.end());
 
     recResults1 = rdp(firstLine, epsilon);
     recResults2 = rdp(lastLine, epsilon);
@@ -329,26 +333,102 @@ std::vector<Eigen::Vector3d> PolygonCoverage::rdp(const std::vector<Eigen::Vecto
   return result;
 }
 
+// Function to calculate the perpendicular distance from a point to a line segment
+double PolygonCoverage::perpendicularDistance(const vector<double>& pt,
+                                              const vector<double>& lineStart,
+                                              const vector<double>& lineEnd) {
+  double dx = lineEnd[0] - lineStart[0];
+  double dy = lineEnd[1] - lineStart[1];
+  double mag = sqrt(dx * dx + dy * dy);
+  if (mag > 0.0) {
+    dx /= mag;
+    dy /= mag;
+  }
+
+  double pvx = pt[0] - lineStart[0];
+  double pvy = pt[1] - lineStart[1];
+  double pvdot = dx * pvx + dy * pvy;
+  double ax = pvx - pvdot * dx;
+  double ay = pvy - pvdot * dy;
+
+  return sqrt(ax * ax + ay * ay);
+}
+
+// RDP algorithm to simplify the path
+vector<vector<double>> PolygonCoverage::rdp(vector<vector<double>>& path, double epsilon) {
+  vector<vector<double>> out;
+  if (path.size() < 2) {
+    throw invalid_argument("Not enough points to simplify");
+  }
+
+  double dmax = 0.0;
+  size_t index = 0;
+  size_t end = path.size() - 1;
+
+  for (size_t i = 1; i < end; ++i) {
+    double d = perpendicularDistance(path[i], path[0], path[end]);
+    if (d > dmax) {
+      index = i;
+      dmax = d;
+    }
+  }
+
+  if (dmax > epsilon) {
+    vector<vector<double>> recResults1;
+    vector<vector<double>> recResults2;
+    vector<vector<double>> firstLine(path.begin(), path.begin() + index + 1);
+    vector<vector<double>> lastLine(path.begin() + index, path.end());
+
+    recResults1 = rdp(firstLine, epsilon);
+    recResults2 = rdp(lastLine, epsilon);
+
+    out.assign(recResults1.begin(), recResults1.end() - 1);
+    out.insert(out.end(), recResults2.begin(), recResults2.end());
+  } else {
+    out.clear();
+    out.push_back(path[0]);
+    out.push_back(path[end]);
+  }
+  return out;
+}
+
 vector<vector<double>> PolygonCoverage::convertNavPathToVectorVector(const nav_msgs::Path& inputPath) {
 
   size_t size = inputPath.poses.size();
   vector<vector<double>> path;
+  string file_path = string(WP5_PLANNER_DIR) + "/data/paths/waypointInOriSpaceConverted.txt";
+
+  ofstream outFile(file_path);
+  if (!outFile) {
+    cerr << "Error opening file for writing" << endl;
+    return path;
+  }
+
   for (size_t i = 0; i < size; i++) {
     geometry_msgs::PoseStamped pose = inputPath.poses[i];
     vector<double> quatPos;
 
+    // Extract quaternion orientation
     quatPos.push_back(pose.pose.orientation.x);
     quatPos.push_back(pose.pose.orientation.y);
     quatPos.push_back(pose.pose.orientation.z);
     quatPos.push_back(pose.pose.orientation.w);
 
+    // Extract position
     quatPos.push_back(pose.pose.position.x);
     quatPos.push_back(pose.pose.position.y);
     quatPos.push_back(pose.pose.position.z);
 
+    // Add to path
     path.push_back(quatPos);
+
+    // Write to file
+    outFile << pose.pose.position.x << " " << pose.pose.position.y << " " << pose.pose.position.z << " "
+            << pose.pose.orientation.x << " " << pose.pose.orientation.y << " " << pose.pose.orientation.z << " "
+            << pose.pose.orientation.w << endl;
   }
 
+  outFile.close();
   return path;
 }
 vector<Eigen::Vector3d> PolygonCoverage::getFlatPolygonFromTxt() {
@@ -400,7 +480,7 @@ bool PolygonCoverage::pointCloudTransformer() {
     // Convert the Python result to a C++ boolean directly
     success = py::cast<bool>(result);
   } catch (const py::error_already_set& e) {
-    std::cerr << "Python error: " << e.what() << std::endl;
+    cerr << "Python error: " << e.what() << endl;
   }
 
   return success; // Return the result
@@ -431,7 +511,7 @@ bool PolygonCoverage::getPathFromFeatureSpaceToRealSpace() {
     // Convert the Python result to a C++ boolean directly
     success = py::cast<bool>(result);
   } catch (const py::error_already_set& e) {
-    std::cerr << "Python error: " << e.what() << std::endl;
+    cerr << "Python error: " << e.what() << endl;
   }
 
   return success; // Return the result
@@ -461,7 +541,7 @@ bool PolygonCoverage::convertPclToPolygon() {
     // Convert the Python result to a C++ boolean directly
     success = py::cast<bool>(result);
   } catch (const py::error_already_set& e) {
-    std::cerr << "Python error: " << e.what() << std::endl;
+    cerr << "Python error: " << e.what() << endl;
   }
 
   return success; // Return the result
@@ -491,7 +571,7 @@ bool PolygonCoverage::makeMesh() {
     // Convert the Python result to a C++ boolean directly
     success = py::cast<bool>(result);
   } catch (const py::error_already_set& e) {
-    std::cerr << "Python error: " << e.what() << std::endl;
+    cerr << "Python error: " << e.what() << endl;
   }
 
   return success; // Return the result
@@ -522,7 +602,7 @@ bool PolygonCoverage::makeUVmap() {
     // Convert the Python result to a C++ boolean directly
     success = py::cast<bool>(result);
   } catch (const py::error_already_set& e) {
-    std::cerr << "Python error: " << e.what() << std::endl;
+    cerr << "Python error: " << e.what() << endl;
   }
 
   return success; // Return the result

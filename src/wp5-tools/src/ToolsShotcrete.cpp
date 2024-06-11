@@ -12,12 +12,24 @@
 
 #include "ToolsShotcrete.h"
 
+#include <ros/ros.h>
+#include <std_msgs/Bool.h>
 #include <yaml-cpp/yaml.h>
 
 #include <fstream>
 
 using namespace std;
 
-ToolsShotcrete::ToolsShotcrete() { takeYaml("shotcrete"); }
+ToolsShotcrete::ToolsShotcrete(ros::NodeHandle& n) : IToolsBase(n) {
+  takeYaml("shotcrete");
+  pubCommand_ = nh_.advertise<std_msgs::Bool>("servo_command", 10);
+  activateTool(false);
+}
 
-// ToolsShotcrete::activateTool(function<void()> func) { func(); }
+void ToolsShotcrete::activateTool(bool activateTrue) {
+  // if True will activate the tool
+  // if False will deactivate the tool
+  std_msgs::Bool msg;
+  msg.data = activateTrue;
+  pubCommand_.publish(msg);
+}

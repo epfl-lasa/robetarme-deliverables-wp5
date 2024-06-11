@@ -10,16 +10,8 @@
 
 #pragma once
 
+#include <ros/ros.h>
 #include <yaml-cpp/yaml.h>
-
-#include <cmath>
-#include <eigen3/Eigen/Dense>
-#include <iostream>
-#include <map>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
 
 /**
  * @brief Mother class to create all the prototype functions needed in different robotic arms.
@@ -30,19 +22,19 @@ class IToolsBase {
 public:
   /**
 IToolsBase   */
-  IToolsBase() = default;
-
+  IToolsBase(ros::NodeHandle& nh) : nh_(nh) {} // Constructor with initializer list
   /**
    * @brief Destructor for IToolsBase.
    */
   virtual ~IToolsBase() = default;
-
+  virtual void activateTool(bool flag) = 0; 
   /// @brief  get the offset tool
   /// @return  the offset tool
   double getOffset();
 
 protected:
   void takeYaml(std::string name);
+  ros::NodeHandle& nh_;
 
 private:
   double offsetTool_;

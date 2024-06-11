@@ -11,14 +11,12 @@ TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, str
   polygonCoverage_ = std::make_unique<PolygonCoverage>(nodeHandle);
 
   // Create an unique pointer for the instance of TargetExtraction
-  tools_ = make_unique<ToolsSurfaceFinishing>();
+  // tools_ = make_unique<ToolsSurfaceFinishing>(nodeHandle);
 
   takeConfigTask("surface_finishing");
   dynamicalSystem_->setOffset(tools_->getOffset());
   dynamicalSystem_->setLimitCycleSpeedConv(limitCycleSpeed_, convRate_);
   dynamicalSystem_->setLinearSpeed(linearSpeed_);
-
-  // Create an unique pointer for the instance of PathPlanner
 
   // Create an unique pointer for the instance of PathPlanner
   outputTwist_ = Eigen::VectorXd::Zero(6);

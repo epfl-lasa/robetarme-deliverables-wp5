@@ -10,9 +10,11 @@
  */
 #pragma once
 
-#include "IToolsBase.h"
+#include <std_msgs/Bool.h>
+
 #include <functional>
 
+#include "IToolsBase.h"
 /**
  * @brief Child class to create all the prototype fonctions needed in the different robotic arms.
  *
@@ -20,11 +22,12 @@
  */
 class ToolsShotcrete : public IToolsBase {
 public:
-  explicit ToolsShotcrete();
-  // void activateTool(std::function<void()> func);
+  explicit ToolsShotcrete(ros::NodeHandle& n);
+  void activateTool(bool flag) override;
 
 protected:
 private:
   double offsetTool_;
   double offsetTarget_;
+  ros::Publisher pubCommand_; /**< Publisher for robot state. */
 };
