@@ -11,6 +11,12 @@ TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName)
 
   // Create an unique pointer for the instance of Tool
   tools_ = make_unique<ToolsShotcrete>(nodeHandle);
+  while (ros::ok() && tools_->getState()) {
+    ros::spinOnce();
+    getRosLoopRate_()->sleep();
+    tools_->activateTool(false);
+    cout << "waiting for the tool to be activated" << endl;
+  }
 
   takeConfigTask("shotcrete");
   dynamicalSystem_->setOffset(tools_->getOffset());
@@ -19,13 +25,12 @@ TaskShotcrete::TaskShotcrete(ros::NodeHandle& nh, double freq, string robotName)
 }
 
 bool TaskShotcrete::computePath() {
-
   bool checkPath = false;
 
   //TODO: understand why checkpython is false
   cout << "get Pointcloud.. " << endl;
 
-  // polygonCoverage_->getPointCloud();
+  polygonCoverage_->getPointCloud();
   ros::spinOnce();
   getRosLoopRate_()->sleep();
 
@@ -63,7 +68,7 @@ bool TaskShotcrete::computePath() {
   polygonCoverage_->callSetPolygonService(simplifiedPolygon, holl_points);
 
   //set start and finish point for boustrophedon
-  polygonCoverage_->callStartService(simplifiedPolygon[0], simplifiedPolygon[0]);
+  polygonCoverage_->callStartService(simplifiedPolygon[0], simplifiedPolygon[3]);
   string name = "waypointInFeatureSpace";
   while (ros::ok() && !polygonCoverage_->checkPathReceived()) {
     ros::spinOnce();
@@ -98,7 +103,13 @@ bool TaskShotcrete::computePath() {
 bool TaskShotcrete::execute() {
   cout << "preforming shotcrete ..." << endl;
   dynamicalSystem_->resetInit();
-  tools_->activateTool(true);
+
+  while (ros::ok() && !tools_->getState()) {
+    ros::spinOnce();
+    getRosLoopRate_()->sleep();
+    tools_->activateTool(true);
+    cout << "waiting for the tool to be activated" << endl;
+  }
 
   while (ros::ok() && !dynamicalSystem_->isFinished()) {
     // set and get desired speed
@@ -111,7 +122,6 @@ bool TaskShotcrete::execute() {
 
     dynamicalSystem_->setCartPose(pairActualQuatPos);
     pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
-
     VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
     vector<double> desiredJointSpeed = roboticArm_->lowLevelController(stateJoints, twistDesiredEigen);
 
@@ -137,7 +147,10 @@ bool TaskShotcrete::execute() {
     ros::spinOnce();
     getRosLoopRate_()->sleep();
   }
-  tools_->activateTool(false);
-
+  while (ros::ok() && tools_->getState()) {
+    ros::spinOnce();
+    getRosLoopRate_()->sleep();
+    tools_->activateTool(false);
+  }
   return dynamicalSystem_->isFinished();
 }

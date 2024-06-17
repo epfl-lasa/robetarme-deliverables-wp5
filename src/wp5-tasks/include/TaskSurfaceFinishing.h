@@ -10,11 +10,11 @@
 #include <string>
 
 #include "BoustrophedonServer.h"
-#include "PolygonCoverage.h"
 #include "DynamicalSystem.h"
 #include "IRoboticArmBase.h"
 #include "ITaskBase.h"
 #include "PathPlanner.h"
+#include "PolygonCoverage.h"
 #include "RosInterfaceNoetic.h"
 #include "TargetExtraction.h"
 
@@ -45,4 +45,14 @@ private:
 
   Eigen::VectorXd decoderWrench();
   Eigen::VectorXd contactUpdateDS();
+  double makeContact();
+  double PIController(double error);
+
+  double desiredContactForce_;
+  double twistForContactForce_;
+  std::vector<std::vector<double>> vectorPathTransformed_;
+  double kp_;           // Proportional gain
+  double ki_;           // Integral gain
+  double integral_;     // Integral term
+  ros::Time prev_time_; // Previous time for integral calculation
 };

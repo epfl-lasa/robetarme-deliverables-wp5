@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.interpolate import interp1d
+from scipy.interpolate import CubicSpline
 import matplotlib.pyplot as plt
 
 # Step 1: Read the joint configurations from a .txt file
@@ -9,12 +9,12 @@ joint_configurations = np.loadtxt(file_path)
 # Define the time steps corresponding to each configuration
 t = np.linspace(0, 1, len(joint_configurations))
 
-# Step 2: Create a linear interpolation for each joint
-linear_interpolations = [interp1d(t, joint_configurations[:, i], kind='linear') for i in range(joint_configurations.shape[1])]
+# Step 2: Create a cubic spline for each joint
+splines = [CubicSpline(t, joint_configurations[:, i]) for i in range(joint_configurations.shape[1])]
 
-# Generate points along the interpolation for smooth trajectory
+# Generate points along the spline for smooth trajectory
 t_fine = np.linspace(0, 1, 100)
-trajectory = np.array([interp(t_fine) for interp in linear_interpolations]).T
+trajectory = np.array([spline(t_fine) for spline in splines]).T
 
 # Step 3: Save the smoothed trajectory to a .txt file
 output_file_path = '../txts/smoothed_trajectory.txt'

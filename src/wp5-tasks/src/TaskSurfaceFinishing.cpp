@@ -11,7 +11,7 @@ TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, str
   polygonCoverage_ = std::make_unique<PolygonCoverage>(nodeHandle);
 
   // Create an unique pointer for the instance of TargetExtraction
-  // tools_ = make_unique<ToolsSurfaceFinishing>(nodeHandle);
+  tools_ = make_unique<ToolsSurfaceFinishing>(nodeHandle);
 
   takeConfigTask("surface_finishing");
   dynamicalSystem_->setOffset(tools_->getOffset());
@@ -20,6 +20,10 @@ TaskSurfaceFinishing::TaskSurfaceFinishing(ros::NodeHandle& nh, double freq, str
 
   // Create an unique pointer for the instance of PathPlanner
   outputTwist_ = Eigen::VectorXd::Zero(6);
+  desiredContactForce_ = -10;
+  integral_ = 0;
+  kp_ = 0.004;
+  ki_ = 0.0006;
 }
 
 bool TaskSurfaceFinishing::computePath() {
@@ -96,6 +100,7 @@ bool TaskSurfaceFinishing::computePath() {
   //TODO: check if the path is well computed
   cout << "path well compute" << endl;
   dynamicalSystem_->setPath(vectorPathTransformed);
+  vectorPathTransformed_ = vectorPathTransformed;
   checkPath = true;
   return checkPath;
 }
@@ -104,13 +109,15 @@ bool TaskSurfaceFinishing::execute() {
   set_bias();
 
   cout << "preforming limitcycle ..." << endl;
+  dynamicalSystem_->setOffset(tools_->getOffset() - makeContact() - 0.005);
+  dynamicalSystem_->setPath(vectorPathTransformed_);
 
   dynamicalSystem_->resetInit();
-  dynamicalSystem_->resetCheckLinearDs();
 
   vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
 
-  while (ros::ok()) {
+  while (ros::ok() && !dynamicalSystem_->isFinished()) {
+    // while (ros::ok()) {
 
     tuple<vector<double>, vector<double>, vector<double>> stateJoints;
     stateJoints = rosInterface_->receiveState();
@@ -121,14 +128,14 @@ bool TaskSurfaceFinishing::execute() {
 
     dynamicalSystem_->setCartPose(pairActualQuatPos);
 
-    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
-    // pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
+    // pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getDsQuatSpeed();
 
-    Eigen::Vector3d centerLimitCycle;
-    centerLimitCycle << firstQuatPos[4], firstQuatPos[5], firstQuatPos[6];
-    Eigen::Vector3d limitCycleLinSpeed =
-        dynamicalSystem_->updateLimitCycle3DPosVelWith2DLC(pairActualQuatPos.second, centerLimitCycle);
-    pairQuatLinerSpeed.second = limitCycleLinSpeed;
+    // Eigen::Vector3d centerLimitCycle;
+    // centerLimitCycle << firstQuatPos[4], firstQuatPos[5], firstQuatPos[6];
+    // Eigen::Vector3d limitCycleLinSpeed =
+    //     dynamicalSystem_->updateLimitCycle3DPosVelWith2DLC(pairActualQuatPos.second, centerLimitCycle);
+    // pairQuatLinerSpeed.second = limitCycleLinSpeed;
 
     VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
 
@@ -150,16 +157,79 @@ bool TaskSurfaceFinishing::execute() {
     }
     rosInterface_->setCartesianTwist(actualTwist);
     rosInterface_->setDesiredDsTwist(desiredTwist);
+    rosInterface_->setCartesianPose(pairActualQuatPos);
 
     // rosLoop
     ros::spinOnce();
     getRosLoopRate_()->sleep();
   }
-  return dynamicalSystem_->checkLinearDs();
+  return dynamicalSystem_->isFinished();
 }
-// void TaskSurfaceFinishing::makeContact() {
+double TaskSurfaceFinishing::makeContact() {
+  int checkForce = 0;
+  dynamicalSystem_->resetInit();
+  dynamicalSystem_->resetCheckLinearDs();
 
-// }
+  vector<double> firstQuatPos = dynamicalSystem_->getFirstQuatPos();
+
+  while (ros::ok()) {
+
+    tuple<vector<double>, vector<double>, vector<double>> stateJoints;
+    stateJoints = rosInterface_->receiveState();
+    vector<double> actualJoint = get<0>(stateJoints);
+    vector<double> actualJointSpeed = get<1>(stateJoints);
+
+    pair<Quaterniond, Vector3d> pairActualQuatPos = roboticArm_->getFK(actualJoint);
+
+    dynamicalSystem_->setCartPose(pairActualQuatPos);
+
+    pair<Quaterniond, Vector3d> pairQuatLinerSpeed = dynamicalSystem_->getLinearDsOnePosition(firstQuatPos);
+
+    VectorXd twistDesiredEigen = dynamicalSystem_->getTwistFromDS(pairActualQuatPos.first, pairQuatLinerSpeed);
+    vector<double> receivedWrench = rosInterface_->receiveWrench();
+
+    for (size_t i = 0; i < receivedWrench.size(); ++i) {
+      receivedWrench[i] -= biasWrench_[i];
+    }
+    cout << "outTwist[2]: " << outputTwist_[2] << endl;
+    cout << "receivedWrench[2]: " << receivedWrench[2] << endl;
+
+    if (receivedWrench[2] < -1) {
+      twistForContactForce_ = outputTwist_[2];
+      cout << "Contact force reached" << endl;
+      cout << "twistForContactForce_: " << twistForContactForce_ << endl;
+      Eigen::VectorXd deltaTwist(6);
+      deltaTwist = Eigen::VectorXd::Zero(6);
+      vector<double> desiredJoint = roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, deltaTwist);
+      rosInterface_->sendState(desiredJoint);
+
+      Eigen::Vector3d actualCenterDesired(firstQuatPos[4], firstQuatPos[5], firstQuatPos[6]);
+      double offset = (actualCenterDesired - pairActualQuatPos.second).norm();
+      cout << "offset: " << offset << endl;
+      outputTwist_ = Eigen::VectorXd::Zero(6);
+
+      return offset;
+    }
+
+    Eigen::VectorXd deltaTwist;
+    deltaTwist = outputTwist_;
+    if (checkForce == 0) {
+      outputTwist_[2] += 0.06;
+    }
+    if (checkForce % 1000 == 0 && checkForce != 0) {
+      outputTwist_[2] += 0.01;
+    }
+
+    vector<double> desiredJoint = roboticArm_->lowLevelControllerSF(stateJoints, twistDesiredEigen, deltaTwist);
+    rosInterface_->sendState(desiredJoint);
+
+    // rosLoop
+    ros::spinOnce();
+    getRosLoopRate_()->sleep();
+    checkForce++;
+  }
+  return 0;
+}
 
 void TaskSurfaceFinishing::set_bias() {
   int meanNum = 1000;
@@ -193,7 +263,7 @@ void TaskSurfaceFinishing::set_bias() {
 
 Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
   vector<double> receivedWrench = rosInterface_->receiveWrench();
-  Eigen::VectorXd outTwist(6);
+  Eigen::VectorXd outTwist = Eigen::VectorXd::Zero(6);
   double alpha = 0.25;
   double margin = 2;
 
@@ -209,9 +279,7 @@ Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
       outTwist(i) = 0;
     }
   }
-
   outputTwist_ = alpha * outputTwist_ + (1 - alpha) * outTwist;
-
   for (size_t i = 0; i < outputTwist_.size(); ++i) {
     if (outputTwist_(i) < -0.15) {
       outputTwist_(i) = -0.15;
@@ -222,43 +290,63 @@ Eigen::VectorXd TaskSurfaceFinishing::decoderWrench() {
   }
   return outputTwist_;
 }
+// double gaussian_function(double x, double A, double mu, double sigma) { return A * std::exp(-std::pow(x - mu, 2)); }
+// Eigen::VectorXd TaskSurfaceFinishing::contactUpdateDS() {
+//   vector<double> receivedWrench = rosInterface_->receiveWrench();
+//   Eigen::VectorXd outTwist(6);
+//   double alpha = 0.25;
+//   double maxDeltaTwist = 0.001;
+//   double sigma = 5 / std::sqrt(2);
+
+//   for (size_t i = 0; i < receivedWrench.size(); ++i) {
+//     receivedWrench[i] -= biasWrench_[i];
+//   }
+
+//   outTwist(2) = gaussian_function(-receivedWrench[2], maxDeltaTwist, desiredContactForce_, sigma);
+//   cout << "outTwist(2): " << outTwist(2) << endl;
+//   cout << "receivedWrench[2]: " << receivedWrench[2] << endl;
+//   for (size_t i = 0; i < outTwist.size(); ++i) {
+//     if (i != 2) {
+//       outTwist(i) = 0;
+//     }
+//   }
+
+//   outputTwist_ = alpha * outputTwist_ + (1 - alpha) * outTwist;
+
+//   return outputTwist_;
+// }
+
+double TaskSurfaceFinishing::PIController(double actualForce) {
+  double dt = 1 / 150;
+  double error = actualForce - desiredContactForce_;
+  integral_ += error * dt;
+
+  double output = kp_ * error + ki_ * integral_;
+
+  return output;
+}
+
 Eigen::VectorXd TaskSurfaceFinishing::contactUpdateDS() {
   vector<double> receivedWrench = rosInterface_->receiveWrench();
   Eigen::VectorXd outTwist(6);
+  outTwist = Eigen::VectorXd::Zero(6);
   double alpha = 0.25;
   double margin = 1;
-  double desiredContactForce = 10;
-
-  receivedWrench[2] += desiredContactForce;
 
   for (size_t i = 0; i < receivedWrench.size(); ++i) {
     receivedWrench[i] -= biasWrench_[i];
   }
 
-  if (receivedWrench[2] > margin) {
-    outTwist(2) = receivedWrench[2] * 0.05;
-
-  } else if (receivedWrench[2] < -margin) {
-    outTwist(2) = receivedWrench[2] * 0.05;
-
-  } else {
-    outTwist(2) = 0;
-  }
-
-  for (size_t i = 0; i < outTwist.size(); ++i) {
-    if (i != 2) {
-      outTwist(i) = 0;
-    }
-  }
+  outTwist(2) = PIController(receivedWrench[2]);
 
   outputTwist_ = alpha * outputTwist_ + (1 - alpha) * outTwist;
-
-  if (outputTwist_(2) < -0.15) {
-    outputTwist_(2) = -0.15;
+  cout << "outputTwist_(2): " << outputTwist_(2) << endl;
+  cout << "receivedWrench[2]: " << receivedWrench[2] << endl;
+  if (outputTwist_(2) < -0.6) {
+    outputTwist_(2) = -0.6;
   }
-  if (outputTwist_(2) > 0.15) {
-    outputTwist_(2) = 0.15;
+  if (outputTwist_(2) > 0.6) {
+    outputTwist_(2) = 0.6;
   }
-
   return outputTwist_;
 }

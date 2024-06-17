@@ -65,7 +65,7 @@ services:
       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
       # - ${XAUTHORITY:-$HOME/.Xauthority}:/root/.Xauthority
       - /run/user/1000/gdm/Xauthority:/run/user/1000/gdm/Xauthority
-
+      - /dev:/dev
       - ./src:/home/robetarme_user/catkin_ws/src
       - ./config:/home/robetarme_user/catkin_ws/config
     devices:

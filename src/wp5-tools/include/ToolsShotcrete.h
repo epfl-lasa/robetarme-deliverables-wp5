@@ -26,8 +26,13 @@ public:
   void activateTool(bool flag) override;
 
 protected:
+  bool state_ = false;
+  void stateCallback(const std_msgs::Bool::ConstPtr& msg);
+  bool getState();
+
 private:
   double offsetTool_;
   double offsetTarget_;
   ros::Publisher pubCommand_; /**< Publisher for robot state. */
+  ros::Subscriber subState_; /**< Subscriber for robot state. */
 };

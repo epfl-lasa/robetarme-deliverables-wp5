@@ -22,6 +22,24 @@
 class ToolsSurfaceFinishing : public IToolsBase {
 public:
   explicit ToolsSurfaceFinishing(ros::NodeHandle& n);
+  void activateTool(bool flag) override {
+    // Implementation of activateTool
+  }
+
+  bool getState() override {
+    // Implementation of getState
+    return false;
+  }
+  /**
+ * @file ToolsSurfaceFinishing.h
+ * @author Louis Munier (lmunier@protonmail.com)
+ * @brief
+ * @version 0.1
+ * @date 2024-02-27
+ *
+ * @copyright Copyright (c) 2024 - EPFL
+ *
+ */
 
 protected:
 private:

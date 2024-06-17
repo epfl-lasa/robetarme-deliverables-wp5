@@ -95,7 +95,7 @@ def main():
 
     for i in range(1, original_waypoints.shape[1]):
         distance = np.linalg.norm(original_waypoints[:, i] - original_waypoints[:, i-1])
-        desired_interval = 0.18
+        desired_interval = 0.02
         num_new_points = max(2, int(np.ceil(distance / desired_interval)))
 
         # Linear interpolation to create more waypoints

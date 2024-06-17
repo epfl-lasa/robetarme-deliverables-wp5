@@ -138,9 +138,39 @@ tuple<vector<double>, vector<double>, vector<double>> RosInterfaceNoetic::receiv
   return stateJoints;
 }
 
+void RosInterfaceNoetic::addWrenchData(const std::vector<double>& new_data) {
+  // Add new data to the buffer
+  if (wrench_buffer_.size() >= buffer_size_) {
+    wrench_buffer_.pop_front(); // Remove the oldest data if the buffer is full
+  }
+  wrench_buffer_.push_back(new_data);
+}
+
+std::vector<double> RosInterfaceNoetic::computeMean() {
+  if (wrench_buffer_.empty()) {
+    return std::vector<double>(6, 0.0); // Return a zero vector if buffer is empty
+  }
+
+  std::vector<double> mean(6, 0.0);
+  for (const auto& data : wrench_buffer_) {
+    std::transform(mean.begin(), mean.end(), data.begin(), mean.begin(), std::plus<double>());
+  }
+
+  for (auto& val : mean) {
+    val /= wrench_buffer_.size();
+  }
+
+  return mean;
+}
+
 vector<double> RosInterfaceNoetic::receiveWrench() {
   ros::spinOnce();
-  return wrenchSensor_;
+
+  // Add new data to the buffer
+  addWrenchData(wrenchSensor_);
+
+  // Compute the mean of the buffer
+  return computeMean();
 }
 
 void RosInterfaceNoetic::sendState(vector<double>& data) {

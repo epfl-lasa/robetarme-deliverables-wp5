@@ -172,26 +172,15 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
   Vector3d pathPointNext;
   pathPointNext.setZero();
 
-
   if (iFollow_ < desiredPath_.size() - 1) {
 
-    if (iFollow_ == 0) {
-      desiredQuat_.w() = desiredPath_[iFollow_][3];
-      desiredQuat_.x() = desiredPath_[iFollow_][0];
-      desiredQuat_.y() = desiredPath_[iFollow_][1];
-      desiredQuat_.z() = desiredPath_[iFollow_][2];
-      pathPointNext(0) = desiredPath_[iFollow_][4];
-      pathPointNext(1) = desiredPath_[iFollow_][5];
-      pathPointNext(2) = desiredPath_[iFollow_][6];
-    } else {
-      desiredQuat_.w() = desiredPath_[iFollow_ + 1][3];
-      desiredQuat_.x() = desiredPath_[iFollow_ + 1][0];
-      desiredQuat_.y() = desiredPath_[iFollow_ + 1][1];
-      desiredQuat_.z() = desiredPath_[iFollow_ + 1][2];
-      pathPointNext(0) = desiredPath_[iFollow_ + 1][4];
-      pathPointNext(1) = desiredPath_[iFollow_ + 1][5];
-      pathPointNext(2) = desiredPath_[iFollow_ + 1][6];
-    }
+    desiredQuat_.w() = desiredPath_[iFollow_][3];
+    desiredQuat_.x() = desiredPath_[iFollow_][0];
+    desiredQuat_.y() = desiredPath_[iFollow_][1];
+    desiredQuat_.z() = desiredPath_[iFollow_][2];
+    pathPointNext(0) = desiredPath_[iFollow_][4];
+    pathPointNext(1) = desiredPath_[iFollow_][5];
+    pathPointNext(2) = desiredPath_[iFollow_][6];
 
     //use the point betweeen path as a linear DS
     dx = pathPointNext(0) - centerLimitCycle_(0);
@@ -247,8 +236,8 @@ pair<Quaterniond, Vector3d> DynamicalSystem::getDsQuatSpeed() {
     cout << "TOO FAST!, limite speed =" << velocityLimit_ << endl;
   }
 
-  // return make_pair(desiredQuat_, desiredVel_);
-  return make_pair(desiredQuat_, dVel);
+  return make_pair(desiredQuat_, desiredVel_);
+  // return make_pair(desiredQuat_, dVel);
 }
 
 std::vector<double> DynamicalSystem::getFirstQuatPos() const { return firstQuatPos_; }
@@ -274,7 +263,7 @@ VectorXd DynamicalSystem::getTwistFromDS(Quaterniond quat1, pair<Quaterniond, Ve
   if (tmpAngularVel.norm() > maxDq)
     tmpAngularVel = maxDq * tmpAngularVel.normalized();
 
-  double dsGainOri = 2;
+  double dsGainOri = 0.5;
   double thetaGq = (-.5 / (4 * maxDq * maxDq)) * tmpAngularVel.transpose() * tmpAngularVel;
   Vector3d omegaOut = 2 * dsGainOri * (1 + exp(thetaGq)) * tmpAngularVel;
 

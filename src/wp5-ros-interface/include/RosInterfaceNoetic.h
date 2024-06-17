@@ -16,6 +16,7 @@
 #include <sensor_msgs/JointState.h>
 
 #include <cstdlib>
+#include <deque>
 #include <eigen3/Eigen/Dense>
 #include <tuple>
 #include <vector>
@@ -92,6 +93,12 @@ private:
   std::vector<double> jointsTorque_;   /**< Vector containing joint torques. */
   std::vector<double> wrenchSensor_;   /**< Vector containing wrench data from sensor. */
   std::string robotName_;              /**< Name of the robot. */
+  std::deque<std::vector<double>> wrench_buffer_;
+  size_t buffer_size_ = 10; // Size of the buffer for mean filtering
+
+  std::vector<double> computeMean();
+  void addWrenchData(const std::vector<double>& new_data);
+  void computeMeanWrench();
 
   bool initJoint_;                           /**< Flag indicating if joint state is initialized. */
   bool initFTsensor_;                        /**< Flag indicating if force/torque sensor is initialized. */

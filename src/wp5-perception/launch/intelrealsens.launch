@@ -3,7 +3,7 @@
   <!-- Launch the RealSense2 camera node with specified parameters -->
   <include file="$(find realsense2_camera)/launch/rs_camera.launch">
     <arg name="align_depth" value="true" />
-    <arg name="filters" value="pointcloud" />
+    <arg name="filters" value="pointcloud, decimation, temporal, spatial" />
     <arg name="color_fps" value="30" />
     <arg name="depth_fps" value="30" />
     <arg name="color_height" value="720" />

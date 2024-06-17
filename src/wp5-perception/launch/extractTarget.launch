@@ -1,8 +1,8 @@
 <launch>
   <!-- Launch camera.sh script -->
   <!-- Launch the RealSense2 camera node with specified parameters -->
-  <include file="$(find wp5_perception)/launch/intelrealsens.launch">
-  </include>
+  <!-- <include file="$(find wp5_perception)/launch/intelrealsens.launch">
+  </include> -->
 
 
   <!-- Launch target_extraction.py script -->

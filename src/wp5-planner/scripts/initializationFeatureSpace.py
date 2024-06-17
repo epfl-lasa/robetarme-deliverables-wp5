@@ -160,7 +160,7 @@ def main()->bool:
     pcd.normals = o3d.utility.Vector3dVector(np.zeros((1, 3)))  # invalidate existing normals
     pcd.estimate_normals()
     pcd.orient_normals_consistent_tangent_plane(100)
-    radii = adapt_radii_based_on_density(pcd)
+    # radii = adapt_radii_based_on_density(pcd)
 
     # # Define the methods and their parameters
     # method = {'name': 'ball_pivoting', 'params': {'scale_factor': [5, 10, 11, 12, 13]}}
@@ -210,7 +210,7 @@ def main()->bool:
 
     # Save the mesh to a file
     path_file = data_path + '/meshes/' + name_file + '.obj'
-    o3d.io.write_triangle_mesh(path_file, mesh_poisson)
+    o3d.io.write_triangle_mesh(path_file, mesh_smooth)
     # Optional: Visualize the results
     # o3d.visualization.draw_geometries([pcd, mesh_poisson], window_name='Poisson Mesh', width=800, height=600)
 

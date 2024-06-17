@@ -27,7 +27,8 @@ IToolsBase   */
    * @brief Destructor for IToolsBase.
    */
   virtual ~IToolsBase() = default;
-  virtual void activateTool(bool flag) = 0; 
+  virtual void activateTool(bool flag) = 0;
+  virtual bool getState() = 0;
   /// @brief  get the offset tool
   /// @return  the offset tool
   double getOffset();

@@ -23,9 +23,12 @@ using namespace std;
 ToolsShotcrete::ToolsShotcrete(ros::NodeHandle& n) : IToolsBase(n) {
   takeYaml("shotcrete");
   pubCommand_ = nh_.advertise<std_msgs::Bool>("servo_command", 10);
+  subState_ = nh_.subscribe("servo_state", 10, &ToolsShotcrete::stateCallback, this);
+
   activateTool(false);
 }
-
+void ToolsShotcrete::stateCallback(const std_msgs::Bool::ConstPtr& msg) { state_ = msg->data; }
+bool ToolsShotcrete::getState() { return state_; }
 void ToolsShotcrete::activateTool(bool activateTrue) {
   // if True will activate the tool
   // if False will deactivate the tool

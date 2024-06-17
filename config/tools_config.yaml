@@ -1,6 +1,6 @@
 shotcrete:
-  offsetTool: 0.3 #0.04
-  offsetTarget: 0.0 # 0.3
+  offsetTool: 0.9 #0.04
+  offsetTarget: 0.4 # 0.3
 surface_finishing:
-  offsetTool: 0.07
-  offsetTarget: 0.05
+  offsetTool: 0.04
+  offsetTarget: 0.01

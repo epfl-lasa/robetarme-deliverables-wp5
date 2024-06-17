@@ -183,7 +183,7 @@ int main(int argc, char** argv) {
     }
 
     cout << "point:" << i << endl;
-    ros::Duration(1.5).sleep();
+    ros::Duration(3).sleep();
 
     std_msgs::Bool boolMsg;
     boolMsg.data = true;

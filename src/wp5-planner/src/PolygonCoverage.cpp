@@ -28,8 +28,11 @@ PolygonCoverage::PolygonCoverage(ros::NodeHandle& n) : nh_(n) {
   pathPubFlat_ = nh_.advertise<nav_msgs::Path>("/result_path_flat", 10, true);
   pathPubFinal_ = nh_.advertise<nav_msgs::Path>("/result_path_final", 10, true);
   posArraySub_ = nh_.subscribe("/waypoint_list", 10, &PolygonCoverage::poseArrayCallback, this);
+  // pointcloudTransformedCropSub_ =
+  //     nh_.subscribe("/camera/depth/points_crop_transformed", 10, &PolygonCoverage::pointCloudCallback, this);
   pointcloudTransformedCropSub_ =
-      nh_.subscribe("/camera/depth/points_crop_transformed", 10, &PolygonCoverage::pointCloudCallback, this);
+      nh_.subscribe("/stereo/pointcloud2/points_transformed", 100, &PolygonCoverage::pointCloudCallback, this);
+
   py::initialize_interpreter();
   checkPath_ = false;
   save_requested_ = false;
@@ -242,6 +245,7 @@ void PolygonCoverage::seePolygonFlat(vector<Eigen::Vector3d> polygonsPositions) 
   }
   PolygonFlatPub_.publish(visualpolygonTarget);
 }
+
 nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
   string file_path = string(WP5_PLANNER_DIR) + "/data/paths/waypointInOriSpace.txt";
   string frame_id = "base_link";
