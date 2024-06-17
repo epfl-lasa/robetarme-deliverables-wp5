@@ -34,6 +34,49 @@ def euler_angle_to_rotation_matrix(theta_ori_zyx):
     
     return RotMatrix
 
+def process_data_for_mapping(Omega, distance_between_surf):
+    #--- Omega is the data [1:2,:] is plane data, [3:6,:] is cuver data
+    
+    cuverData = Omega[3:6, :]
+
+    planeData_raw = np.vstack((np.full(Omega.shape[1], distance_between_surf), Omega[1], Omega[2]))
+
+    #--- find the center of surface and replace the planeData_raw
+    center_cuverData = np.mean(cuverData, axis=1)
+    center_planeData_raw = np.mean(planeData_raw, axis=1)
+    centroid_difference = center_cuverData - center_planeData_raw + np.array([distance_between_surf, 0, 0])
+    centroid_difference_rep = np.tile(centroid_difference[:, None], planeData_raw.shape[1])
+
+    #--- try find the best rotate for the planeData_raw and cuverData
+    planeData_centered = planeData_raw - center_planeData_raw.reshape(-1, 1)
+    cuverData_centered = cuverData - center_cuverData.reshape(-1, 1)
+    selected_planePoints = np.concatenate((planeData_centered[:, :10], planeData_centered[:, -10:]), axis=1)
+    selected_cuverPoints = np.concatenate((cuverData_centered[:, :10], cuverData_centered[:, -10:]), axis=1)
+
+    theta_optimal = find_optimal_rotation(selected_planePoints.T, selected_cuverPoints.T)
+    print(f"Optimal rotation angle: {theta_optimal} degrees")
+
+    # Perform rotation and transformations as in the MATLAB code
+    rotM = euler_angle_to_rotation_matrix([0,0,(theta_optimal/360)*(2*math.pi)])
+
+    planeData_rote = np.dot(rotM, planeData_centered)
+    
+
+    #--- scale the planeData to cuverData
+    #--- find the best scale for planeData
+    total_dist_cuverData = calculate_total_distance_3D(cuverData.T)
+    total_dist_planeData = calculate_total_distance_3D(planeData_rote.T)
+    scale_factor = total_dist_cuverData / total_dist_planeData
+
+    planeData_scaled = planeData_rote * scale_factor *1.3
+
+    planeData = planeData_scaled + center_planeData_raw.reshape(-1, 1)
+    planeData = planeData + centroid_difference_rep
+
+    
+
+
+    return cuverData,planeData
 
 
 def main():
@@ -51,22 +94,26 @@ def main():
     txt_name = load_data_path + file_name + '.txt'
     Omega = np.loadtxt(txt_name).T  # Transpose to match MATLAB format
 
-    cuverData = Omega[3:6, :]
-
     distance_between_surf=0.3
 
-    planeData_raw = np.vstack((np.full(Omega.shape[1], distance_between_surf), Omega[1], Omega[2]))
-
-    # Perform rotation and transformations as in the MATLAB code
-    rotM = euler_angle_to_rotation_matrix([0,0,(-90/360)*(2*math.pi)])
-    # rotM = euler_angle_to_rotation_matrix([0,0,(90/360)*(2*math.pi)])
-    planeData_rote = np.dot(rotM, planeData_raw)
-
-    center_cuverData = np.mean(cuverData, axis=1)
-    center_planeData_raw = np.mean(planeData_rote, axis=1)
-    centroid_difference = center_cuverData - center_planeData_raw + np.array([distance_between_surf, 0, 0])
-    centroid_difference_rep = np.tile(centroid_difference[:, None], planeData_rote.shape[1])
-    planeData = planeData_rote + centroid_difference_rep
+    #--- process data for mapping, rotate, move to same center
+    use_new_scaleFunction = True
+    if use_new_scaleFunction:
+        cuverData, planeData = process_data_for_mapping(Omega, distance_between_surf)
+    else:
+        cuverData = Omega[3:6, :]
+        
+        planeData_raw = np.vstack((np.full(Omega.shape[1], distance_between_surf), Omega[1], Omega[2]))
+    
+        # Perform rotation and transformations as in the MATLAB code
+        rotM = euler_angle_to_rotation_matrix([0,0,(-90/360)*(2*math.pi)])
+        planeData_rote = np.dot(rotM, planeData_raw)
+    
+        center_cuverData = np.mean(cuverData, axis=1)
+        center_planeData_raw = np.mean(planeData_rote, axis=1)
+        centroid_difference = center_cuverData - center_planeData_raw + np.array([distance_between_surf, 0, 0])
+        centroid_difference_rep = np.tile(centroid_difference[:, None], planeData_rote.shape[1])
+        planeData = planeData_rote + centroid_difference_rep
 
     # Boundary and enhanced visualization
     Y = planeData[1, :]
