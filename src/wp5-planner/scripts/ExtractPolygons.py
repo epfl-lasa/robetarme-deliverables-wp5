@@ -9,6 +9,14 @@ import math
 import rospkg
 from scipy.optimize import minimize_scalar
 
+def total_distance_squared(theta, points1, points2):
+    total_distance = 0
+    for (x1, y1, z1), (x2, y2, z2) in zip(points1, points2):
+        dy = y1 * np.cos(theta) - z1 * np.sin(theta) - y2
+        dz = y1 * np.sin(theta) + z1 * np.cos(theta) - z2
+        total_distance += (x1 - x2) ** 2 + dy ** 2 + dz ** 2
+    return total_distance
+
 def find_optimal_rotation(points1, points2):
     result = minimize_scalar(total_distance_squared, args=(points1, points2), bounds=(0, 2*np.pi), method='bounded')
     return np.degrees(result.x)
