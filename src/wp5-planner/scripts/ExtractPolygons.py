@@ -7,8 +7,11 @@ from scipy.spatial import ConvexHull
 from scipy.interpolate import interp1d
 import math
 import rospkg
+from scipy.optimize import minimize_scalar
 
-
+def find_optimal_rotation(points1, points2):
+    result = minimize_scalar(total_distance_squared, args=(points1, points2), bounds=(0, 2*np.pi), method='bounded')
+    return np.degrees(result.x)
 
 def euler_angle_to_rotation_matrix(theta_ori_zyx):
     """
