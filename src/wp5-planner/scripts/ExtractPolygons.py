@@ -9,6 +9,28 @@ import math
 import rospkg
 from scipy.optimize import minimize_scalar
 
+def calculate_total_distance_3D(points):
+    """
+    Calculate the total distance traveled through a set of 3D points in the given order.
+    
+    Args:
+    points (list of tuples): A list where each tuple represents the x, y, and z coordinates of a point.
+    
+    Returns:
+    float: The total distance traveled from the first to the last point, visiting each sequentially.
+    """
+    total_distance = 0
+    # Loop through the list of points and calculate distances between consecutive points
+    for i in range(len(points) - 1):
+        x1, y1, z1 = points[i]
+        x2, y2, z2 = points[i + 1]
+        
+        # Calculate Euclidean distance between the current point and the next
+        distance = math.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2 + (z2 - z1) ** 2)
+        total_distance += distance
+    
+    return total_distance
+    
 def total_distance_squared(theta, points1, points2):
     total_distance = 0
     for (x1, y1, z1), (x2, y2, z2) in zip(points1, points2):
