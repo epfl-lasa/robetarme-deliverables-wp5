@@ -1,5 +1,5 @@
 shotcrete:
-  limitCycleSpeed: 9
+  limitCycleSpeed: 7
   convRate: 10
   linearSpeed: 0.05
 surface_finishing:

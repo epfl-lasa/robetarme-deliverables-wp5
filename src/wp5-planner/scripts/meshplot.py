@@ -30,6 +30,16 @@ def visualize_obj(file_path):
     ax.set_ylabel('Y')
     ax.set_zlabel('Z')
     
+    # Calculate limits for axes
+    max_range = max(vertices.max(axis=0) - vertices.min(axis=0))
+    mid_x = (vertices[:, 0].max() + vertices[:, 0].min()) / 2
+    mid_y = (vertices[:, 1].max() + vertices[:, 1].min()) / 2
+    mid_z = (vertices[:, 2].max() + vertices[:, 2].min()) / 2
+    
+    ax.set_xlim(mid_x - max_range / 2, mid_x + max_range / 2)
+    ax.set_ylim(mid_y - max_range / 2, mid_y + max_range / 2)
+    ax.set_zlim(mid_z - max_range / 2, mid_z + max_range / 2)
+    
     # Show plot
     plt.show()
 

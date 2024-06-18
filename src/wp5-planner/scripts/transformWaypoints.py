@@ -134,6 +134,7 @@ def main():
     print('new_waypoints:', new_waypoints.shape)
     waypoints_mapped = M.forward(new_waypoints) 
 
+    # filename_curve = f'{save_data_path}waypointInOriSpace.txt'
     filename_curve = f'{save_data_path}waypointInOriSpace.txt'
     np.savetxt(filename_curve, waypoints_mapped[:,:], delimiter='\t')  # Transpose to save in correct format
     print('Saved new_waypoints in original space to', filename_curve)

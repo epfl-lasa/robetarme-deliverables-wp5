@@ -1,5 +1,6 @@
 #initializationFeatureSpace
 import open3d as o3d
+import trimesh
 import numpy as np
 import matplotlib.pyplot as plt
 import time
@@ -195,8 +196,8 @@ def main()->bool:
     mesh.remove_degenerate_triangles()
 
     # Step 2: Density-based filtering
-    vertices_to_remove = densities < np.quantile(densities, 0.05)  # Remove vertices with densities in the bottom 5%
-    mesh.remove_vertices_by_mask(vertices_to_remove)
+    # vertices_to_remove = densities < np.quantile(densities, 0.05)  # Remove vertices with densities in the bottom 5%
+    # mesh.remove_vertices_by_mask(vertices_to_remove)
 
     # Ensure the mesh has vertex normals
     mesh.compute_vertex_normals()
@@ -206,11 +207,11 @@ def main()->bool:
     mesh_poisson = mesh.crop(bbox)
 
     # Step 4: Smooth the mesh (optional)
-    mesh_smooth = mesh_poisson.filter_smooth_simple(number_of_iterations=3)
+    # mesh_smooth = mesh_poisson.filter_smooth_simple(number_of_iterations=3)
 
     # Save the mesh to a file
     path_file = data_path + '/meshes/' + name_file + '.obj'
-    o3d.io.write_triangle_mesh(path_file, mesh_smooth)
+    o3d.io.write_triangle_mesh(path_file, mesh_poisson)
     # Optional: Visualize the results
     # o3d.visualization.draw_geometries([pcd, mesh_poisson], window_name='Poisson Mesh', width=800, height=600)
 

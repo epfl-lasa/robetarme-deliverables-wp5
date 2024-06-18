@@ -130,7 +130,7 @@ def main():
     distance_between_surf=0.3
 
     #--- process data for mapping, rotate, move to same center
-    use_new_scaleFunction = True
+    use_new_scaleFunction = False
     if use_new_scaleFunction:
         cuverData, planeData = process_data_for_mapping(Omega, distance_between_surf)
     else:

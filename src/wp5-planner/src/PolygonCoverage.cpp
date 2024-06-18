@@ -247,7 +247,7 @@ void PolygonCoverage::seePolygonFlat(vector<Eigen::Vector3d> polygonsPositions) 
 }
 
 nav_msgs::Path PolygonCoverage::convertFileToNavMsgsPath() {
-  string file_path = string(WP5_PLANNER_DIR) + "/data/paths/waypointInOriSpace.txt";
+  string file_path = string(WP5_PLANNER_DIR) + "/data/paths/waypointInOriSpaceSaved.txt";
   string frame_id = "base_link";
   nav_msgs::Path path;
   path.header.frame_id = frame_id;
