@@ -90,6 +90,8 @@ class DataSubscriber:
         eef_time = np.array(eef_time) - eef_time[0]
         eef_size = len(eef_time) -10
         positions = np.array([np.array([msg.pose.position.x, msg.pose.position.y, msg.pose.position.z]) for msg in actual_pose_data])
+        quatPos = np.array([np.array([msg.pose.orientation.w, msg.pose.orientation.x, msg.pose.orientation.y, msg.pose.orientation.z,msg.pose.position.x, msg.pose.position.y, msg.pose.position.z]) for msg in actual_pose_data])
+        np.savetxt('../txts/quatPos.txt', quatPos, delimiter=',')
 
         # Plot Force
         plt.figure(figsize=(15, 9))
@@ -161,6 +163,8 @@ class DataSubscriber:
         # plt.savefig("../plots/" + str(start_time) + "_actualPath.png")
         # plt.close()
         plt.show()
+
+
 
 
         # Plot RMSE

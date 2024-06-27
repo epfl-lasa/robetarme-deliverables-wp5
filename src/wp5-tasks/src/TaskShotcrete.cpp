@@ -29,7 +29,6 @@ bool TaskShotcrete::computePath() {
 
   //TODO: understand why checkpython is false
   cout << "get Pointcloud.. " << endl;
-
   polygonCoverage_->getPointCloud();
   ros::spinOnce();
   getRosLoopRate_()->sleep();
@@ -55,8 +54,9 @@ bool TaskShotcrete::computePath() {
   vector<Vector3d> polygonsPositions = polygonCoverage_->getFlatPolygonFromTxt();
 
   // Simplify the polygon
-  double epsilon = 0.2; // Tolerance for simplification
-  vector<Vector3d> simplifiedPolygon = polygonCoverage_->rdp(polygonsPositions, epsilon);
+  double epsilon = 0.9; // Tolerance for simplification
+  // vector<Vector3d> simplifiedPolygon = polygonCoverage_->rdp(polygonsPositions, epsilon);
+  vector<Vector3d> simplifiedPolygon =polygonsPositions;
 
   polygonCoverage_->seePolygonFlat(simplifiedPolygon);
 
@@ -104,12 +104,12 @@ bool TaskShotcrete::execute() {
   cout << "preforming shotcrete ..." << endl;
   dynamicalSystem_->resetInit();
 
-  while (ros::ok() && !tools_->getState()) {
-    ros::spinOnce();
-    getRosLoopRate_()->sleep();
-    tools_->activateTool(true);
-    cout << "waiting for the tool to be activated" << endl;
-  }
+  // while (ros::ok() && !tools_->getState()) {
+  //   ros::spinOnce();
+  //   getRosLoopRate_()->sleep();
+  //   tools_->activateTool(true);
+  //   cout << "waiting for the tool to be activated" << endl;
+  // }
 
   while (ros::ok() && !dynamicalSystem_->isFinished()) {
     // set and get desired speed

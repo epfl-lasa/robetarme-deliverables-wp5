@@ -5,6 +5,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import sys
 import rospkg
 
+
 def main():
     # Initialize the ROS package manager
     rospack = rospkg.RosPack()
@@ -27,6 +28,7 @@ def main():
     mesh.compute_uvatlas(size=size, gutter=gutter, max_stretch=max_stretch)
     vertices_3D = mesh.vertex['positions'].numpy()
     uv_coords = mesh.triangle['texture_uvs'].numpy()
+
     # Number of 3D mesh vertices
     num_vertices = mesh.vertex['positions'].shape[0]
     num_triangles = mesh.triangle['indices'].shape[0]
@@ -71,15 +73,21 @@ def main():
     uv_coords_index_unique=unique_rows
 
 
-
     if uv_coords_index_unique.shape[0] != vertices_3D.shape[0]:
-        print("succes")
-        # print(f"\033[91mERROR: uv_coords_index_unique has different number of vertices_3D\033[0m")
+        print(f"\033[91mERROR: uv_coords_index_unique has different number of vertices_3D\033[0m")
     else:
         #--- put the 3D vertices in the uv_coords_index_unique
-        # print(f"\033[91m SUCCESS !!! \033[0m")
+        print(f"\033[91m SUCCESS !!! \033[0m")
         uv_coords_index_unique= np.hstack((uv_coords_index_unique,vertices_3D))
         unique_uv_coords=uv_coords_index_unique[:,1:]
+            # Plot the unique UV coordinates as points
+        plt.figure(figsize=(5, 5))
+        plt.scatter(uv_coords_index_unique[:, 1], uv_coords_index_unique[:, 2], s=1)  # s controls the size of the points
+        plt.title("UV Map")
+        plt.xlabel("U")
+        plt.ylabel("V")
+        plt.gca().set_aspect('equal', adjustable='box')  # Set equal aspect ratio
+        plt.show()
 
     Uv_path_reshaped = data_path + '/UVmap'
 

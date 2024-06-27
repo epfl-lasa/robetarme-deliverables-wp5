@@ -11,7 +11,7 @@ def publish_pose():
 
     # Create a publisher for the PoseStamped message
     pose_publisher = rospy.Publisher(
-        '/vrpn_client_node/targetRobetarme/pose_transform', PoseStamped, queue_size=10)
+        '/vrpn_client_node/BaseRidgeback/pose', PoseStamped, queue_size=10)
 
     # Set the publishing rate (adjust as needed)
     rate = rospy.Rate(10)  # 1 Hz

@@ -5,6 +5,8 @@ import rospkg
 from scipy.interpolate import interp1d
 from scipy.optimize import minimize
 import iteration_mapping as iter
+import quaternion # [w,x,y,z] order
+
 
 def compute_quaternion(normal_vector):
     """
@@ -133,6 +135,32 @@ def main():
 
     print('new_waypoints:', new_waypoints.shape)
     waypoints_mapped = M.forward(new_waypoints) 
+
+    # Extract the positions and quaternions from waypoints_mapped
+    positions = waypoints_mapped[:, :3]
+    quaternions = waypoints_mapped[:, 3:]
+
+    quaternions = np.array([quaternion.quaternion(*q) for q in quaternions])
+
+
+    # Convert the quaternions to rotation matrices and extract the z-axes
+    z_axes = np.empty_like(positions)
+    for i in range(quaternions.shape[0]):
+        rotation_matrix = quaternion.as_rotation_matrix(quaternions[i])
+        z_axes[i] = rotation_matrix[:, 2]
+
+    # Plot the points and the z-axes
+    fig = plt.figure(figsize=(fig_width, fig_height*2))
+    ax = fig.add_subplot(111, projection='3d')
+
+    # Plot every 10th point and z-axis
+    for i in range(0, positions.shape[0]):
+        ax.scatter(positions[i, 0], positions[i, 1], positions[i, 2], color='blue')
+        ax.quiver(positions[i, 0], positions[i, 1], positions[i, 2],
+                z_axes[i, 0], z_axes[i, 1], z_axes[i, 2], color='red', length=0.03)
+
+    ax.axis('equal')
+    plt.show()
 
     # filename_curve = f'{save_data_path}waypointInOriSpace.txt'
     filename_curve = f'{save_data_path}waypointInOriSpace.txt'

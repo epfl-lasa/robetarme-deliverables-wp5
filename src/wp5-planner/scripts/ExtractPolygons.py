@@ -41,7 +41,8 @@ def total_distance_squared(theta, points1, points2):
 
 def find_optimal_rotation(points1, points2):
     result = minimize_scalar(total_distance_squared, args=(points1, points2), bounds=(0, 2*np.pi), method='bounded')
-    return np.degrees(result.x)
+    optimal_distance = result.fun  # optimized total distance value
+    return np.degrees(result.x), optimal_distance
 
 def euler_angle_to_rotation_matrix(theta_ori_zyx):
     """
@@ -86,7 +87,7 @@ def process_data_for_mapping(Omega, distance_between_surf):
     selected_planePoints = np.concatenate((planeData_centered[:, :10], planeData_centered[:, -10:]), axis=1)
     selected_cuverPoints = np.concatenate((cuverData_centered[:, :10], cuverData_centered[:, -10:]), axis=1)
 
-    theta_optimal = find_optimal_rotation(selected_planePoints.T, selected_cuverPoints.T)
+    theta_optimal, dist_optimal = find_optimal_rotation(selected_planePoints.T, selected_cuverPoints.T)
     print(f"Optimal rotation angle: {theta_optimal} degrees")
 
     # Perform rotation and transformations as in the MATLAB code
@@ -109,7 +110,7 @@ def process_data_for_mapping(Omega, distance_between_surf):
     
 
 
-    return cuverData,planeData
+    return cuverData,planeData, dist_optimal
 
 
 def main():
@@ -119,6 +120,8 @@ def main():
 
     package_path = rospack.get_path('wp5_planner')
     file_name = 'uv_map_pointcloud_target_transformed'
+    file_name_vector = 'normvector_pointcloud_target_transformed'
+
 
     load_data_path = package_path + '/data/UVmap/'
     save_data_path = package_path + '/data/boundary/'
@@ -127,12 +130,34 @@ def main():
     txt_name = load_data_path + file_name + '.txt'
     Omega = np.loadtxt(txt_name).T  # Transpose to match MATLAB format
 
+    txt_name_vector = load_data_path + file_name_vector + '.txt'
+    normals_vector = np.loadtxt(txt_name_vector)  # Transpose to match MATLAB format
+
     distance_between_surf=0.3
 
     #--- process data for mapping, rotate, move to same center
-    use_new_scaleFunction = False
+    use_new_scaleFunction = True
     if use_new_scaleFunction:
-        cuverData, planeData = process_data_for_mapping(Omega, distance_between_surf)
+
+        # Create copies of Omega for Omega1 and Omega2
+        Omega1 = Omega.copy()
+        Omega2 = Omega.copy()
+
+        Omega2[1] = Omega[2]  # Overwrite row 1 with row 2
+        Omega2[2] = Omega[1]  # Overwrite row 2 with the stored row 1
+
+        cuverData1, planeData1, dist_optimal1 = process_data_for_mapping(Omega1, distance_between_surf)
+        cuverData2, planeData2, dist_optimal2 = process_data_for_mapping(Omega2, distance_between_surf)
+
+        if dist_optimal2 >dist_optimal1:
+            cuverData = cuverData1
+            planeData = planeData1
+        else:
+            cuverData = cuverData2
+            planeData = planeData2
+            normals_vector = -1*normals_vector
+            np.savetxt(load_data_path +file_name_vector+ ".txt", normals_vector, fmt='%f', delimiter=' ')
+
     else:
         cuverData = Omega[3:6, :]
         
@@ -148,11 +173,43 @@ def main():
         centroid_difference_rep = np.tile(centroid_difference[:, None], planeData_rote.shape[1])
         planeData = planeData_rote + centroid_difference_rep
 
+    # Creating a figure
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+    scatter1 = ax.scatter(cuverData[0, :], cuverData[1, :], cuverData[2, :], c='b',s=1)
+    scatter2 = ax.scatter(planeData[0, :], planeData[1, :], planeData[2, :], c='g',s=1)
+    # Choose a number of points to plot
+    num_points = 100  # Change this to the number of points you want
+    # Generate random indices
+    indices = np.random.choice(cuverData.shape[1], size=num_points, replace=False)
+    # Plot the selected points
+    for i in indices:
+        ax.plot([cuverData[0, i], planeData[0, i]], [cuverData[1, i], planeData[1, i]], [cuverData[2, i], planeData[2, i]], 'r-')
+    # Adding labels
+    ax.set_xlabel('X Label')
+    ax.set_ylabel('Y Label')
+    ax.set_zlabel('Z Label')
+    ax.axis('equal')
+    # Show plot
+    plt.show()
+
+
     # Boundary and enhanced visualization
     Y = planeData[1, :]
     Z = planeData[2, :]
     hull = ConvexHull(np.vstack((Y, Z)).T)
+
     boundary_planeData = np.vstack((Y[hull.vertices], Z[hull.vertices], np.full(len(hull.vertices), 0.1)))
+
+
+    plt.figure()
+    plt.scatter(Y, Z, c='g', alpha=0.5,s=1)
+    plt.plot(Y[hull.vertices], Z[hull.vertices], 'r-')
+    plt.xlabel('Y-axis')
+    plt.ylabel('Z-axis')
+    plt.axis('equal')
+    plt.show()
+
 
     filename = save_data_path+"planeData_"+ file_name+".txt"
 

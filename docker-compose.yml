@@ -63,7 +63,7 @@ services:
       - ./shared-ros-humble-9f:/home/robetarme_user/shared:rw
       - /tmp/.X11-unix:/tmp/.X11-unix:rw
       - /tmp/.docker.xauth:/tmp/.docker.xauth:rw
-      # - ${XAUTHORITY:-$HOME/.Xauthority}:/root/.Xauthority
+      - ${XAUTHORITY:-$HOME/.Xauthority}:/root/.Xauthority
       - /run/user/1000/gdm/Xauthority:/run/user/1000/gdm/Xauthority
       - /dev:/dev
       - ./src:/home/robetarme_user/catkin_ws/src
