@@ -8,6 +8,13 @@ def generate_square(side_length, num_points):
     z = np.zeros(num_points)
     return np.vstack((x, y, z)).T
 
+def generate_wave(side_length, num_points, wave_height=1):
+    x = np.linspace(-side_length / 2, side_length / 2, num_points)
+    y = np.random.uniform(-side_length / 2, side_length / 2, num_points)
+    rad = np.linspace(0,2*math.pi,len(x))
+    z = wave_height * np.sin(rad)  # Adjust the amplitude and wavelength as needed
+    return np.vstack((x, y, z)).T
+
 def generate_half_cylinder(radius, height, num_points):
     theta = np.random.uniform(0, np.pi, num_points)
     z = np.random.uniform(-height / 2, height / 2, num_points)
@@ -100,11 +107,14 @@ rotation_90_y = np.array([[np.cos(np.pi/2), 0, np.sin(np.pi/2)],
 
 # Generate point clouds
 side_length = 0.3# Generate point clouds
-square_points = generate_square(side_length, 1000)
-square_point = generate_square(2*side_length, 1000)
-half_cylinder_points = generate_half_cylinder(0.6, 0.6, 1000)
-half_cylinder_points_i = generate_half_cylinder(0.2, 0.2, 1000)
-half_sphere_points = generate_half_sphere(0.2, 1000)
+num_points= 10000
+square_points = generate_square(side_length, num_points)
+square_point = generate_square(2*side_length, num_points)
+half_cylinder_points = generate_half_cylinder(0.6, 0.6, num_points)
+half_cylinder_points_i = generate_half_cylinder(0.2, 0.2, num_points)
+half_sphere_points = generate_half_sphere(0.2, num_points)
+wave_points = generate_wave(side_length, num_points, wave_height=0.05)
+
 
 # Apply transformations: rotation to the second square
 # Apply transformations: position second square to share an edge with the first
@@ -127,17 +137,19 @@ square_points_transformed = apply_transformation(square_point, translation=[1, 0
 half_cylinder_points_transformed = apply_transformation(half_cylinder_points, translation=[0.5, 0, 0.8], rotation=rotation_matrix_z(-math.pi/2))
 half_sphere_points_transformed = apply_transformation(half_sphere_points, translation=[1, 0, 0.8], rotation=rotation_matrix_y(math.pi/2))
 combined_points_transformed = apply_transformation(combined_points, translation=[1, 0, 0.8], rotation=rotation_matrix_y(math.pi/2))
+wave_points_transformed = apply_transformation(wave_points, translation=[1, 0, 0.8], rotation=rotation_matrix_y(math.pi/2))
 
 half_cylinder_points_inverted_transformed = apply_transformation(half_cylinder_points_inverted, translation=[0.7, 0, 0.8], rotation=rotation_matrix_z(-math.pi/2))
 half_sphere_points_inverted_transformed = apply_transformation(half_sphere_points_inverted, translation=[1, 0, 0.8], rotation=rotation_matrix_y(math.pi/2))
 combined_point_inverted_transformed = apply_transformation(combined_point_inverted, translation=[1, 0, 0.8], rotation=rotation_matrix_y(math.pi/2))
 
 # Add noise to the transformed points
-noise_level = 0.01  # Standard deviation of the Gaussian noise
+noise_level = 0.003  # Standard deviation of the Gaussian noise
 square_points_noisy = add_noise(square_points_transformed, noise_level)
 half_cylinder_points_noisy = add_noise(half_cylinder_points_transformed, noise_level)
 half_sphere_points_noisy = add_noise(half_sphere_points_transformed, noise_level)
 combined_points_noisy = add_noise(combined_points_transformed, noise_level)
+wave_points_noisy = add_noise(wave_points_transformed, noise_level)
 
 half_cylinder_points_inverted_noisy = add_noise(half_cylinder_points_inverted_transformed, noise_level)
 half_sphere_points_inverted_noisy = add_noise(half_sphere_points_inverted_transformed, noise_level)
@@ -148,10 +160,11 @@ square_pcd = create_open3d_point_cloud(square_points_noisy)
 half_cylinder_pcd = create_open3d_point_cloud(half_cylinder_points_noisy)
 half_sphere_pcd = create_open3d_point_cloud(half_sphere_points_noisy)
 combined_pcd = create_open3d_point_cloud(combined_points_noisy)
+wave_points_pcd = create_open3d_point_cloud(wave_points_noisy)
+
 half_cylinder_pcd_inverted = create_open3d_point_cloud(half_cylinder_points_inverted_noisy)
 half_sphere_pcd_inverted = create_open3d_point_cloud(half_sphere_points_inverted_noisy)
 combined_pcd_inverted = create_open3d_point_cloud(combined_points_inverted_noisy)
-
 
 # Save point clouds to PLY files
 path = "../data/pointclouds/"
@@ -162,6 +175,7 @@ o3d.io.write_point_cloud(path + "combined_square_noisy_transformed.ply", combine
 o3d.io.write_point_cloud(path + "half_cylinder_noisy_inverted_transformed.ply", half_cylinder_pcd_inverted,write_ascii=True)
 o3d.io.write_point_cloud(path + "half_sphere_noisy_inverted_transformed.ply", half_sphere_pcd_inverted,write_ascii=True)
 o3d.io.write_point_cloud(path + "combined_square_inverted_noisy_transformed.ply", combined_pcd_inverted,write_ascii=True)
+o3d.io.write_point_cloud(path + "wave_noisy_transformed.ply", wave_points_pcd,write_ascii=True)
 
 
 # Visualize point clouds

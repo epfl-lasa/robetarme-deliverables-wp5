@@ -66,7 +66,7 @@ void PolygonCoverage::pointCloudCallback(const sensor_msgs::PointCloud2ConstPtr&
 
 void PolygonCoverage::getPointCloud() {
   save_requested_ = true;
-  while (save_requested_) {
+  while (save_requested_ && ros::ok()) {
     ros::spinOnce();
   }
 }

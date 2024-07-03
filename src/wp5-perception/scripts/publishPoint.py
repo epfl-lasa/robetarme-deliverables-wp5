@@ -38,7 +38,8 @@ if __name__ == '__main__':
         # ply_file_path = "../data/pointclouds/half_cylinder_noisy_inverted_transformed.ply"  # Replace with your PLY file path
         # ply_file_path = "../data/pointclouds/half_sphere_noisy_transformed.ply"  # Replace with your PLY file path
         # ply_file_path = "../data/pointclouds/half_sphere_noisy_inverted_transformed.ply"  # Replace with your PLY file path
-        ply_file_path = "../data/pointclouds/square_noisy_transformed.ply"  # Replace with your PLY file path
+        # ply_file_path = "../data/pointclouds/square_noisy_transformed.ply"  # Replace with your PLY file path
+        ply_file_path = "../data/pointclouds/wave_noisy_transformed.ply"  # Replace with your PLY file path
 
 
 

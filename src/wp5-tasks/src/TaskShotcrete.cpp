@@ -68,7 +68,7 @@ bool TaskShotcrete::computePath() {
   polygonCoverage_->callSetPolygonService(simplifiedPolygon, holl_points);
 
   //set start and finish point for boustrophedon
-  polygonCoverage_->callStartService(simplifiedPolygon[0], simplifiedPolygon[3]);
+  polygonCoverage_->callStartService(simplifiedPolygon[0], simplifiedPolygon[end]);
   string name = "waypointInFeatureSpace";
   while (ros::ok() && !polygonCoverage_->checkPathReceived()) {
     ros::spinOnce();

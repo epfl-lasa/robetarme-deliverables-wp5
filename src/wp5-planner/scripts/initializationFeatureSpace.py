@@ -1,6 +1,7 @@
 import open3d as o3d
 import numpy as np
 import rospkg
+import math
 
 def main():
     # Initialize the ROS package manager
@@ -11,9 +12,19 @@ def main():
     name_file = 'pointcloud_target_transformed'
     path_file = data_path + '/pointclouds/' + name_file + '.ply'
 
-    # Step 1: Read and preprocess point cloud
     pcd = o3d.io.read_point_cloud(path_file)
-    pcd = pcd.voxel_down_sample(voxel_size=0.01)
+    points_array = np.asarray(pcd.points)
+    # Get the number of points
+    num_points = points_array.shape[0]
+    print(num_points)
+    voxel_size =0.01 * (math.log(num_points,10)-2)
+    print(voxel_size)
+    pcd = pcd.voxel_down_sample(voxel_size)
+
+    points_array = np.asarray(pcd.points)
+    # Get the number of points
+    num_points = points_array.shape[0]
+    print(num_points)
 
     # Step 2: Remove statistical outliers
     pcd, _ = pcd.remove_statistical_outlier(nb_neighbors=20, std_ratio=2.0)
